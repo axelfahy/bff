@@ -1,5 +1,45 @@
 # -*- coding: utf-8 -*-
+import matplotlib.pyplot as plt
 from typing import Sequence
+
+
+def plot_history(history, style: str = 'default') -> None:
+    """
+    Plot the history of the model trained using Keras.
+
+    Parameters
+    ----------
+    history : tensorflow.keras.callbask.History
+        History of the training.
+    style: str
+        Style to use for matplotlib.pyplot (default='default').
+        The style is use only in this context and not applied globally.
+    """
+    with plt.style.context(style):
+        fig, (ax_acc, ax_loss) = plt.subplots(1, 2, figsize=(17, 7))
+
+        # Summarize history for accuracy
+        ax_acc.plot(history.history['acc'],
+                    label=f"Train ({history.history['acc'][-1]:.4f})")
+        ax_acc.plot(history.history['val_acc'],
+                    label=f"Validation ({history.history['val_acc'][-1]:.4f})")
+        ax_acc.set_title('Model accuracy')
+        ax_acc.set_ylabel('Accuracy')
+        ax_acc.set_xlabel('Epochs')
+        ax_acc.legend(loc='upper left')
+
+        # Summarize history for loss
+        ax_loss.plot(history.history['loss'],
+                     label=f"Train ({history.history['loss'][-1]:.4f})")
+        ax_loss.plot(history.history['val_loss'],
+                     label=f"Train ({history.history['val_loss'][-1]:.4f})")
+        ax_loss.set_title('Model loss')
+        ax_loss.set_ylabel('Loss')
+        ax_loss.set_xlabel('Epochs')
+        ax_loss.legend(loc='upper left')
+
+        fig.suptitle('Model history')
+        plt.show()
 
 
 def sliding_window(sequence: Sequence, window_size: int, step: int):
