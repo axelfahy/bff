@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+import collections
 import matplotlib.pyplot as plt
-from typing import Sequence
+from typing import Dict, Sequence
 
 
 def plot_history(history, style: str = 'default') -> None:
@@ -83,4 +84,35 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
         yield sequence[i:i+window_size]
     if mod:
         yield sequence[len(sequence)-mod:]
+
+
+def value_2_list(**kwargs) -> Dict[str, Sequence]:
+    """
+    Convert single values into list.
+
+    For each argument provided, if the type is not a sequence,
+    convert the single value into a list.
+    Strings are not considered as a sequence in this scenario.
+
+    Parameters
+    ----------
+    kwargs : dict
+        Parameters passed to the function.
+
+    Returns
+    -------
+    dict
+        Dictionary with the single values put into a list.
+
+    Examples
+    --------
+    >>> value_2_list(name='John Doe', age=42, children=('Jane Doe', 14))
+    {'name': ['John Doe'], 'age': [42], 'children': ('Jane Doe', 14)}
+    >>> value_2_list(countries=['Swiss', 'Spain'])
+    {'countries': ['Swiss', 'Spain']}
+    """
+    for k, v in kwargs.items():
+        if not isinstance(v, collections.Sequence) or isinstance(v, str):
+            kwargs[k] = [v]
+    return kwargs
 
