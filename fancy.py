@@ -32,7 +32,7 @@ def plot_history(history, style: str = 'default') -> None:
         ax_loss.plot(history.history['loss'],
                      label=f"Train ({history.history['loss'][-1]:.4f})")
         ax_loss.plot(history.history['val_loss'],
-                     label=f"Train ({history.history['val_loss'][-1]:.4f})")
+                     label=f"Validation ({history.history['val_loss'][-1]:.4f})")
         ax_loss.set_title('Model loss')
         ax_loss.set_ylabel('Loss')
         ax_loss.set_xlabel('Epochs')
