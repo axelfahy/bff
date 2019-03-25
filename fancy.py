@@ -1,7 +1,74 @@
 # -*- coding: utf-8 -*-
 import collections
 import matplotlib.pyplot as plt
-from typing import Dict, Sequence
+import sys
+from dateutil import parser
+from functools import wraps
+from typing import Callable, Dict, Sequence
+
+
+def parse_date(func: Callable = None, date_fields=('date')) -> Callable:
+    """
+    Cast str date into datetime format.
+
+    This decorator casts string arguments of a function to datetime.datetime
+    type. This allows to specify either string of datetime format for a
+    function argument. The name of the parameters to cast must be specified in
+    the `date_fields`.
+
+    The cast is done using the `parse` function from the
+    `dateutil<https://dateutil.readthedocs.io/en/stable/parser.html>` package.
+    All supported format are those from the library and may evolve.
+
+    In order to use the decorator both with or without parenthesis when calling
+    it without parameter, the `date_fields` argument is keyword only. This
+    allows checking if the parameter was given or not.
+
+    Parameters
+    ----------
+    func: Callable
+        Function with the arguments to parse.
+    date_fields: Sequence
+        Sequence containing the fields with dates.
+
+    Returns
+    -------
+    Callable
+        Function with the date fields cast to datetime.datetime type.
+
+    Examples
+    --------
+    >>> @parse_date
+    ... def dummy_function(**kwargs):
+    ...     print(f'Args {kwargs}')
+    ...
+    >>> dummy_function(date='20190325')
+    Args {'date': datetime.datetime(2019, 3, 25, 0, 0)}
+    >>> dummy_function(date='Mon, 21 March, 2015')
+    Args {'date': datetime.datetime(2015, 3, 21, 0, 0)}
+    >>> dummy_function(date='2019-03-09 08:03:00')
+    Args {'date': datetime.datetime(2019, 3, 9, 8, 3)}
+    >>> dummy_function(date='March 27 2019')
+    Args {'date': datetime.datetime(2019, 3, 27, 0, 0)}
+    >>> dummy_function(date='wrong string')
+    Value `wrong string` for field `date` is not convertible to a date format.
+    Args {'date': 'wrong string'}
+    """
+    def _parse_date(func: Callable):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Parse the arguments of the function, if the date field is present
+            # and is str, cast to datetime format.
+            for key, value in kwargs.items():
+                if key in date_fields and isinstance(value, str):
+                    try:
+                        kwargs[key] = parser.parse(value)
+                    except ValueError:
+                        print(f'Value `{value}` for field `{key}` is not '
+                              'convertible to a date format.', file=sys.stderr)
+            return func(*args, **kwargs)
+        return wrapper
+    return _parse_date(func) if func else _parse_date
 
 
 def plot_history(history, style: str = 'default') -> None:
@@ -47,8 +114,8 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     """
     Apply a sliding window over the sequence.
 
-    Each window is yielded. If there is a remainder, the remainder is yielded last,
-    and will be smaller than the other windows.
+    Each window is yielded. If there is a remainder, the remainder is yielded
+    last, and will be smaller than the other windows.
 
     Parameters
     ----------
