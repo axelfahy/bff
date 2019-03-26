@@ -7,7 +7,8 @@ from functools import wraps
 from typing import Callable, Dict, Sequence
 
 
-def parse_date(func: Callable = None, date_fields=('date')) -> Callable:
+def parse_date(func: Callable = None,
+               date_fields: Sequence[str] = ('date')) -> Callable:
     """
     Cast str date into datetime format.
 
@@ -28,7 +29,7 @@ def parse_date(func: Callable = None, date_fields=('date')) -> Callable:
     ----------
     func: Callable
         Function with the arguments to parse.
-    date_fields: Sequence
+    date_fields: Sequence of str
         Sequence containing the fields with dates.
 
     Returns
@@ -120,7 +121,8 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     Parameters
     ----------
     sequence: Sequence
-        Sequence to apply the sliding window on (can be str, list, numpy.array, etc.).
+        Sequence to apply the sliding window on
+        (can be str, list, numpy.array, etc.).
     window_size: int
         Size of the window to apply on the sequence.
     step: int
@@ -138,10 +140,13 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     >>> list(sliding_window(np.array([1, 2, 3, 4, 5, 6]), 5, 5))
     [array([1, 2, 3, 4, 5]), array([6])]
     """
-    assert window_size >= step, 'Error: window_size must be larger or equal than step.'
-    assert len(sequence) >= window_size, 'Error: length of sequence must be larger or equal than window_size.'
+    assert window_size >= step, (
+            'Error: window_size must be larger or equal than step.')
+    assert len(sequence) >= window_size, (
+            'Error: length of sequence must be '
+            ' larger or equal than window_size.')
     try:
-        it = iter(sequence)
+        __ = iter(sequence)
     except TypeError:
         raise Exception('Error: sequence must by iterable.')
 
