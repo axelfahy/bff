@@ -17,8 +17,8 @@ def parse_date(func: Callable = None, date_fields=('date')) -> Callable:
     the `date_fields`.
 
     The cast is done using the `parse` function from the
-    `dateutil<https://dateutil.readthedocs.io/en/stable/parser.html>` package.
-    All supported format are those from the library and may evolve.
+    `dateutil <https://dateutil.readthedocs.io/en/stable/parser.html>`_
+    package. All supported format are those from the library and may evolve.
 
     In order to use the decorator both with or without parenthesis when calling
     it without parameter, the `date_fields` argument is keyword only. This
