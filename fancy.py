@@ -193,6 +193,6 @@ def value_2_list(**kwargs) -> Dict[str, Sequence]:
     {'countries': ['Swiss', 'Spain']}
     """
     for k, v in kwargs.items():
-        if not isinstance(v, collections.Sequence) or isinstance(v, str):
+        if not isinstance(v, collections.abc.Sequence) or isinstance(v, str):
             kwargs[k] = [v]
     return kwargs
