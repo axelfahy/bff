@@ -67,7 +67,29 @@ class TestFancyPythonThings(unittest.TestCase):
         pass
 
     def test_value_2_list(self):
-        pass
+        """
+        Test of the `value_2_list` function.
+        """
+        # A list should remain a list.
+        self.assertEqual(value_2_list(seq=[1, 2, 3]), {'seq': [1, 2, 3]})
+        # A single integer should result in a list with one integer.
+        self.assertEqual(value_2_list(age=42), {'age': [42]})
+        # A single string should result in a list with one string.
+        self.assertEqual(value_2_list(name='John Doe'), {'name': ['John Doe']})
+        # A tuple should remain a tuple.
+        self.assertEqual(value_2_list(children=('Jane Doe', 14)),
+                         {'children': ('Jane Doe', 14)})
+        # A dictionary should result in a list with a dictionary.
+        self.assertEqual(value_2_list(info={'name': 'John Doe', 'age': 42}),
+                         {'info': [{'name': 'John Doe', 'age': 42}]})
+        # Passing a non-keyword argument should raise an exception.
+        self.assertRaises(TypeError, value_2_list, [1, 2, 3])
+        # Passing multiple keyword arguments should work.
+        self.assertEqual(value_2_list(name='John Doe', age=42,
+                                      children=('Jane Doe', 14)),
+                         {'name': ['John Doe'], 'age': [42],
+                          'children': ('Jane Doe', 14)})
+
 
 if __name__ == '__main__':
     unittest.main()
