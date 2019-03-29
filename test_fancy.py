@@ -6,7 +6,7 @@ This module test the various functions present in the FancyPythonThings module.
 import datetime
 import unittest
 
-from fancy import parse_date, value_2_list
+from fancy import parse_date, value_2_list, sliding_window
 
 
 class TestFancyPythonThings(unittest.TestCase):
@@ -64,7 +64,7 @@ class TestFancyPythonThings(unittest.TestCase):
         """
         Test of the `sliding_window` function.
         """
-        pass
+        self.assertEqual(list(sliding_window('abcdef', 2, 1)), ['ab', 'bc', 'cd', 'de', 'ef'])
 
     def test_value_2_list(self):
         """
