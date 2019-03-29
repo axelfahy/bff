@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+"""FancyPythonThings
+
+This module contains various useful functions.
+"""
 import collections
-import matplotlib.pyplot as plt
 import sys
 from dateutil import parser
 from functools import wraps
 from typing import Callable, Dict, Sequence
+import matplotlib.pyplot as plt
 
 
 def parse_date(func: Callable = None,
@@ -29,7 +33,7 @@ def parse_date(func: Callable = None,
     ----------
     func: Callable
         Function with the arguments to parse.
-    date_fields: Sequence of str
+    date_fields: Sequence of str, default 'date'
         Sequence containing the fields with dates.
 
     Returns
@@ -80,8 +84,8 @@ def plot_history(history, style: str = 'default') -> None:
     ----------
     history : tensorflow.keras.callbask.History
         History of the training.
-    style: str
-        Style to use for matplotlib.pyplot (default='default').
+    style: str, default 'default'
+        Style to use for matplotlib.pyplot.
         The style is use only in this context and not applied globally.
     """
     with plt.style.context(style):
@@ -141,10 +145,10 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     [array([1, 2, 3, 4, 5]), array([6])]
     """
     assert window_size >= step, (
-            'Error: window_size must be larger or equal than step.')
+        'Error: window_size must be larger or equal than step.')
     assert len(sequence) >= window_size, (
-            'Error: length of sequence must be '
-            ' larger or equal than window_size.')
+        'Error: length of sequence must be '
+        ' larger or equal than window_size.')
     try:
         __ = iter(sequence)
     except TypeError:
@@ -168,13 +172,18 @@ def value_2_list(**kwargs) -> Dict[str, Sequence]:
 
     Parameters
     ----------
-    kwargs : dict
+    **kwargs
         Parameters passed to the function.
 
     Returns
     -------
     dict
         Dictionary with the single values put into a list.
+
+    Raises
+    ------
+    TypeError
+        If a non-keyword argument is passed to the function.
 
     Examples
     --------
@@ -187,4 +196,3 @@ def value_2_list(**kwargs) -> Dict[str, Sequence]:
         if not isinstance(v, collections.Sequence) or isinstance(v, str):
             kwargs[k] = [v]
     return kwargs
-
