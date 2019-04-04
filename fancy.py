@@ -155,11 +155,12 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
         raise Exception('Error: sequence must by iterable.')
 
     nb_chunks = int(((len(sequence) - window_size) / step) + 1)
-    mod = window_size - nb_chunks
+    mod = len(sequence) % window_size
     for i in range(0, nb_chunks * step, step):
         yield sequence[i:i+window_size]
     if mod:
-        yield sequence[len(sequence)-mod:]
+        start = len(sequence) - (window_size - step) - mod
+        yield sequence[start:]
 
 
 def value_2_list(**kwargs) -> Dict[str, Sequence]:
