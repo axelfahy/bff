@@ -144,15 +144,25 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     >>> list(sliding_window(np.array([1, 2, 3, 4, 5, 6]), 5, 5))
     [array([1, 2, 3, 4, 5]), array([6])]
     """
-    assert window_size >= step, (
-        'Error: window_size must be larger or equal than step.')
-    assert len(sequence) >= window_size, (
-        'Error: length of sequence must be '
-        ' larger or equal than window_size.')
+    # Check for types.
     try:
         __ = iter(sequence)
     except TypeError:
-        raise Exception('Error: sequence must by iterable.')
+        raise TypeError('Sequence must by iterable.')
+
+    if not isinstance(step, int):
+        raise TypeError('Step must be an integer.')
+    if not isinstance(window_size, int):
+        raise TypeError('Window size must be an integer.')
+    # Check for values.
+    if window_size < step or window_size <= 0:
+        raise ValueError('Window_size must be larger or equal '
+                         'than step and higher than 0.')
+    if step <= 0:
+        raise ValueError('Step must be higher than 0.')
+    if len(sequence) < window_size:
+        raise ValueError('Length of sequence must be larger '
+                         'or equal than window_size.')
 
     nb_chunks = int(((len(sequence) - window_size) / step) + 1)
     mod = len(sequence) % window_size
