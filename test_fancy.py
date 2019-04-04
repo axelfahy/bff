@@ -5,6 +5,7 @@ This module test the various functions present in the FancyPythonThings module.
 """
 import datetime
 import unittest
+import numpy as np
 
 from fancy import parse_date, value_2_list, sliding_window
 
@@ -64,7 +65,60 @@ class TestFancyPythonThings(unittest.TestCase):
         """
         Test of the `sliding_window` function.
         """
-        self.assertEqual(list(sliding_window('abcdef', 2, 1)), ['ab', 'bc', 'cd', 'de', 'ef'])
+        # Should work with step of 1.
+        self.assertEqual(list(sliding_window('abcdef', 2, 1)),
+                         ['ab', 'bc', 'cd', 'de', 'ef'])
+        # Should work with numpy arrays.
+        res_np_1 = list(sliding_window(np.array([1, 2, 3, 4, 5, 6]), 5, 5))
+        np.testing.assert_array_equal(res_np_1[0], np.array([1, 2, 3, 4, 5]))
+        np.testing.assert_array_equal(res_np_1[1], np.array([6]))
+        # Should work when step and windows size are the same.
+        # In this case, each element will only be present once.
+        self.assertEqual(list(sliding_window('abcdef', 2, 2)),
+                         ['ab', 'cd', 'ef'])
+        # Should work with and odd number of elements.
+        self.assertEqual(list(sliding_window('abcdefg', 1, 1)),
+                         ['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+        self.assertEqual(list(sliding_window('abcdefg', 2, 2)),
+                         ['ab', 'cd', 'ef', 'g'])
+        # Should work if lenght of sequence is the same as window size.
+        self.assertEqual(list(sliding_window('abcdefg', 7, 3)),
+                         ['abcdefg'])
+        # Should work if last chunk is not full.
+        self.assertEqual(list(sliding_window('abcdefgh', 6, 4)),
+                         ['abcdef', 'efgh'])
+        self.assertEqual(list(sliding_window('abcdefgh', 6, 5)),
+                         ['abcdef', 'fgh'])
+        self.assertEqual(list(sliding_window('abcdefghi', 6, 5)),
+                         ['abcdef', 'fghi'])
+        # Should work with longer sequence.
+        seq_1 = 'abcdefghijklmnopqrstuvwxyz'
+        res_1 = ['abcdef', 'ghijkl', 'mnopqr', 'stuvwx', 'yz']
+        self.assertEqual(list(sliding_window(seq_1, 6, 6)), res_1)
+        res_2 = ['abcdef', 'defghi', 'ghijkl', 'jklmno', 'mnopqr', 'pqrstu',
+                 'stuvwx', 'vwxyz']
+        self.assertEqual(list(sliding_window(seq_1, 6, 3)), res_2)
+        # Check for exceptions.
+        with self.assertRaises(TypeError):
+            # Should raise an exception if the sequence is not iterable.
+            list(sliding_window(3, 2, 1))
+            # Should raise an exception if step is not an integer.
+            list(sliding_window(seq_1, 2, 1.0))
+            list(sliding_window(seq_1, 2, '1'))
+            # Should raise an exception if window size is not an integer.
+            list(sliding_window(seq_1, 2.0, 1))
+            list(sliding_window(seq_1, '2', 1))
+        with self.assertRaises(ValueError):
+            # Should raise an exception if window size is smaller
+            # than step or <= 0.
+            list(sliding_window(seq_1, 2, 3))
+            list(sliding_window(seq_1, -1, -1))
+            # Should raise an exception if the step is smaller or equal than 0.
+            list(sliding_window(seq_1, 2, 0))
+            list(sliding_window(seq_1, 2, -1))
+            # Should raise an exception if length of sequence
+            # is smaller than the window size.
+            list(sliding_window('abc', 4, 1))
 
     def test_value_2_list(self):
         """
