@@ -9,6 +9,114 @@ from dateutil import parser
 from functools import wraps
 from typing import Callable, Dict, Sequence
 import matplotlib.pyplot as plt
+import pandas as pd
+
+
+def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
+                           **kwargs) -> pd.DataFrame:
+    """
+    Concatenation of Pandas DataFrame having categorical columns.
+
+    With the `concat` function from Pandas, when merging two DataFrames
+    having categorical columns, categories not present in both DataFrames
+    and with the same code are lost. Columns are cast to `object`,
+    which takes more memory.
+
+    In this function, a union of categorical values from both DataFrames
+    is done and both DataFrames are recategorized with the complete list of
+    categorical values before the concatenation. This way, the category
+    field is preserved.
+
+    Original DataFrame are copied, hence preserved.
+
+    Parameters
+    ----------
+    df_left: pd.DataFrame
+        Left DataFrame to merge.
+    df_right: pd.DataFrame
+        Right DataFrame to merge.
+    **kwargs
+        Additional keyword arguments to be passed to the `pd.concat` function.
+
+    Returns
+    -------
+    pd.DataFrame
+        Concatenation of both DataFrames.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> column_types = {'name': 'object',
+    ...                 'color': 'category',
+    ...                 'country': 'category'}
+    >>> columns = list(column_types.keys())
+    >>> df_left = pd.DataFrame([['John', 'red', 'China'],
+                                ['Jane', 'blue', 'Switzerland']],
+    ...                        columns=columns).astype(column_types)
+    >>> df_right = pd.DataFrame([['Mary', 'yellow', 'France'],
+                                 ['Fred', 'blue', 'Italy']],
+    ...                         columns=columns).astype(column_types)
+    >>> df_left
+       name color      country
+    0  John   red        China
+    1  Jane  blue  Switzerland
+    >>> df_left.dtypes
+    name         object
+    color      category
+    country    category
+    dtype: object
+
+    The following concatenation shows the issue when using the `concat`
+    function from pandas:
+
+    >>> res_fail = pd.concat([df_left, df_right], ignore_index=True)
+    >>> res_fail
+       name   color      country
+    0  John     red        China
+    1  Jane    blue  Switzerland
+    2  Mary  yellow       France
+    3  Fred    blue       Italy
+    >>> res_fail.dtypes
+    name       object
+    color      object
+    country    object
+    dtype: object
+
+    All types are back to `object` since not all categorical values were
+    present in both DataFrames.
+
+    With this custom implementation, the categorical type is preserved:
+
+    >>> res_ok = concat_with_categories(df_left, df_right, ignore_index=True)
+    >>> res_ok
+       name   color      country
+    0  John     red        China
+    1  Jane    blue  Switzerland
+    2  Mary  yellow       France
+    3  Fred    blue       Italy
+    >>> res_ok.dtypes
+    name         object
+    color      category
+    country    category
+    dtype: object
+    """
+    assert sorted(df_left.columns.values) == sorted(df_right.columns.values), (
+        f'DataFrames must have identical columns '
+        f'({df_left.columns.values} != {df_right.columns.values})')
+
+    df_a = df_left.copy()
+    df_b = df_right.copy()
+
+    for col in df_a.columns:
+        # Process only the categorical columns.
+        if pd.api.types.is_categorical_dtype(df_a[col].dtype):
+            # Get all possible values for the categories.
+            cats = pd.api.types.union_categoricals([df_a[col], df_b[col]],
+                                                   sort_categories=True)
+            # Set all the possibles categories
+            df_a[col] = pd.Categorical(df_a[col], categories=cats.categories)
+            df_b[col] = pd.Categorical(df_b[col], categories=cats.categories)
+    return pd.concat([df_a, df_b], **kwargs)
 
 
 def parse_date(func: Callable = None,

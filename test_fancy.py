@@ -6,14 +6,46 @@ This module test the various functions present in the FancyPythonThings module.
 import datetime
 import unittest
 import numpy as np
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
 
-from fancy import parse_date, value_2_list, sliding_window
+from fancy import (concat_with_categories, parse_date, value_2_list,
+                   sliding_window)
 
 
 class TestFancyPythonThings(unittest.TestCase):
     """
     Unittest of FancyPythonThings.
     """
+
+    def test_concat_with_categories(self):
+        """
+        Test of the `concat_with_categories` function.
+        """
+        column_types = {'name': 'object',
+                        'color': 'category',
+                        'country': 'category'}
+        columns = list(column_types.keys())
+        df_left = pd.DataFrame([['John', 'red', 'China'],
+                                ['Jane', 'blue', 'Switzerland']],
+                               columns=columns).astype(column_types)
+        df_right = pd.DataFrame([['Mary', 'yellow', 'France'],
+                                 ['Fred', 'blue', 'Italy']],
+                                columns=columns).astype(column_types)
+        df_res = pd.DataFrame([['John', 'red', 'China'],
+                               ['Jane', 'blue', 'Switzerland'],
+                               ['Mary', 'yellow', 'France'],
+                               ['Fred', 'blue', 'Italy']],
+                              columns=columns).astype(column_types)
+        df_concat = concat_with_categories(df_left, df_right,
+                                           ignore_index=True)
+        # Check the content of the DataFrame.
+        assert_frame_equal(df_res, df_concat)
+        # Check the types of the DataFrame's columns.
+        self.assertTrue(pd.api.types.is_object_dtype(df_concat['name']))
+        self.assertTrue(pd.api.types.is_categorical_dtype(df_concat['color']))
+        self.assertTrue(pd.api.types.is_categorical_dtype(
+                        df_concat['country']))
 
     def test_parse_date(self):
         """
