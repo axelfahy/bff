@@ -4,10 +4,11 @@
 This module contains various useful functions.
 """
 import collections
+import pyodbc
 import sys
 from dateutil import parser
 from functools import wraps
-from typing import Callable, Dict, Sequence
+from typing import Callable, Dict, List, Sequence, Union
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -221,6 +222,53 @@ def plot_history(history, style: str = 'default') -> None:
 
         fig.suptitle('Model history')
         plt.show()
+
+
+def read_sql_by_chunks(sql: str, cnxn: pyodbc.Connection,
+                       params: Union[List, Dict] = None,
+                       chunksize: int = 8_000_000, column_types: Dict = None,
+                       **kwargs) -> pd.DataFrame:
+    """
+    Read SQL query by chunks into a DataFrame.
+
+    This function uses the `read_sql` from Pandas with the `chunksize` option.
+
+    The columns of the DataFrame are cast in order to be memory efficient and
+    preserved when adding the several chunks of the iterator.
+
+    Parameters
+    ----------
+    sql: str
+        SQL query to be executed.
+    cnxn: pyodbc.Connection
+        Connection object representing a single connection to the database.
+    params: list or dict, default None
+        List of parameters to pass to execute method.
+    chunksize: int, default 8,000,000
+        Number of rows to include in each chunk.
+    column_types: dict, default None
+        Dictionary with the name of the column as key and the type as value.
+        No cast is done if None.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `pd.read_sql` function.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with the concatenation of the chunks in the wanted type.
+    """
+    sql_it = pd.read_sql(sql, cnxn, params=params, chunksize=chunksize)
+    # Read the first chunk and cast the types.
+    res = next(sql_it)
+    if column_types:
+        res = res.astype(column_types)
+    for df in sql_it:
+        # Concatenate each chunk with the preservation of the categories.
+        if column_types:
+            df = df.astype(column_types)
+        res = concat_with_categories(res, df, ignore_index=True)
+    return res
 
 
 def sliding_window(sequence: Sequence, window_size: int, step: int):
