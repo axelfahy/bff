@@ -185,7 +185,7 @@ def parse_date(func: Callable = None,
     return _parse_date(func) if func else _parse_date
 
 
-def plot_history(history, style: str = 'default') -> None:
+def plot_history(history, metric: str = None, style: str = 'default') -> None:
     """
     Plot the history of the model trained using Keras.
 
@@ -193,24 +193,34 @@ def plot_history(history, style: str = 'default') -> None:
     ----------
     history : tensorflow.keras.callbask.History
         History of the training.
+    metric: str, default None
+        Metric to plot.
+        If no metric is provided, will only print the loss.
     style: str, default 'default'
         Style to use for matplotlib.pyplot.
         The style is use only in this context and not applied globally.
     """
+    if metric:
+        assert metric in history.history.keys(), (
+            f'Metric {metric} does not exist in history.\n'
+            f'Possible metrics: {history.history.keys()}')
+
     with plt.style.context(style):
-        fig, (ax_acc, ax_loss) = plt.subplots(1, 2, figsize=(17, 7))
+        fig, axes = plt.subplots(1, 2 if metric else 1, figsize=(12, 4))
 
-        # Summarize history for accuracy
-        ax_acc.plot(history.history['acc'],
-                    label=f"Train ({history.history['acc'][-1]:.4f})")
-        ax_acc.plot(history.history['val_acc'],
-                    label=f"Validation ({history.history['val_acc'][-1]:.4f})")
-        ax_acc.set_title('Model accuracy')
-        ax_acc.set_ylabel('Accuracy')
-        ax_acc.set_xlabel('Epochs')
-        ax_acc.legend(loc='upper left')
+        if metric:
+            # Summarize history for metric, if any.
+            axes[0].plot(history.history[metric],
+                         label=f"Train ({history.history[metric][-1]:.4f})")
+            axes[0].plot(history.history[f'val_{metric}'],
+                         label=f"Validation ({history.history[f'val_{metric}'][-1]:.4f})")
+            axes[0].set_title(f'Model {metric}')
+            axes[0].set_ylabel(metric.capitalize())
+            axes[0].set_xlabel('Epochs')
+            axes[0].legend(loc='upper left')
 
-        # Summarize history for loss
+        # Summarize history for loss.
+        ax_loss = axes[1] if metric else axes
         ax_loss.plot(history.history['loss'],
                      label=f"Train ({history.history['loss'][-1]:.4f})")
         ax_loss.plot(history.history['val_loss'],
