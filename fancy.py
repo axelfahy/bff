@@ -185,7 +185,8 @@ def parse_date(func: Callable = None,
     return _parse_date(func) if func else _parse_date
 
 
-def plot_history(history, metric: str = None, style: str = 'default') -> None:
+def plot_history(history, metric: str = None, title: str = 'Model history',
+                 style: str = 'default') -> None:
     """
     Plot the history of the model trained using Keras.
 
@@ -196,6 +197,8 @@ def plot_history(history, metric: str = None, style: str = 'default') -> None:
     metric: str, default None
         Metric to plot.
         If no metric is provided, will only print the loss.
+    title: str, default 'Model history'
+        Model to set on the plot.
     style: str, default 'default'
         Style to use for matplotlib.pyplot.
         The style is use only in this context and not applied globally.
