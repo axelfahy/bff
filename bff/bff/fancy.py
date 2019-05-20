@@ -114,7 +114,7 @@ def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
             # Get all possible values for the categories.
             cats = pd.api.types.union_categoricals([df_a[col], df_b[col]],
                                                    sort_categories=True)
-            # Set all the possibles categories
+            # Set all the possibles categories.
             df_a[col] = pd.Categorical(df_a[col], categories=cats.categories)
             df_b[col] = pd.Categorical(df_b[col], categories=cats.categories)
     return pd.concat([df_a, df_b], **kwargs)
