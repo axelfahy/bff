@@ -5,12 +5,17 @@ This module test the various functions present in the FancyPythonThings module.
 """
 import datetime
 import unittest
+import os
+import sys
 import numpy as np
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 
-from fancy import (concat_with_categories, parse_date, value_2_list,
-                   sliding_window)
+# Set the package in the PATH.
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../bff/")
+
+from bff import (concat_with_categories, parse_date, value_2_list,
+                 sliding_window)
 
 
 class TestFancyPythonThings(unittest.TestCase):
