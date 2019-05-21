@@ -4,7 +4,6 @@
 This module contains various useful functions.
 """
 import collections
-import pyodbc
 import sys
 from dateutil import parser
 from functools import wraps
@@ -237,8 +236,7 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
         plt.show()
 
 
-def read_sql_by_chunks(sql: str, cnxn: pyodbc.Connection,
-                       params: Union[List, Dict] = None,
+def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict] = None,
                        chunksize: int = 8_000_000, column_types: Dict = None,
                        **kwargs) -> pd.DataFrame:
     """
@@ -253,7 +251,7 @@ def read_sql_by_chunks(sql: str, cnxn: pyodbc.Connection,
     ----------
     sql: str
         SQL query to be executed.
-    cnxn: pyodbc.Connection
+    cnxn: SQLAlchemy connectable (engine/connection) or database string URI
         Connection object representing a single connection to the database.
     params: list or dict, default None
         List of parameters to pass to execute method.
@@ -271,7 +269,8 @@ def read_sql_by_chunks(sql: str, cnxn: pyodbc.Connection,
     pd.DataFrame
         DataFrame with the concatenation of the chunks in the wanted type.
     """
-    sql_it = pd.read_sql(sql, cnxn, params=params, chunksize=chunksize)
+    sql_it = pd.read_sql(sql, cnxn, params=params, chunksize=chunksize,
+                         **kwargs)
     # Read the first chunk and cast the types.
     res = next(sql_it)
     if column_types:
