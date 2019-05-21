@@ -17,7 +17,6 @@ DOWNLOAD_URL = ''
 REQUIRES = [
     'matplotlib==3.0.3',
     'pandas==0.24.2',
-    'pyodbc==4.0.26',
     'typing==3.6.6'
 ]
 CLASSIFIERS = [
