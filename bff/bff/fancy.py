@@ -7,7 +7,7 @@ import collections
 import sys
 from dateutil import parser
 from functools import wraps
-from typing import Callable, Dict, List, Sequence, Union
+from typing import Callable, Dict, List, Sequence, Tuple, Union
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -185,7 +185,8 @@ def parse_date(func: Callable = None,
 
 
 def plot_history(history, metric: str = None, title: str = 'Model history',
-                 style: str = 'default') -> None:
+                 figsize: Tuple[int, int] = (12, 4), grid: bool = False,
+                 style: str = 'default', **kwargs) -> plt.axes:
     """
     Plot the history of the model trained using Keras.
 
@@ -198,9 +199,26 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
         If no metric is provided, will only print the loss.
     title: str, default 'Model history'
         Model to set on the plot.
+    figsize: Tuple[int, int], default (12, 4)
+        Size of the figure to plot.
+    grid: bool, default False
+        Turn the axes grids on or off.
     style: str, default 'default'
         Style to use for matplotlib.pyplot.
         The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.plot` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> history = model.fit(...)
+    >>> plot_history(history, metric='acc', title='MyTitle', linestyle=':')
     """
     if metric:
         assert metric in history.history.keys(), (
@@ -208,14 +226,16 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
             f'Possible metrics: {history.history.keys()}')
 
     with plt.style.context(style):
-        fig, axes = plt.subplots(1, 2 if metric else 1, figsize=(12, 4))
+        fig, axes = plt.subplots(1, 2 if metric else 1, figsize=figsize)
 
         if metric:
             # Summarize history for metric, if any.
             axes[0].plot(history.history[metric],
-                         label=f"Train ({history.history[metric][-1]:.4f})")
+                         label=f"Train ({history.history[metric][-1]:.4f})",
+                         **kwargs)
             axes[0].plot(history.history[f'val_{metric}'],
-                         label=f"Validation ({history.history[f'val_{metric}'][-1]:.4f})")
+                         label=f"Validation ({history.history[f'val_{metric}'][-1]:.4f})",
+                         **kwargs)
             axes[0].set_title(f'Model {metric}')
             axes[0].set_ylabel(metric.capitalize())
             axes[0].set_xlabel('Epochs')
@@ -224,16 +244,20 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
         # Summarize history for loss.
         ax_loss = axes[1] if metric else axes
         ax_loss.plot(history.history['loss'],
-                     label=f"Train ({history.history['loss'][-1]:.4f})")
+                     label=f"Train ({history.history['loss'][-1]:.4f})",
+                     **kwargs)
         ax_loss.plot(history.history['val_loss'],
-                     label=f"Validation ({history.history['val_loss'][-1]:.4f})")
+                     label=f"Validation ({history.history['val_loss'][-1]:.4f})",
+                     **kwargs)
         ax_loss.set_title('Model loss')
         ax_loss.set_ylabel('Loss')
         ax_loss.set_xlabel('Epochs')
         ax_loss.legend(loc='upper left')
 
-        fig.suptitle('Model history')
-        plt.show()
+        axes.grid(grid)
+
+        fig.suptitle(title)
+        return axes
 
 
 def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict] = None,
