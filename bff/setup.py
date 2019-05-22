@@ -8,11 +8,11 @@ DESCRIPTION = 'Best Fancy Functions, your Best Friend Forever'
 LONG_DESCRIPTION = HERE.joinpath('README.md').read_text()
 
 DISTNAME = 'bff'
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 LICENSE = 'MIT'
 AUTHOR = 'Axel Fahy'
 EMAIL = 'axel@fahy.net'
-URL = 'https://github.com/axelfahy/FancyThings'
+URL = 'https://github.com/axelfahy/FancyThings/tree/master/bff'
 DOWNLOAD_URL = ''
 REQUIRES = [
     'matplotlib==3.0.3',
