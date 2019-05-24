@@ -9,6 +9,7 @@ from dateutil import parser
 from functools import wraps
 from typing import Callable, Dict, List, Sequence, Tuple, Union
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 
@@ -258,6 +259,80 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
 
         fig.suptitle(title)
         return axes
+
+
+def plot_predictions(y_true: Union[np.array, pd.DataFrame],
+                     y_pred: Union[np.array, pd.DataFrame],
+                     title: str = 'Model predictions',
+                     label_true: str = 'Actual', label_pred: str = 'Predicted',
+                     label_x: str = 'x', label_y: str = 'y',
+                     figsize: Tuple[int, int] = (12, 4), grid: bool = False,
+                     style: str = 'default', **kwargs) -> plt.axes:
+    """
+    Plot the predictions of the model.
+
+    Values of actual and predicted must be in column format.
+
+    For example: array([[142], [141], [143]])
+
+    If a DataFrame is provided, it must only contain one column.
+
+    Parameters
+    ----------
+    y_true : np.array or pd.DataFrame
+        Actual values.
+    y_pred : np.array or pd.DataFrame
+        Predicted values by the model.
+    label_true : str, default 'Actual'
+        Label for the actual values.
+    label_pred : str, default 'Predicted'
+        Label for the predicted values.
+    label_x : str, default 'x'
+        Label for x axis.
+    label_y : str, default 'y'
+        Label for y axis.
+    title : str, default 'Model predictions'
+        Title for the plot (axis level).
+    figsize : Tuple[int, int], default (12, 4)
+        Size of the figure to plot.
+    grid : bool, default False
+        Turn the axes grids on or off.
+    style : str, default 'default'
+        Style to use for matplotlib.pyplot.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.plot` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> y_pred = model.predict(x_test, ...)
+    >>> plot_predictions(y_true, y_pred, title='MyTitle', linestyle=':')
+    """
+    with plt.style.context(style):
+        __, ax = plt.subplots(1, 1, figsize=figsize)
+
+        # Plot predictions.
+        ax.plot(np.array(y_pred), color='r', label=label_pred, **kwargs)
+        # Plot actual values on top of the predictions.
+        ax.plot(np.array(y_true), color='b', label=label_true, **kwargs)
+        ax.set_xlabel(label_x)
+        ax.set_ylabel(label_y)
+        ax.set_title(title)
+        ax.grid(grid)
+
+        # Sort labels and handles by labels.
+        handles, labels = ax.get_legend_handles_labels()
+        labels, handles = zip(*sorted(zip(labels, handles),
+                                      key=lambda t: t[0]))
+        ax.legend(handles, labels, loc='upper left')
+
+        return ax
 
 
 def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict] = None,
