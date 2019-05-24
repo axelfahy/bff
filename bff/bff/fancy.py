@@ -31,9 +31,9 @@ def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
 
     Parameters
     ----------
-    df_left: pd.DataFrame
+    df_left : pd.DataFrame
         Left DataFrame to merge.
-    df_right: pd.DataFrame
+    df_right : pd.DataFrame
         Right DataFrame to merge.
     **kwargs
         Additional keyword arguments to be passed to the `pd.concat` function.
@@ -139,9 +139,9 @@ def parse_date(func: Callable = None,
 
     Parameters
     ----------
-    func: Callable
+    func : Callable
         Function with the arguments to parse.
-    date_fields: Sequence of str, default 'date'
+    date_fields : Sequence of str, default 'date'
         Sequence containing the fields with dates.
 
     Returns
@@ -194,16 +194,16 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
     ----------
     history : tensorflow.keras.callbask.History
         History of the training.
-    metric: str, default None
+    metric : str, default None
         Metric to plot.
         If no metric is provided, will only print the loss.
-    title: str, default 'Model history'
-        Model to set on the plot.
-    figsize: Tuple[int, int], default (12, 4)
+    title : str, default 'Model history'
+        Main title for the plot (figure level).
+    figsize : Tuple[int, int], default (12, 4)
         Size of the figure to plot.
-    grid: bool, default False
+    grid : bool, default False
         Turn the axes grids on or off.
-    style: str, default 'default'
+    style : str, default 'default'
         Style to use for matplotlib.pyplot.
         The style is use only in this context and not applied globally.
     **kwargs
@@ -237,8 +237,8 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
                          label=f"Validation ({history.history[f'val_{metric}'][-1]:.4f})",
                          **kwargs)
             axes[0].set_title(f'Model {metric}')
-            axes[0].set_ylabel(metric.capitalize())
             axes[0].set_xlabel('Epochs')
+            axes[0].set_ylabel(metric.capitalize())
             axes[0].legend(loc='upper left')
 
         # Summarize history for loss.
@@ -250,8 +250,8 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
                      label=f"Validation ({history.history['val_loss'][-1]:.4f})",
                      **kwargs)
         ax_loss.set_title('Model loss')
-        ax_loss.set_ylabel('Loss')
         ax_loss.set_xlabel('Epochs')
+        ax_loss.set_ylabel('Loss')
         ax_loss.legend(loc='upper left')
 
         axes.grid(grid)
@@ -273,15 +273,15 @@ def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict] = None,
 
     Parameters
     ----------
-    sql: str
+    sql : str
         SQL query to be executed.
-    cnxn: SQLAlchemy connectable (engine/connection) or database string URI
+    cnxn : SQLAlchemy connectable (engine/connection) or database string URI
         Connection object representing a single connection to the database.
-    params: list or dict, default None
+    params : list or dict, default None
         List of parameters to pass to execute method.
-    chunksize: int, default 8,000,000
+    chunksize : int, default 8,000,000
         Number of rows to include in each chunk.
-    column_types: dict, default None
+    column_types : dict, default None
         Dictionary with the name of the column as key and the type as value.
         No cast is done if None.
     **kwargs
@@ -316,12 +316,12 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
 
     Parameters
     ----------
-    sequence: Sequence
+    sequence : Sequence
         Sequence to apply the sliding window on
         (can be str, list, numpy.array, etc.).
-    window_size: int
+    window_size : int
         Size of the window to apply on the sequence.
-    step: int
+    step : int
         Step for each sliding window.
 
     Yields
