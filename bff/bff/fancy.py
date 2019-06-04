@@ -187,7 +187,8 @@ def parse_date(func: Callable = None,
 
 def plot_history(history, metric: str = None, title: str = 'Model history',
                  figsize: Tuple[int, int] = (12, 4), grid: bool = False,
-                 style: str = 'default', **kwargs) -> plt.axes:
+                 style: str = 'default',
+                 **kwargs) -> Union[plt.axes, Sequence[plt.axes]]:
     """
     Plot the history of the model trained using Keras.
 
@@ -214,7 +215,8 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
     Returns
     -------
     plt.axes
-        Axes returned by the `plt.subplots` function.
+        Axes object or array of Axes objects returned by the `plt.subplots`
+        function.
 
     Examples
     --------
@@ -255,7 +257,12 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
         ax_loss.set_ylabel('Loss')
         ax_loss.legend(loc='upper left')
 
-        axes.grid(grid)
+        # Put the grid on axes.
+        if metric:
+            for ax in axes.flatten():
+                ax.grid(grid)
+        else:
+            axes.grid(grid)
 
         fig.suptitle(title)
         return axes
