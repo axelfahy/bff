@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+TNum = Union[int, float]
 
 def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
                            **kwargs) -> pd.DataFrame:
@@ -348,6 +349,97 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
         labels, handles = zip(*sorted(zip(labels, handles),
                                       key=lambda t: t[0]))
         ax.legend(handles, labels, loc='upper left')
+
+        return ax
+
+
+def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
+                      y_pred: Union[np.array, pd.DataFrame],
+                      marker: Union[str, int] = 'k.', corr: bool = True,
+                      label_x: str = 'Ground truth',
+                      label_y: str = 'Prediction',
+                      title: str = 'Predicted vs Actual',
+                      lim_x: Tuple[TNum, TNum] = None,
+                      lim_y: Tuple[TNum, TNum] = None,
+                      ax: plt.axes = None, figsize: Tuple[int, int] = (12, 5),
+                      grid: bool = False, style: str = 'default',
+                      **kwargs) -> plt.axes:
+    """
+    Plot the ground truth against the predictions of the model.
+
+    If a DataFrame is provided, it must only contain one column.
+
+    Parameters
+    ----------
+    y_true : np.array or pd.DataFrame
+        Actual values.
+    y_pred : np.array or pd.DataFrame
+        Predicted values by the model.
+    label_x : str, default 'Ground truth'
+        Label for x axis.
+    label_y : str, default 'Prediction'
+        Label for y axis.
+    title : str, default 'Predicted vs Actual'
+        Title for the plot (axis level).
+    lim_x : Tuple[TNum, TNum], default None
+        Limit for the x axis. If None, automatically calculated according
+        to the limits of the data, with an extra 5% for readability.
+    lim_y : Tuple[TNum, TNum], default None
+        Limit for the y axis. If None, automatically calculated according
+        to the limits of the data, with an extra 5% for readability.
+    ax : plt.axes, default None
+        Axes from matplotlib, if None, new figure and axes will be created.
+    figsize : Tuple[int, int], default (12, 5)
+        Size of the figure to plot.
+    grid : bool, default False
+        Turn the axes grids on or off.
+    style : str, default 'default'
+        Style to use for matplotlib.pyplot.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.plot` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> y_pred = model.predict(x_test, ...)
+    >>> plot_true_vs_pred(y_true, y_pred, title='MyTitle', linestyle=':')
+    """
+    with plt.style.context(style):
+        if ax is None:
+            __, ax = plt.subplots(1, 1, figsize=figsize)
+
+        y_true = np.array(y_true).flatten()
+        y_pred = np.array(y_pred).flatten()
+        ax.plot(y_true, y_pred, marker, **kwargs)
+        ax.set_xlabel(label_x)
+        ax.set_ylabel(label_y)
+        ax.set_title(title)
+        ax.grid(grid)
+
+        # Calculate the limit of the plot if not provided,
+        # add and extra 5% for readability.
+        def get_limit(limit, data, percent=5):
+            if not limit or not isinstance(limit, tuple):
+                lim_max = data.max()
+                lim_min = data.min()
+                margin = (lim_max - lim_min) * percent / 100
+                limit = (lim_min - margin, lim_max + margin)
+            return limit
+
+        ax.set_xlim(get_limit(lim_x, y_true))
+        ax.set_ylim(get_limit(lim_y, y_pred))
+
+        # Add correlation in upper left position.
+        if corr:
+            ax.text(0.025, 0.925,
+                    f'R={np.round(np.corrcoef(y_true, y_pred)[0][1], 3)}',
+                    transform=ax.transAxes)
 
         return ax
 
