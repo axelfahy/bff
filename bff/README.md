@@ -1,7 +1,12 @@
 # BFF
 > Best Fancy Functions, your Best Friend Forever
 
-[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
+<p align="left">
+    <a href="https://pypi.org/project/bff/">
+        <img src="https://img.shields.io/pypi/v/bff.svg" alt="latest release" /></a>
+    <a href="https://pypi.org/project/bff/">
+        <img src="https://img.shields.io/badge/python-3.6-blue.svg" alt="Python36" /></a>
+</p>
 
 This package contains some utility functions from plots to data manipulations and could become your new bff.
 
@@ -35,8 +40,10 @@ python tests/test_fancy.py
 
 ## Release History
 
+* 0.1.2
+    * ADD: Function `plot_predictions` function to plot the actual values and the predictions of a model
 * 0.1.1
-    * CHANGE: Improvement of `plot-history` function
+    * CHANGE: Improvement of `plot_history` function
     * ADD: Readme with instructions
     * FIX: Fix the imports in the test
 * 0.1.0
