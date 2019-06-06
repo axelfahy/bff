@@ -41,6 +41,7 @@ python tests/test_fancy.py
 ## Release History
 
 * 0.1.2
+    * CHANGE: Add axes in plot functions
     * ADD: Function `plot_predictions` function to plot the actual values and the predictions of a model
 * 0.1.1
     * CHANGE: Improvement of `plot_history` function
