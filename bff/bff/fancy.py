@@ -186,8 +186,8 @@ def parse_date(func: Callable = None,
 
 
 def plot_history(history, metric: str = None, title: str = 'Model history',
-                 figsize: Tuple[int, int] = (12, 4), grid: bool = False,
-                 style: str = 'default',
+                 axes: plt.axes = None, figsize: Tuple[int, int] = (12, 4),
+                 grid: bool = False, style: str = 'default',
                  **kwargs) -> Union[plt.axes, Sequence[plt.axes]]:
     """
     Plot the history of the model trained using Keras.
@@ -201,6 +201,9 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
         If no metric is provided, will only print the loss.
     title : str, default 'Model history'
         Main title for the plot (figure level).
+    axes : plt.axes, default None
+        Axes from matplotlib, if None, new figure and axes will be created.
+        If metric is provided, need to have at least 2 axes.
     figsize : Tuple[int, int], default (12, 4)
         Size of the figure to plot.
     grid : bool, default False
@@ -229,7 +232,12 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
             f'Possible metrics: {history.history.keys()}')
 
     with plt.style.context(style):
-        fig, axes = plt.subplots(1, 2 if metric else 1, figsize=figsize)
+        # Given axes are not check for now.
+        # If metric is given, must have at least 2 axes.
+        if axes is None:
+            fig, axes = plt.subplots(1, 2 if metric else 1, figsize=figsize)
+        else:
+            fig = plt.gcf()
 
         if metric:
             # Summarize history for metric, if any.
@@ -270,17 +278,14 @@ def plot_history(history, metric: str = None, title: str = 'Model history',
 
 def plot_predictions(y_true: Union[np.array, pd.DataFrame],
                      y_pred: Union[np.array, pd.DataFrame],
-                     title: str = 'Model predictions',
                      label_true: str = 'Actual', label_pred: str = 'Predicted',
                      label_x: str = 'x', label_y: str = 'y',
+                     title: str = 'Model predictions',
+                     ax: plt.axes = None,
                      figsize: Tuple[int, int] = (12, 4), grid: bool = False,
                      style: str = 'default', **kwargs) -> plt.axes:
     """
     Plot the predictions of the model.
-
-    Values of actual and predicted must be in column format.
-
-    For example: array([[142], [141], [143]])
 
     If a DataFrame is provided, it must only contain one column.
 
@@ -300,6 +305,8 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
         Label for y axis.
     title : str, default 'Model predictions'
         Title for the plot (axis level).
+    ax : plt.axes, default None
+        Axes from matplotlib, if None, new figure and axes will be created.
     figsize : Tuple[int, int], default (12, 4)
         Size of the figure to plot.
     grid : bool, default False
@@ -322,12 +329,15 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
     >>> plot_predictions(y_true, y_pred, title='MyTitle', linestyle=':')
     """
     with plt.style.context(style):
-        __, ax = plt.subplots(1, 1, figsize=figsize)
+        if ax is None:
+            __, ax = plt.subplots(1, 1, figsize=figsize)
 
         # Plot predictions.
-        ax.plot(np.array(y_pred), color='r', label=label_pred, **kwargs)
+        ax.plot(np.array(y_pred).flatten(), color='r',
+                label=label_pred, **kwargs)
         # Plot actual values on top of the predictions.
-        ax.plot(np.array(y_true), color='b', label=label_true, **kwargs)
+        ax.plot(np.array(y_true).flatten(), color='b',
+                label=label_true, **kwargs)
         ax.set_xlabel(label_x)
         ax.set_ylabel(label_y)
         ax.set_title(title)
