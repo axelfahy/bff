@@ -483,7 +483,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
                       .mean()
                       .resample(groupby)
                       .apply(sem)
-                      if groupby is not 'S' and groupby is not '1S' else
+                      if groupby == 'S' and groupby != '1S' else
                       df[column].groupby('datetime').apply(sem))
 
             ax.fill_between(x, df_plot - df_sem, df_plot + df_sem,
