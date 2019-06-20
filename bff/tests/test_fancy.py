@@ -9,13 +9,14 @@ import os
 import sys
 import numpy as np
 import pandas as pd
-from pandas.util.testing import assert_frame_equal
+import pandas.util.testing as tm
+from numpy.testing import assert_array_equal
 
 # Set the package in the PATH.
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../bff/")
 
-from bff import (concat_with_categories, parse_date, value_2_list,
-                 sliding_window)
+from bff import (concat_with_categories, get_peaks, parse_date,
+                 value_2_list, sliding_window)
 
 
 class TestFancyPythonThings(unittest.TestCase):
@@ -45,12 +46,31 @@ class TestFancyPythonThings(unittest.TestCase):
         df_concat = concat_with_categories(df_left, df_right,
                                            ignore_index=True)
         # Check the content of the DataFrame.
-        assert_frame_equal(df_res, df_concat)
+        tm.assert_frame_equal(df_res, df_concat)
         # Check the types of the DataFrame's columns.
         self.assertTrue(pd.api.types.is_object_dtype(df_concat['name']))
         self.assertTrue(pd.api.types.is_categorical_dtype(df_concat['color']))
         self.assertTrue(pd.api.types.is_categorical_dtype(
                         df_concat['country']))
+
+    def test_get_peaks(self):
+        """
+        Test of the `get_peaks` function.
+        """
+        # Creation of a serie with peaks 9 and 12.
+        values = [4, 5, 9, 3, 2, 1, 2, 1, 3, 4, 12, 9, 6, 3, 2, 4, 5]
+        dates = pd.date_range('2019-06-20', periods=len(values), freq='T')
+        s = pd.Series(values, index=dates)
+
+        # Compute the peaks.
+        peak_dates, peak_values = get_peaks(s)
+
+        peak_dates_res = [np.datetime64('2019-06-20T00:02'),
+                          np.datetime64('2019-06-20T00:10')]
+        peak_values_res = [9., 12.]
+
+        assert_array_equal(peak_dates, peak_dates_res)
+        assert_array_equal(peak_values, peak_values_res)
 
     def test_parse_date(self):
         """

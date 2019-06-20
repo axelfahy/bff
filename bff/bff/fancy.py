@@ -4,15 +4,22 @@
 This module contains various useful functions.
 """
 import collections
+import math
 import sys
 from dateutil import parser
 from functools import wraps
+from scipy import signal
+from scipy.stats import sem
 from typing import Callable, Dict, List, Sequence, Tuple, Union
+import matplotlib as mpl
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 TNum = Union[int, float]
+
 
 def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
                            **kwargs) -> pd.DataFrame:
@@ -119,6 +126,40 @@ def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
             df_a[col] = pd.Categorical(df_a[col], categories=cats.categories)
             df_b[col] = pd.Categorical(df_b[col], categories=cats.categories)
     return pd.concat([df_a, df_b], **kwargs)
+
+
+def get_peaks(s: pd.Series, distance_scale: float = 0.04):
+    """
+    Get the peaks of a time series having datetime as index.
+
+    Only the peaks having an heights higher than 0.75 quantile are returned
+    and a distance between two peaks at least `df.shape[0]*distance_scale`.
+
+    Return the dates and the corresponding value of the peaks.
+
+    Parameters
+    ----------
+    s : pd.Series
+        Series to get the peaks from, with datetime as index.
+    distance_scale : str, default 0.04
+        Scaling for the minimal distances between two peaks.
+        Multiplication of the length of the DataFrame
+        with the `distance_scale` value.
+    Returns
+    -------
+    dates : np.ndarray
+        Dates when the peaks occur.
+    heights : np.ndarray
+        Heights of the peaks at the corresponding dates.
+    """
+    assert isinstance(s.index, pd.DatetimeIndex), (
+        'Serie must have a datetime index.')
+
+    peaks = signal.find_peaks(s.values,
+                              height=s.quantile(0.75),
+                              distance=math.ceil(s.shape[0]*distance_scale))
+    peaks_dates = s.reset_index().iloc[:, 0][peaks[0]]
+    return peaks_dates.values, peaks[1]['peak_heights']
 
 
 def parse_date(func: Callable = None,
