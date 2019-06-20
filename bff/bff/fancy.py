@@ -394,6 +394,148 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
         return ax
 
 
+def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
+                with_sem: bool = True, with_peaks: bool = False,
+                distance_scale: float = 0.04, label_x: str = 'Datetime',
+                label_y: str = None, title: str = 'Plot of series',
+                ax: plt.axes = None, color: str = '#3F5D7D',
+                figsize: Tuple[int, int] = (14, 6), dpi: int = 80,
+                style: str = 'default', **kwargs) -> plt.axes:
+    """
+    Plot time series with datetime with the given resample (`groupby`).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to plot, with datetime as index.
+    column : str
+        Column of the DataFrame to display.
+    groupby : str, default '1S'
+        Grouping for the resampling by mean of the data.
+        For example, can resample from seconds ('S') to minutes ('T').
+    with_sem : bool, default True
+        Display the standard error of the mean (SEM) if set to true.
+    with_peaks : bool, default False
+        Display the peaks of the serie if set to true.
+    distance_scale: float, default 0.04
+        Scaling for the minimal distance between peaks.
+        Only used if `with_peaks` is set to true.
+    label_x : str, default 'Datetime'
+        Label for x axis.
+    label_y : str, default None
+        Label for y axis. If None, will take the column name as label.
+    title : str, default 'Plot of series'
+        Title for the plot (axis level).
+    ax : plt.axes, default None
+        Axes from matplotlib, if None, new figure and ax will be created.
+    color : str, default '#3F5D7D'
+        Default color for the plot.
+    figsize : Tuple[int, int], default (14, 6)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'default'
+        Style to use for matplotlib.pyplot.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.plot` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes object or array of Axes objects returned by the `plt.subplots`
+        function.
+
+    Examples
+    --------
+    >>> df_acceleration = fake.get_data_with_datetime_index(...)
+    >>> _, axes = plt.subplots(nrows=3, ncols=1, figsize=(14, 20), dpi=80)
+    >>> colors = {'x': 'steelblue', 'y': 'darkorange', 'z': 'darkgreen'}
+    >>> for i, acc in enumerate(['x', 'y', 'z']):
+    ...     plot_series(df_acceleration, acc, groupby='T',
+    ...                 ax=axes[i], color=colors[acc])
+    """
+    assert 'datetime' in df.index.names, (
+        'DataFrame must have a datetime index.')
+    assert column in df.columns, (
+        f'DataFrame does not contain column: {column}')
+
+    with plt.style.context(style):
+        if ax is None:
+            __, ax = plt.subplots(figsize=figsize, dpi=dpi)
+
+        # By default, the x label if the column name.
+        if label_y is None:
+            label_y = column.capitalize()
+
+        # Get the values to plot.
+        df_plot = (df[column].groupby('datetime').mean()
+                   .resample(groupby).mean())
+        x = df_plot.index
+
+        ax.plot(x, df_plot, label=column, color=color, lw=2, **kwargs)
+
+        # With sem (standard error of the mean).
+        if with_sem:
+            df_sem = (df[column]
+                      .groupby('datetime')
+                      .mean()
+                      .resample(groupby)
+                      .apply(sem)
+                      if groupby is not 'S' and groupby is not '1S' else
+                      df[column].groupby('datetime').apply(sem))
+
+            ax.fill_between(x, df_plot - df_sem, df_plot + df_sem,
+                            color='grey', alpha=0.2)
+
+        # Plot the peak as circle.
+        if with_peaks:
+            peak_dates, peak_values = get_peaks(df_plot, distance_scale)
+            ax.plot(peak_dates, peak_values, linestyle='', marker='o',
+                    color='plum')
+
+        ax.set_ylabel(f'{label_y}', fontsize=12)
+        ax.set_xlabel('Datetime', fontsize=12)
+        ax.set_title(f'{title} (mean by {groupby})', fontsize=14)
+
+        # Style.
+        # Remove border on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        # Remove ticks on y axis.
+        ax.yaxis.set_ticks_position('none')
+
+        # Draw Horizontal Tick lines.
+        ax.xaxis.grid(False)
+        ax.yaxis.grid(which='major', color='black', alpha=0.5,
+                      linestyle='--', lw=0.5)
+
+        # Set thousand separator for y axis.
+        ax.yaxis.set_major_formatter(
+            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+            )
+
+        handles, labels = ax.get_legend_handles_labels()
+        labels_cap = [label.capitalize() for label in labels]
+        # Add the sem on the legend.
+        if with_sem:
+            handles.append(mpatches.Patch(color='grey', alpha=0.2))
+            labels_cap.append('Standard error of the mean (SEM)')
+
+        # Add the peak symbol on the legend.
+        if with_peaks:
+            handles.append(mlines.Line2D([], [], linestyle='', marker='o',
+                                         color='plum'))
+            labels_cap.append('Peaks')
+
+        ax.legend(handles, labels_cap)
+        plt.tight_layout()
+
+        return ax
+
+
 def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                       y_pred: Union[np.array, pd.DataFrame],
                       marker: Union[str, int] = 'k.', corr: bool = True,
