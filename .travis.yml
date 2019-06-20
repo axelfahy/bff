@@ -10,9 +10,6 @@ script:
   - flake8 bff
 after_success:
   - coveralls
-branches:
-  only:
-    - master
 deploy:
   provider: pypi
   user: axlair
