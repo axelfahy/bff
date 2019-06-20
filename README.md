@@ -27,19 +27,21 @@ git clone https://github.com/axelfahy/bff.git
 cd bff
 python -m venv venv-dev
 source venv-dev/bin/activate
+pip install requirements_dev.txt
 pip install -e .
 ```
 
 ## Tests
 
 ```sh
-python tests/test_fancy.py
+pytest --cov==bff
 ```
 
 ## Release History
 
 * 0.1.3
     * CHANGE: Restructuration of repo
+    * ADD: Travis, flake8, coveralls and PyUp configurations
     * ADD: Function `get_peaks` to get the peaks of a time series
     * ADD: Function `plot_series` to plot a time series
 * 0.1.2

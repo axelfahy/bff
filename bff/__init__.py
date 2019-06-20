@@ -22,4 +22,4 @@ __all__ = [
 ]
 
 # Version of the bff package.
-__version__ = '0.1.2'
+__version__ = '0.1.3'

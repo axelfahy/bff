@@ -1,0 +1,22 @@
+dist: xenial
+language: python
+python:
+  - '3.7'
+install:
+  - pip install -r requirements_dev.txt
+  - pip install -e .
+script:
+  - pytest --cov=bff
+  - flake8 bff
+after_success:
+  - coveralls
+branches:
+  only:
+    - master
+deploy:
+  provider: pypi
+  user: axlair
+  password:
+    secure: VZ3g6tv9pw5DkRApHEa3cI8/ZW6bmg0ogz6B5VETRRgi+b+V80G1U6t1srIoVXboO3ku9no6ZRzAnjC0QsBnFpFfOAjOgNh6I5VuyGsHfPbktOUfcFvZuzQAZHCY2Ff6/cbrY9tOA4G2a/pkl/TRCr3QMdLRtzK44/WYDaC2hbX9u+eGyB1ipyXjwfY2tTP/jYAfJ22u4Fz+T2yhlfvEJ8PjoikcFicIaLfUE/3aA9w2AYc8evbK/OtQL+/eCogSoPkvKXi6kPdxIdhdUjAmJRCqs8D+qGqtB3zJ4TagXe0izEYGeYZzBmIOWIxJqhjJ+wZ0zq6WtgLqzaEA0rG5V8fN558fPa5ASdjVJo1fX35jm9jvaptCHzMwyxbjs+syfeKf60IOqfqNyCq3uwdPXDo26QBomHzVWhzCxCmdSijgXhVrsU+aQKXYKl4Yg/x/qb1E3idWogP0KiSzu5fcT4es8nE+0BW48v0YftRqHDdKRaAxoAWWc4J+7E67qyN9JunOUzTDOLoCdPf90u/QfAC4wZ/jdzwGWuzpFe9LCRdo/M42o+sltoSZo5Ku1ehOxnO9FhRGvZ24MvXIj12rUQNCzPc9pppmAZUjqlHoQ4ehoHfrT7B1Z+QV9LRAUuPo2OQhS98gWBQ9SisMkpMPx1mYpQw20WtvAR9pc1nnZ3c=
+  on:
+    tags: true
