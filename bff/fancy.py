@@ -157,7 +157,7 @@ def get_peaks(s: pd.Series, distance_scale: float = 0.04):
 
     peaks = signal.find_peaks(s.values,
                               height=s.quantile(0.75),
-                              distance=math.ceil(s.shape[0]*distance_scale))
+                              distance=math.ceil(s.shape[0] * distance_scale))
     peaks_dates = s.reset_index().iloc[:, 0][peaks[0]]
     return peaks_dates.values, peaks[1]['peak_heights']
 
@@ -515,7 +515,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
         # Set thousand separator for y axis.
         ax.yaxis.set_major_formatter(
             mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-            )
+        )
 
         handles, labels = ax.get_legend_handles_labels()
         labels_cap = [label.capitalize() for label in labels]
@@ -726,7 +726,7 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     nb_chunks = int(((len(sequence) - window_size) / step) + 1)
     mod = len(sequence) % window_size
     for i in range(0, nb_chunks * step, step):
-        yield sequence[i:i+window_size]
+        yield sequence[i:i + window_size]
     if mod:
         start = len(sequence) - (window_size - step) - mod
         yield sequence[start:]
