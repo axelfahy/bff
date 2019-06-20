@@ -3,7 +3,11 @@
 
 <p align="left">
     <a href="https://pypi.org/project/bff/">
-        <img src="https://img.shields.io/pypi/v/bff.svg" alt="latest release" /></a>
+        <img src="https://img.shields.io/pypi/v/bff.svg" alt="Latest Release" /></a>
+    <a href="https://travis-ci.com/axelfahy/bff">
+        <img src="https://api.travis-ci.com/axelfahy/bff.svg?branch=master" alt="Build Status" /></a>
+    <a href="https://coveralls.io/github/axelfahy/bff?branch=master">
+        <img src="https://coveralls.io/repos/github/axelfahy/bff/badge.svg?branch=master" alt="Coverage Status" /></a>
     <a href="https://pypi.org/project/bff/">
         <img src="https://img.shields.io/badge/python-3.7-blue.svg" alt="Python37" /></a>
 </p>
