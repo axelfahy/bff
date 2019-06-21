@@ -80,10 +80,12 @@ class TestFancyPythonThings(unittest.TestCase):
         """
         valid_dict = {1: 4, 2: 5, 3: 6}
         another_valid_dict = {'1': 4, 2: '5', 3: '6'}
+        dataloss_dict = {1: 4, 2: 4, 3: 6}
         invalid_dict = {1: [1], 2: [2], 3: [3]}
 
         self.assertEqual(idict(valid_dict), {4: 1, 5: 2, 6: 3})
         self.assertEqual(idict(another_valid_dict), {4: '1', '5': 2, '6': 3})
+        self.assertEqual(idict(dataloss_dict), {4: 2, 6: 3})
         self.assertRaises(TypeError, idict, invalid_dict)
 
     def test_parse_date(self):
