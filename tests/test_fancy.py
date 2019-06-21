@@ -13,6 +13,8 @@ import pandas.util.testing as tm
 from numpy.testing import assert_array_equal
 
 # Set the package in the PATH.
+from bff.fancy import idict
+
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../bff/")
 
 from bff import (concat_with_categories, get_peaks, parse_date,
@@ -71,6 +73,18 @@ class TestFancyPythonThings(unittest.TestCase):
 
         assert_array_equal(peak_dates, peak_dates_res)
         assert_array_equal(peak_values, peak_values_res)
+
+    def test_idict(self):
+        """
+        Test of the `idict` function.
+        """
+        valid_dict = {1: 4, 2: 5, 3: 6}
+        another_valid_dict = {'1': 4, 2: '5', 3: '6'}
+        invalid_dict = {1: [1], 2: [2], 3: [3]}
+
+        self.assertEqual(idict(valid_dict), {4: 1, 5: 2, 6: 3})
+        self.assertEqual(idict(another_valid_dict), {4: '1', '5': 2, '6': 3})
+        self.assertRaises(TypeError, idict, invalid_dict)
 
     def test_parse_date(self):
         """

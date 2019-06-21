@@ -10,7 +10,7 @@ from dateutil import parser
 from functools import wraps
 from scipy import signal
 from scipy.stats import sem
-from typing import Callable, Dict, List, Sequence, Tuple, Union
+from typing import Callable, Dict, List, Sequence, Tuple, Union, Hashable, Any
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -160,6 +160,39 @@ def get_peaks(s: pd.Series, distance_scale: float = 0.04):
                               distance=math.ceil(s.shape[0] * distance_scale))
     peaks_dates = s.reset_index().iloc[:, 0][peaks[0]]
     return peaks_dates.values, peaks[1]['peak_heights']
+
+
+def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
+    """
+    Invert a dictionary meaning that keys will be become values and values will become keys.
+
+    Parameters
+    ----------
+    d : dict of any to hashable
+        Dictionary to invert
+
+    Returns
+    -------
+    dict of hashable to any
+        Inverted dictionary
+
+    Raises
+    ------
+    TypeError
+        If original values are not Hashable
+
+    Examples
+    -------
+    >>> idict({1: 4, 2: 5})
+    {4: 1, 5: 2}
+    """
+
+    try:
+        _ = set(d.values())
+    except TypeError:
+        raise TypeError(f'TypeError: values of dict {d} are not hashable.')
+
+    return {v: k for k, v in d.items()}
 
 
 def parse_date(func: Callable = None,
