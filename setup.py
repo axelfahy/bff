@@ -8,7 +8,7 @@ DESCRIPTION = 'Best Fancy Functions, your Best Friend Forever'
 LONG_DESCRIPTION = HERE.joinpath('README.md').read_text()
 
 DISTNAME = 'bff'
-VERSION = '0.1.3'
+VERSION = '0.1.4'
 LICENSE = 'MIT'
 AUTHOR = 'Axel Fahy'
 EMAIL = 'axel@fahy.net'

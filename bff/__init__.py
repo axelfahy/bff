@@ -2,7 +2,7 @@
 All of bff' functions.
 """
 from .fancy import (
-    concat_with_categories, get_peaks, parse_date, plot_history,
+    concat_with_categories, get_peaks, idict, parse_date, plot_history,
     plot_predictions, plot_series, plot_true_vs_pred, read_sql_by_chunks,
     sliding_window, value_2_list
 )
@@ -11,6 +11,7 @@ from .fancy import (
 __all__ = [
     'concat_with_categories',
     'get_peaks',
+    'idict',
     'parse_date',
     'plot_history',
     'plot_predictions',
@@ -22,4 +23,4 @@ __all__ = [
 ]
 
 # Version of the bff package.
-__version__ = '0.1.3'
+__version__ = '0.1.4'
