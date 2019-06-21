@@ -4,13 +4,14 @@
 This module contains various useful functions.
 """
 import collections
+import logging
 import math
 import sys
 from dateutil import parser
 from functools import wraps
 from scipy import signal
 from scipy.stats import sem
-from typing import Callable, Dict, List, Sequence, Tuple, Union, Hashable, Any
+from typing import Any, Callable, Dict, Hashable, List, Sequence, Tuple, Union
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -19,6 +20,10 @@ import numpy as np
 import pandas as pd
 
 TNum = Union[int, float]
+
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT)
+logger = logging.getLogger(name='bff')
 
 
 def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
@@ -185,10 +190,16 @@ def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
     -------
     >>> idict({1: 4, 2: 5})
     {4: 1, 5: 2}
+    >>> idict({1: 4, 2: 4, 3: 6})
+    {4: 2, 6: 3}
     """
 
     try:
-        _ = set(d.values())
+        s = set(d.values())
+
+        if len(s) < len(d.values()):
+            logger.warning('[DATA LOSS] Same values for multiple keys, '
+                           'inverted dict will not contain all keys')
     except TypeError:
         raise TypeError(f'TypeError: values of dict {d} are not hashable.')
 
