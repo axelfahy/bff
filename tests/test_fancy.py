@@ -5,20 +5,14 @@ This module test the various functions present in the FancyPythonThings module.
 """
 import datetime
 import unittest
-import os
-import sys
+import unittest.mock
 import numpy as np
+from numpy.testing import assert_array_equal
 import pandas as pd
 import pandas.util.testing as tm
-from numpy.testing import assert_array_equal
 
-# Set the package in the PATH.
-from bff.fancy import idict
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../bff/")
-
-from bff import (concat_with_categories, get_peaks, parse_date,
-                 value_2_list, sliding_window)
+from bff.fancy import (concat_with_categories, get_peaks, idict, mem_usage_pd,
+                       parse_date, value_2_list, sliding_window)
 
 
 class TestFancyPythonThings(unittest.TestCase):
@@ -88,6 +82,39 @@ class TestFancyPythonThings(unittest.TestCase):
         self.assertEqual(idict(dataloss_dict), {4: 2, 6: 3})
         self.assertRaises(TypeError, idict, invalid_dict)
 
+    def test_mem_usage_pd(self):
+        """
+        Test of the `mem_usage_pd` function.
+        """
+        df = pd.DataFrame({'A': [f'value{i}' for i in range(100000)],
+                           'B': [i for i in range(100000)],
+                           'C': [float(i) for i in range(100000)]}).set_index('A')
+
+        test_1 = mem_usage_pd(df)
+        res_1 = {'total': '7.90 MB'}
+        self.assertDictEqual(test_1, res_1)
+
+        test_2 = mem_usage_pd(df, details=True)
+        res_2 = {'Index': {'6.38 MB', 'Index type'},
+                 'B': {'0.76 MB', np.dtype('int64')},
+                 'C': {'0.76 MB', np.dtype('float64')},
+                 'total': '7.90 MB'}
+        self.assertDictEqual(test_2, res_2)
+
+        serie = df.reset_index()['B']
+
+        test_3 = mem_usage_pd(serie)
+        res_3 = {'total': '0.76 MB'}
+        self.assertDictEqual(test_3, res_3)
+
+        # Check the warning message using a mock.
+        with unittest.mock.patch('logging.Logger.warning') as mock_logging:
+            mem_usage_pd(serie, details=True)
+            mock_logging.assert_called_with('Details is only available for DataFrames.')
+
+        # Check for exception if not a pandas object.
+        self.assertRaises(AttributeError, mem_usage_pd, {'a': 1, 'b': 2})
+
     def test_parse_date(self):
         """
         Test of the `parse_date` decorator.
@@ -124,15 +151,6 @@ class TestFancyPythonThings(unittest.TestCase):
         # Should not parse if wrong format
         self.assertEqual(dummy_function(date='wrong format')['date'],
                          'wrong format')
-
-    def test_plot_history(self):
-        """
-        Test of the plot history function.
-
-        This is not a real unittest since this is a plot.
-        The test only checks if it is running smoothly.
-        """
-        pass
 
     def test_sliding_window(self):
         """
