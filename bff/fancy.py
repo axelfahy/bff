@@ -150,6 +150,7 @@ def get_peaks(s: pd.Series, distance_scale: float = 0.04):
         Scaling for the minimal distances between two peaks.
         Multiplication of the length of the DataFrame
         with the `distance_scale` value.
+
     Returns
     -------
     dates : np.ndarray
@@ -174,20 +175,20 @@ def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
     Parameters
     ----------
     d : dict of any to hashable
-        Dictionary to invert
+        Dictionary to invert.
 
     Returns
     -------
     dict of hashable to any
-        Inverted dictionary
+        Inverted dictionary.
 
     Raises
     ------
     TypeError
-        If original values are not Hashable
+        If original values are not Hashable.
 
     Examples
-    -------
+    --------
     >>> idict({1: 4, 2: 5})
     {4: 1, 5: 2}
     >>> idict({1: 4, 2: 4, 3: 6})
@@ -204,6 +205,81 @@ def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
         raise TypeError(f'TypeError: values of dict {d} are not hashable.')
 
     return {v: k for k, v in d.items()}
+
+
+def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, deep: bool = True,
+                 details: bool = False) -> Dict[str, Union[str, dict]]:
+    """
+    Calculate the memory usage of a pandas object.
+
+    If `details`, returns a dictionary with the memory usage and type of
+    each column (DataFrames only). Key=column, value=(memory, type).
+    Else returns a dictionary with the total memory usage. Key=`total`, value=memory.
+
+    Parameters
+    ----------
+    pd_obj : pd.DataFrame or pd.Series
+        DataFrame or Series to calculate the memory usage.
+    index : bool, default True
+        If True, include the memory usage of the index.
+    deep : bool, default True
+        If True, introspect the data deeply by interrogating object dtypes for system-level
+        memory consumption.
+    details : bool, default False
+        If True and a DataFrame is given, give the detail (memory and type) of each column.
+
+    Returns
+    -------
+    dict of str to str
+        Dictionary with the column or total as key and the memory usage as value (with 'MB').
+
+    Raises
+    ------
+    AttributeError
+        If argument is not a pandas object.
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'A': [f'value{i}' for i in range(100000)],
+    ...                    'B': [i for i in range(100000)],
+    ...                    'C': [float(i) for i in range(100000)]}).set_index('A')
+    >>> mem_usage_pd(df)
+    {'total': '7.90 MB'}
+    >>> mem_usage_pd(df, details=True)
+    {'Index': {'6.38 MB', 'Index type'},
+     'B': {'0.76 MB', dtype('int64')},
+     'C': {'0.76 MB', dtype('float64')},
+     'total': '7.90 MB'}
+    >>> serie = df.reset_index()['B']
+    >>> mem_usage_pd(serie)
+    {'total': '0.76 MB'}
+    >>> mem_usage_pd(serie, details=True)
+    2019-06-24 11:23:39,500 Details is only available for DataFrames.
+    {'total': '0.76 MB'}
+    """
+    try:
+        usage_b = pd_obj.memory_usage(index=index, deep=deep)
+    except AttributeError:
+        raise AttributeError(f'Object does not have a `memory_usage` function, '
+                             'use only pandas objects.')
+
+    # Convert bytes to megabytes.
+    usage_mb = usage_b / 1024 ** 2
+
+    res = {}
+
+    if details:
+        if isinstance(pd_obj, pd.DataFrame):
+            res.update({idx: {f'{value:03.2f} MB',
+                              pd_obj[idx].dtype if idx != 'Index' else 'Index type'}
+                        for (idx, value) in usage_mb.iteritems()})
+        else:
+            logger.warning('Details is only available for DataFrames.')
+    # Sum the memory usage of the columns if this is a DataFrame.
+    if isinstance(pd_obj, pd.DataFrame):
+        usage_mb = usage_mb.sum()
+    res['total'] = f'{usage_mb:03.2f} MB'
+    return res
 
 
 def parse_date(func: Callable = None,
@@ -550,6 +626,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
 
         # Remove ticks on y axis.
         ax.yaxis.set_ticks_position('none')
+        ax.xaxis.set_ticks_position('bottom')
 
         # Draw Horizontal Tick lines.
         ax.xaxis.grid(False)

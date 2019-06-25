@@ -43,20 +43,23 @@ pytest --cov==bff
 
 ## Release History
 
+* 0.1.4
+    * ADD: Function `mem_usage_pd` to calculate the memory usage of a pandas object.
+    * ADD: Function `idict` to invert the key / values of a dictionary.
 * 0.1.3
-    * CHANGE: Restructuration of repo
-    * ADD: Travis, flake8, coveralls and PyUp configurations
-    * ADD: Function `get_peaks` to get the peaks of a time series
-    * ADD: Function `plot_series` to plot a time series
+    * CHANGE: Restructuration of repo.
+    * ADD: Travis, flake8, coveralls and PyUp configurations.
+    * ADD: Function `get_peaks` to get the peaks of a time series.
+    * ADD: Function `plot_series` to plot a time series.
 * 0.1.2
-    * CHANGE: Add axes in plot functions
-    * ADD: Function `plot_predictions` function to plot the actual values and the predictions of a model
+    * CHANGE: Add axes in plot functions.
+    * ADD: Function `plot_predictions` function to plot the actual values and the predictions of a model.
 * 0.1.1
-    * CHANGE: Improvement of `plot_history` function
-    * ADD: Readme with instructions
-    * FIX: Fix the imports in the test
+    * CHANGE: Improvement of `plot_history` function.
+    * ADD: Readme with instructions.
+    * FIX: Fix the imports in the test.
 * 0.1.0
-    * Initial release
+    * Initial release.
 
 ## Meta
 
