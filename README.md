@@ -46,6 +46,8 @@ pytest --cov==bff
 * 0.1.4
     * ADD: Function `mem_usage_pd` to calculate the memory usage of a pandas object.
     * ADD: Function `idict` to invert the key / values of a dictionary.
+    * ADD: Add Makefile for testing code and style.
+    * ADD: Add python-versioneer to handle version of package.
 * 0.1.3
     * CHANGE: Restructuration of repo.
     * ADD: Travis, flake8, coveralls and PyUp configurations.
@@ -76,4 +78,15 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
 5. Create a new Pull Request
+
+## Version number
+
+The version of the package is link to the tag pushed.
+
+To set a new version:
+
+```sh
+git tag v0.1.4
+git push --tags
+```
 

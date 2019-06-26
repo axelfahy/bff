@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-"""FancyPythonThings
+"""Functions of bff library.
 
-This module contains various useful functions.
+This module contains various useful fancy functions.
 """
 import collections
 import logging
 import math
 import sys
-from dateutil import parser
 from functools import wraps
+from typing import Any, Callable, Dict, Hashable, List, Sequence, Tuple, Union
+from dateutil import parser
 from scipy import signal
 from scipy.stats import sem
-from typing import Any, Callable, Dict, Hashable, List, Sequence, Tuple, Union
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -23,7 +23,7 @@ TNum = Union[int, float]
 
 FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
-logger = logging.getLogger(name='bff')
+LOGGER = logging.getLogger(name='bff')
 
 
 def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
@@ -194,12 +194,11 @@ def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
     >>> idict({1: 4, 2: 4, 3: 6})
     {4: 2, 6: 3}
     """
-
     try:
         s = set(d.values())
 
         if len(s) < len(d.values()):
-            logger.warning('[DATA LOSS] Same values for multiple keys, '
+            LOGGER.warning('[DATA LOSS] Same values for multiple keys, '
                            'inverted dict will not contain all keys')
     except TypeError:
         raise TypeError(f'TypeError: values of dict {d} are not hashable.')
@@ -274,7 +273,7 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
                               pd_obj[idx].dtype if idx != 'Index' else 'Index type'}
                         for (idx, value) in usage_mb.iteritems()})
         else:
-            logger.warning('Details is only available for DataFrames.')
+            LOGGER.warning('Details is only available for DataFrames.')
     # Sum the memory usage of the columns if this is a DataFrame.
     if isinstance(pd_obj, pd.DataFrame):
         usage_mb = usage_mb.sum()
@@ -585,7 +584,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
         if ax is None:
             __, ax = plt.subplots(figsize=figsize, dpi=dpi)
 
-        # By default, the x label if the column name.
+        # By default, the y label if the column name.
         if label_y is None:
             label_y = column.capitalize()
 
@@ -615,8 +614,8 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
             ax.plot(peak_dates, peak_values, linestyle='', marker='o',
                     color='plum')
 
-        ax.set_ylabel(f'{label_y}', fontsize=12)
-        ax.set_xlabel('Datetime', fontsize=12)
+        ax.set_xlabel(label_x, fontsize=12)
+        ax.set_ylabel(label_y, fontsize=12)
         ax.set_title(f'{title} (mean by {groupby})', fontsize=14)
 
         # Style.
