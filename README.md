@@ -38,7 +38,7 @@ pip install -e .
 ## Tests
 
 ```sh
-pytest --cov==bff
+make all
 ```
 
 ## Release History

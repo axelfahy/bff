@@ -45,6 +45,7 @@ coverage_html_report
 .cache
 nosetests.xml
 coverage.xml
+.coveralls.yml
 *.cover
 .hypothesis/
 .pytest_cache/
