@@ -1,8 +1,13 @@
 coveralls
 flake8
+numpydoc
 pytest
 pytest-codestyle
 pytest-cov
 pytest-docstyle
 pytest-pylint
+python-coveralls
+recommonmark
 Sphinx
+sphinx-autodoc-typehints
+sphinx-rtd-theme

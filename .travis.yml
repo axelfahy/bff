@@ -6,8 +6,9 @@ install:
   - pip install -r requirements_dev.txt
   - pip install -e .
 script:
-  - pytest --cov=bff
   - flake8 bff
+  - pytest --codestyle --docstyle --pylint --pylint-rcfile=.pylintrc --pylint-error-types=CWEF
+  - pytest --cov=bff tests --cov-resport=html:coverage_html_report
 after_success:
   - coveralls
 deploy:
