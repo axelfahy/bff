@@ -239,9 +239,9 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
 
     Examples
     --------
-    >>> df = pd.DataFrame({'A': [f'value{i}' for i in range(100000)],
-    ...                    'B': [i for i in range(100000)],
-    ...                    'C': [float(i) for i in range(100000)]}).set_index('A')
+    >>> df = pd.DataFrame({'A': [f'value{i}' for i in range(100_000)],
+    ...                    'B': [i for i in range(100_000)],
+    ...                    'C': [float(i) for i in range(100_000)]}).set_index('A')
     >>> mem_usage_pd(df)
     {'total': '7.90 MB'}
     >>> mem_usage_pd(df, details=True)
