@@ -1,3 +1,6 @@
+[Installation](#installation) |
+[Documentation](https://bff.readthedocs.io/en/latest/)
+
 # bff
 > Best Fancy Functions, your Best Friend Forever
 
@@ -20,9 +23,9 @@ This package contains some utility functions from plots to data manipulations an
 pip install bff
 ```
 
-## Usage example
+## Documentation
 
-Examples are available in the docstrings of the functions. Official documentation will soon come out.
+Available [here](https://bff.readthedocs.io/en/latest/).
 
 ## Development setup
 
