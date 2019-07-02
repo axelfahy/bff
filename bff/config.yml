@@ -1,0 +1,16 @@
+# Configuration file example.
+
+# Database information
+database:
+  user: Chew
+  pwd: bacca
+  host: 127.0.0.1
+  port: 3306
+  name: porgs
+
+imports:
+    star_wars:
+        - ewok
+        - bantha
+
+env: prod
