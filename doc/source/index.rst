@@ -29,3 +29,5 @@ Contents
 
    fancy
 
+   config
+
