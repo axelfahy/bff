@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Test of FancyPythonThings
+"""Test of Fancy module
 
-This module test the various functions present in the FancyPythonThings module.
+This module test the various functions present in the Fancy module.
 """
 import datetime
 import unittest
@@ -15,9 +15,9 @@ from bff.fancy import (concat_with_categories, get_peaks, idict, mem_usage_pd,
                        parse_date, value_2_list, sliding_window)
 
 
-class TestFancyPythonThings(unittest.TestCase):
+class TestFancy(unittest.TestCase):
     """
-    Unittest of FancyPythonThings.
+    Unittest of Fancy module.
     """
 
     def test_concat_with_categories(self):
