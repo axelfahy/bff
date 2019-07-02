@@ -46,10 +46,12 @@ make all
 
 ## Release History
 
+* 0.1.7
+    * ADD: ``FancyConfig`` to handle configuration files.
 * 0.1.6
     * FIX: Correction of dependencies for doc.
 * 0.1.5
-    * ADD Documentation of project on Read the Docs.
+    * ADD: Documentation of project on Read the Docs.
 * 0.1.4
     * ADD: Function `mem_usage_pd` to calculate the memory usage of a pandas object.
     * ADD: Function `idict` to invert the key / values of a dictionary.
