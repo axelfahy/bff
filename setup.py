@@ -23,12 +23,12 @@ PROJECT_URLS = {
     'Source Code': 'https://github.com/axelfahy/bff'
 }
 REQUIRES = [
-    'matplotlib==3.0.3',
+    'matplotlib==3.1.1',
     'numpy==1.16.4',
-    'pandas==0.24.2',
+    'pandas==0.25.0',
     'pyyaml==5.1.1',
     'scipy==1.3.0',
-    'typing==3.6.6'
+    'typing==3.7.4'
 ]
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',

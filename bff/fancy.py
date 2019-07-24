@@ -8,7 +8,7 @@ import logging
 import math
 import sys
 from functools import wraps
-from typing import Any, Callable, Dict, Hashable, List, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, Hashable, List, Sequence, Set, Tuple, Union
 from dateutil import parser
 from scipy import signal
 from scipy.stats import sem
@@ -207,7 +207,7 @@ def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
 
 
 def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, deep: bool = True,
-                 details: bool = False) -> Dict[str, Union[str, dict]]:
+                 details: bool = False) -> Dict[str, Union[str, Set[Any]]]:
     """
     Calculate the memory usage of a pandas object.
 
@@ -265,7 +265,7 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
     # Convert bytes to megabytes.
     usage_mb = usage_b / 1024 ** 2
 
-    res = {}
+    res: Dict[str, Union[str, Set[Any]]] = {}
 
     if details:
         if isinstance(pd_obj, pd.DataFrame):
@@ -281,7 +281,7 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
     return res
 
 
-def parse_date(func: Callable = None,
+def parse_date(func: Union[Callable, None] = None,
                date_fields: Sequence[str] = ('date')) -> Callable:
     """
     Cast str date into datetime format.
@@ -346,7 +346,7 @@ def parse_date(func: Callable = None,
     return _parse_date(func) if func else _parse_date
 
 
-def plot_history(history, metric: str = None, title: str = 'Model history',
+def plot_history(history, metric: Union[str, None] = None, title: str = 'Model history',
                  axes: plt.axes = None, figsize: Tuple[int, int] = (12, 4),
                  grid: bool = False, style: str = 'default',
                  **kwargs) -> Union[plt.axes, Sequence[plt.axes]]:
@@ -516,7 +516,7 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
 def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
                 with_sem: bool = True, with_peaks: bool = False,
                 distance_scale: float = 0.04, label_x: str = 'Datetime',
-                label_y: str = None, title: str = 'Plot of series',
+                label_y: Union[str, None] = None, title: str = 'Plot of series',
                 ax: plt.axes = None, color: str = '#3F5D7D',
                 figsize: Tuple[int, int] = (14, 6), dpi: int = 80,
                 style: str = 'default', **kwargs) -> plt.axes:
@@ -662,8 +662,8 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                       label_x: str = 'Ground truth',
                       label_y: str = 'Prediction',
                       title: str = 'Predicted vs Actual',
-                      lim_x: Tuple[TNum, TNum] = None,
-                      lim_y: Tuple[TNum, TNum] = None,
+                      lim_x: Union[Tuple[TNum, TNum], None] = None,
+                      lim_y: Union[Tuple[TNum, TNum], None] = None,
                       ax: plt.axes = None, figsize: Tuple[int, int] = (12, 5),
                       grid: bool = False, style: str = 'default',
                       **kwargs) -> plt.axes:
@@ -747,8 +747,8 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
         return ax
 
 
-def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict] = None,
-                       chunksize: int = 8_000_000, column_types: Dict = None,
+def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict, None] = None,
+                       chunksize: int = 8_000_000, column_types: Union[Dict, None] = None,
                        **kwargs) -> pd.DataFrame:
     """
     Read SQL query by chunks into a DataFrame.
