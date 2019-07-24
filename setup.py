@@ -26,6 +26,7 @@ REQUIRES = [
     'matplotlib==3.0.3',
     'numpy==1.16.4',
     'pandas==0.24.2',
+    'pyyaml==5.1.1',
     'scipy==1.3.0',
     'typing==3.6.6'
 ]

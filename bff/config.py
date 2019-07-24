@@ -77,6 +77,10 @@ class FancyConfig(Mapping):
         """Lenght of the config."""
         return len(self._config)
 
+    def __repr__(self):
+        """Representation of the config."""
+        return f'{super().__repr__}\n{str(self._config)}'
+
     def __str__(self):
         """
         __str__ method.
@@ -85,7 +89,3 @@ class FancyConfig(Mapping):
         """
         pretty = pprint.PrettyPrinter(indent=2)
         return pretty.pformat(self._config)
-
-    def __repr__(self):
-        """Representation of the config."""
-        return f'{super().__repr__}\n{str(self._config)}'
