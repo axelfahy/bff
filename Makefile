@@ -16,6 +16,7 @@ lint:
 
 style:
 	flake8
+	mypy bff tests
 	pytest --codestyle --docstyle
 
 coverage:
