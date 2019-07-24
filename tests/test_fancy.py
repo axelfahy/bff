@@ -189,26 +189,35 @@ class TestFancy(unittest.TestCase):
         res_2 = ['abcdef', 'defghi', 'ghijkl', 'jklmno', 'mnopqr', 'pqrstu',
                  'stuvwx', 'vwxyz']
         self.assertEqual(list(sliding_window(seq_1, 6, 3)), res_2)
+
         # Check for exceptions.
+        # Should raise an exception if the sequence is not iterable.
         with self.assertRaises(TypeError):
-            # Should raise an exception if the sequence is not iterable.
             list(sliding_window(3, 2, 1))
-            # Should raise an exception if step is not an integer.
+        # Should raise an exception if step is not an integer.
+        with self.assertRaises(TypeError):
             list(sliding_window(seq_1, 2, 1.0))
+        with self.assertRaises(TypeError):
             list(sliding_window(seq_1, 2, '1'))
-            # Should raise an exception if window size is not an integer.
+        # Should raise an exception if window size is not an integer.
+        with self.assertRaises(TypeError):
             list(sliding_window(seq_1, 2.0, 1))
+        with self.assertRaises(TypeError):
             list(sliding_window(seq_1, '2', 1))
+        # Should raise an exception if window size is smaller
+        # than step or <= 0.
         with self.assertRaises(ValueError):
-            # Should raise an exception if window size is smaller
-            # than step or <= 0.
             list(sliding_window(seq_1, 2, 3))
+        with self.assertRaises(ValueError):
             list(sliding_window(seq_1, -1, -1))
-            # Should raise an exception if the step is smaller or equal than 0.
+        # Should raise an exception if the step is smaller or equal than 0.
+        with self.assertRaises(ValueError):
             list(sliding_window(seq_1, 2, 0))
+        with self.assertRaises(ValueError):
             list(sliding_window(seq_1, 2, -1))
-            # Should raise an exception if length of sequence
-            # is smaller than the window size.
+        # Should raise an exception if length of sequence
+        # is smaller than the window size.
+        with self.assertRaises(ValueError):
             list(sliding_window('abc', 4, 1))
 
     def test_value_2_list(self):
