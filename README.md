@@ -46,6 +46,10 @@ make all
 
 ## Release History
 
+* 0.1.8
+    * ADD: Option ``with_missing_datetimes`` in ``plot_series`` function.
+    * ADD: Mypy for type verification.
+    * FIX: Tests when raising exceptions in ``sliding_window`` function.
 * 0.1.7
     * ADD: ``FancyConfig`` to handle configuration files.
 * 0.1.6
