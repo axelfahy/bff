@@ -843,7 +843,7 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     try:
         __ = iter(sequence)
     except TypeError:
-        raise TypeError('Sequence must by iterable.')
+        raise TypeError('Sequence must be iterable.')
 
     if not isinstance(step, int):
         raise TypeError('Step must be an integer.')
