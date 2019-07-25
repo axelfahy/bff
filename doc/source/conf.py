@@ -1,5 +1,6 @@
 import recommonmark
 from recommonmark.transform import AutoStructify
+from bff import __version__
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -25,7 +26,7 @@ copyright = '2019, Axel Fahy'
 author = 'Axel Fahy'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.4'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
