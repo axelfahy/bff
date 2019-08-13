@@ -519,6 +519,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
                 distance_scale: float = 0.04, label_x: str = 'Datetime',
                 label_y: Union[str, None] = None, title: str = 'Plot of series',
                 ax: plt.axes = None, color: str = '#3F5D7D',
+                loc: Union[str, int] = 'best',
                 figsize: Tuple[int, int] = (14, 6), dpi: int = 80,
                 style: str = 'default', **kwargs) -> plt.axes:
     """
@@ -552,6 +553,9 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
         Axes from matplotlib, if None, new figure and ax will be created.
     color : str, default '#3F5D7D'
         Default color for the plot.
+    loc : str or int, default 'best'
+        Location of the legend on the plot.
+        Either the legend string or legend code are possible.
     figsize : Tuple[int, int], default (14, 6)
         Size of the figure to plot.
     dpi : int, default 80
@@ -666,7 +670,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
             handles.append(mlines.Line2D([], [], linestyle='-', color='crimson'))
             labels_cap.append('Missing datetimes')
 
-        ax.legend(handles, labels_cap)
+        ax.legend(handles, labels_cap, loc=loc)
         plt.tight_layout()
 
         return ax
