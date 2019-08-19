@@ -26,6 +26,61 @@ logging.basicConfig(format=FORMAT)
 LOGGER = logging.getLogger(name='bff')
 
 
+def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
+    """
+    Automatically converts columns that are worth stored as ``category`` dtype.
+
+    To be casted a column must not be numerical and must have less than 50%
+    of unique values.
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame with the columns to cast.
+    deep: bool, default True
+        Whether or not to perform a deep copy of the original DataFrame.
+
+    Returns
+    -------
+    pd.DataFrame
+        Optimized copy of the input DataFrame.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> columns = ['name', 'age', 'country']
+    >>> df = pd.DataFrame([['John', 24, 'China'],
+    ...                    ['Mary', 20, 'China'],
+    ...                    ['Jane', 25, 'Switzerland'],
+    ...                    ['Greg', 23, 'China'],
+    ...                    ['James', 28, 'China']],
+    ...                   columns=columns)
+    >>> df
+        name  age      country
+    0   John   24        China
+    1   Jane   25  Switzerland
+    2  James   28        China
+    >>> df.dtypes
+    name       object
+    age         int64
+    country    object
+    dtype: object
+    >>> df_optimized = cast_to_category_pd(df)
+    >>> df_optimized.dtypes
+    name       object
+    age         int64
+    country  category
+    dtype: object
+    """
+    return (df.copy(deep=deep)
+            .astype({col: 'category' for col in df.columns
+                     if (df[col].dtype == 'object'
+                         and df[col].nunique() / df[col].shape[0] < 0.5)
+                     }
+                    )
+            )
+
+
 def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
                            **kwargs) -> pd.DataFrame:
     """
@@ -65,10 +120,10 @@ def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
     ...                 'country': 'category'}
     >>> columns = list(column_types.keys())
     >>> df_left = pd.DataFrame([['John', 'red', 'China'],
-                                ['Jane', 'blue', 'Switzerland']],
+    ...                         ['Jane', 'blue', 'Switzerland']],
     ...                        columns=columns).astype(column_types)
     >>> df_right = pd.DataFrame([['Mary', 'yellow', 'France'],
-                                 ['Fred', 'blue', 'Italy']],
+    ...                          ['Fred', 'blue', 'Italy']],
     ...                         columns=columns).astype(column_types)
     >>> df_left
        name color      country
@@ -137,8 +192,8 @@ def get_peaks(s: pd.Series, distance_scale: float = 0.04):
     """
     Get the peaks of a time series having datetime as index.
 
-    Only the peaks having an heights higher than 0.75 quantile are returned
-    and a distance between two peaks at least `df.shape[0]*distance_scale`.
+    Only the peaks having an height higher than 0.75 quantile are returned
+    and a distance between two peaks at least ``df.shape[0]*distance_scale``.
 
     Return the dates and the corresponding value of the peaks.
 

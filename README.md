@@ -48,6 +48,7 @@ make all
 
 * 0.1.9
     * ADD: Option ``loc`` in ``plot_series`` function.
+    * ADD: Function ``cast_to_category_pd`` to cast columns to category ``dtype`` automatically.
 * 0.1.8
     * ADD: Option ``with_missing_datetimes`` in ``plot_series`` function.
     * ADD: Mypy for type verification.
