@@ -9,16 +9,42 @@ import unittest.mock
 import numpy as np
 from numpy.testing import assert_array_equal
 import pandas as pd
+from pandas.api.types import CategoricalDtype
 import pandas.util.testing as tm
 
-from bff.fancy import (concat_with_categories, get_peaks, idict, mem_usage_pd,
-                       parse_date, value_2_list, sliding_window)
+from bff.fancy import (cast_to_category_pd, concat_with_categories, get_peaks, idict,
+                       mem_usage_pd, parse_date, value_2_list, sliding_window)
 
 
 class TestFancy(unittest.TestCase):
     """
     Unittest of Fancy module.
     """
+
+    def test_cast_to_category_pd(self):
+        """
+        Test of the `cast_to_category_pd` function.
+        """
+        columns = ['name', 'age', 'country']
+        df = pd.DataFrame([['John', 24, 'China'],
+                           ['Mary', 20, 'China'],
+                           ['Jane', 25, 'Switzerland'],
+                           ['Greg', 23, 'China'],
+                           ['James', 28, 'China']],
+                          columns=columns)
+        original_types = {'name': np.dtype('O'), 'age': np.dtype('int64'),
+                          'country': np.dtype('O')}
+        self.assertDictEqual(df.dtypes.to_dict(), original_types)
+
+        df_optimized = cast_to_category_pd(df)
+
+        tm.assert_frame_equal(df, df_optimized, check_dtype=False, check_categorical=False)
+
+        country_type = CategoricalDtype(categories=['China', 'Switzerland'], ordered=False)
+        optimized_types = {'name': np.dtype('O'), 'age': np.dtype('int64'),
+                           'country': country_type}
+        print(df_optimized.dtypes.to_dict())
+        self.assertDictEqual(df_optimized.dtypes.to_dict(), optimized_types)
 
     def test_concat_with_categories(self):
         """
