@@ -7,6 +7,7 @@ All of bff's functions.
    :nosignatures:
    :toctree: generated/
 
+   bff.cast_to_category_pd
    bff.concat_with_categories
    bff.get_peaks
    bff.idict

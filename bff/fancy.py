@@ -225,7 +225,9 @@ def get_peaks(s: pd.Series, distance_scale: float = 0.04):
 
 def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
     """
-    Invert a dictionary meaning that keys will be become values and values will become keys.
+    Invert a dictionary.
+
+    Keys will be become values and values will become keys.
 
     Parameters
     ----------
