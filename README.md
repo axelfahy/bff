@@ -34,7 +34,7 @@ git clone https://github.com/axelfahy/bff.git
 cd bff
 python -m venv venv-dev
 source venv-dev/bin/activate
-pip install requirements_dev.txt
+pip install -r requirements_dev.txt
 pip install -e .
 ```
 
@@ -46,6 +46,8 @@ make all
 
 ## Release History
 
+* 0.2.0
+    * ADD: Separation of plots in submodule ``plot``. This breaks the previous API.
 * 0.1.9
     * ADD: Option ``loc`` in ``plot_series`` function.
     * ADD: Function ``cast_to_category_pd`` to cast columns to category ``dtype`` automatically.
