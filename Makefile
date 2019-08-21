@@ -4,10 +4,14 @@
 
 all: test
 
+build-python:
+	python setup.py sdist bdist_wheel
+
 clean:
 	rm -rf coverage_html_report .coverage
 	rm -rf bff.egg-info
 	rm -rf venv-dev
+	rm -rf dist/
 
 test: lint style coverage
 

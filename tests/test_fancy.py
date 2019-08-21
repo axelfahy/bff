@@ -43,7 +43,6 @@ class TestFancy(unittest.TestCase):
         country_type = CategoricalDtype(categories=['China', 'Switzerland'], ordered=False)
         optimized_types = {'name': np.dtype('O'), 'age': np.dtype('int64'),
                            'country': country_type}
-        print(df_optimized.dtypes.to_dict())
         self.assertDictEqual(df_optimized.dtypes.to_dict(), optimized_types)
 
     def test_concat_with_categories(self):
