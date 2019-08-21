@@ -48,6 +48,7 @@ make all
 
 * 0.2.0
     * ADD: Separation of plots in submodule ``plot``. This breaks the previous API.
+    * FIX: Correction of resampling in the ``plot_series`` function.
 * 0.1.9
     * ADD: Option ``loc`` in ``plot_series`` function.
     * ADD: Function ``cast_to_category_pd`` to cast columns to category ``dtype`` automatically.

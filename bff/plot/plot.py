@@ -187,8 +187,8 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
         return ax
 
 
-def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
-                with_sem: bool = True, with_peaks: bool = False,
+def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
+                with_sem: bool = False, with_peaks: bool = False,
                 with_missing_datetimes: bool = False,
                 distance_scale: float = 0.04, label_x: str = 'Datetime',
                 label_y: Union[str, None] = None, title: str = 'Plot of series',
@@ -205,15 +205,18 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
         DataFrame to plot, with datetime as index.
     column : str
         Column of the DataFrame to display.
-    groupby : str, default '1S'
+    groupby : str or None, default None
         Grouping for the resampling by mean of the data.
         For example, can resample from seconds ('S') to minutes ('T').
-    with_sem : bool, default True
+        By default, no resampling is applied.
+    with_sem : bool, default False
         Display the standard error of the mean (SEM) if set to true.
+        Only possible if a resampling has been done.
     with_peaks : bool, default False
         Display the peaks of the serie if set to true.
     with_missing_datetimes : bool, default False
         Display the missing datetimes with vertical red lines.
+        Only possible if a resampling has been done.
     distance_scale: float, default 0.04
         Scaling for the minimal distance between peaks.
         Only used if `with_peaks` is set to true.
@@ -270,24 +273,21 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
             label_y = column.capitalize()
 
         # Get the values to plot.
-        df_plot = (df[column].groupby('datetime').mean()
-                   .resample(groupby).mean())
+        df_plot = df[column]
+        if groupby:
+            df_plot = df_plot.resample(groupby).mean()
+
         x = df_plot.index
 
         ax.plot(x, df_plot, label=column, color=color, lw=2, **kwargs)
 
         # With sem (standard error of the mean).
-        if with_sem:
-            df_sem = (df[column]
-                      .groupby('datetime')
-                      .mean()
-                      .resample(groupby)
-                      .apply(sem)
-                      if groupby not in ('S', '1S') else
-                      df[column].groupby('datetime').apply(sem))
+        sem_alpha = 0.3
+        if groupby and with_sem:
+            df_sem = df_plot.resample(groupby).sem()
 
             ax.fill_between(x, df_plot - df_sem, df_plot + df_sem,
-                            color='grey', alpha=0.2)
+                            color='grey', alpha=sem_alpha)
 
         # Plot the peak as circle.
         if with_peaks:
@@ -296,16 +296,19 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
                     color='plum')
 
         # Plot vertical line where there is missing datetimes.
-        if with_missing_datetimes:
-            df_date_missing = pd.date_range(start=df.index.get_level_values(0).min(),
-                                            end=df.index.get_level_values(0).max(),
-                                            freq=groupby).difference(df.index.get_level_values(0))
+        if groupby and with_missing_datetimes:
+            df_date_missing = pd.date_range(start=df_plot.index.get_level_values(0).min(),
+                                            end=df_plot.index.get_level_values(0).max(),
+                                            freq=groupby).difference(df_plot.index)
             for date in df_date_missing.tolist():
                 ax.axvline(date, color='crimson')
 
         ax.set_xlabel(label_x, fontsize=12)
         ax.set_ylabel(label_y, fontsize=12)
-        ax.set_title(f'{title} (mean by {groupby})', fontsize=14)
+        # Add the groupby if any
+        if groupby:
+            title += f' (mean by {groupby})'
+        ax.set_title(title, fontsize=14)
 
         # Style.
         # Remove border on the top and right.
@@ -329,8 +332,8 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
         handles, labels = ax.get_legend_handles_labels()
         labels_cap = [label.capitalize() for label in labels]
         # Add the sem on the legend.
-        if with_sem:
-            handles.append(mpatches.Patch(color='grey', alpha=0.2))
+        if groupby and with_sem:
+            handles.append(mpatches.Patch(color='grey', alpha=sem_alpha))
             labels_cap.append('Standard error of the mean (SEM)')
 
         # Add the peak symbol on the legend.
@@ -340,7 +343,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: str = '1S',
             labels_cap.append('Peaks')
 
         # Add the missing date line on the legend.
-        if with_missing_datetimes:
+        if groupby and with_missing_datetimes:
             handles.append(mlines.Line2D([], [], linestyle='-', color='crimson'))
             labels_cap.append('Missing datetimes')
 
