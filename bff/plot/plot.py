@@ -445,7 +445,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
 def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                       y_pred: Union[np.array, pd.DataFrame],
                       with_correlation: bool = True,
-                      marker: Union[str, int] = 'k.',
+                      with_histograms: bool = False,
                       label_x: str = 'Ground truth',
                       label_y: str = 'Prediction',
                       title: str = 'Predicted vs Actual',
@@ -469,8 +469,9 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
         Predicted values by the model.
     with_correlation : bool, default True
         If true, print correlation coefficients in the top left corner.
-    marker : str or int, default 'k.',
-        Style of the markers to plot, by default black points.
+    with_histograms : bool, default False
+        If true, plot histograms of `y_true` and `y_pred` on the sides.
+        Not possible if the `ax` is provided.
     label_x : str, default 'Ground truth'
         Label for x axis.
     label_y : str, default 'Prediction'
@@ -503,6 +504,7 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
     -------
     plt.axes
         Axes returned by the `plt.subplots` function.
+        If `with_histograms`, return the three axes.
 
     Examples
     --------
@@ -511,16 +513,32 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
     """
     with plt.style.context(style):
         if ax is None:
-            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+            if with_histograms:
+                fig = plt.figure(figsize=figsize, dpi=dpi)
+                grid_plt = plt.GridSpec(4, 4, hspace=0.5, wspace=0.2)
+                # Define the axes
+                ax_main = fig.add_subplot(grid_plt[:-1, :-1])
+                ax_right = fig.add_subplot(grid_plt[:-1, -1], xticklabels=[], yticklabels=[])
+                ax_bottom = fig.add_subplot(grid_plt[-1, 0:-1], xticklabels=[], yticklabels=[])
+            else:
+                __, ax_main = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+        else:
+            assert not with_histograms, (
+                'Option `with_histograms is not possible when providing an axis.')
+            ax_main = ax
 
         y_true = np.array(y_true).flatten()
         y_pred = np.array(y_pred).flatten()
 
-        ax.plot(y_true, y_pred, marker, **kwargs)
+        # Default marker is black if not provided.
+        if 'c' not in kwargs:
+            kwargs['c'] = 'black'
 
-        ax.set_xlabel(label_x, fontsize=12)
-        ax.set_ylabel(label_y, fontsize=12)
-        ax.set_title(title, fontsize=14)
+        ax_main.scatter(y_true, y_pred, **kwargs)
+
+        ax_main.set_xlabel(label_x, fontsize=12)
+        ax_main.set_ylabel(label_y, fontsize=12)
+        ax_main.set_title(title, fontsize=14)
 
         # Calculate the limit of the plot if not provided,
         # add and extra 5% for readability.
@@ -533,41 +551,62 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
             return limit
 
         # Set x and y limits.
-        ax.set_xlim(get_limit(lim_x, y_true))
-        ax.set_ylim(get_limit(lim_y, y_pred))
+        ax_main.set_xlim(get_limit(lim_x, y_true))
+        ax_main.set_ylim(get_limit(lim_y, y_pred))
 
         # Add correlation in upper left position.
         if with_correlation:
-            ax.text(0.025, 0.925,
-                    f'R={np.round(np.corrcoef(y_true, y_pred)[0][1], 3)}',
-                    fontsize=12, transform=ax.transAxes)
+            ax_main.text(0.025, 0.925,
+                         f'R={np.round(np.corrcoef(y_true, y_pred)[0][1], 3)}',
+                         fontsize=12, transform=ax_main.transAxes)
+
+        if with_histograms:
+            # Histogram on the right.
+            ax_bottom.hist(y_pred, histtype='stepfilled', orientation='vertical',
+                           color='cadetblue')
+            ax_bottom.invert_yaxis()
+
+            # Histogram in the bottom.
+            ax_right.hist(y_true, histtype='stepfilled', orientation='horizontal',
+                          color='cadetblue')
+
+            # Style of histograms.
+            # Remove borders.
+            for spine in ['top', 'right', 'left', 'bottom']:
+                ax_bottom.spines[spine].set_alpha(0.3)
+                ax_right.spines[spine].set_alpha(0.3)
+            # Remove ticks on axis.
+            ax_bottom.xaxis.set_ticks_position('none')
+            ax_bottom.yaxis.set_ticks_position('none')
+            ax_right.xaxis.set_ticks_position('none')
+            ax_right.yaxis.set_ticks_position('none')
 
         # Style.
         # Remove borders on the top and right.
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
+        ax_main.spines['top'].set_visible(False)
+        ax_main.spines['right'].set_visible(False)
         # Set alpha on remaining borders.
-        ax.spines['left'].set_alpha(0.4)
-        ax.spines['bottom'].set_alpha(0.4)
+        ax_main.spines['left'].set_alpha(0.4)
+        ax_main.spines['bottom'].set_alpha(0.4)
 
         # Remove ticks on axis.
-        ax.xaxis.set_ticks_position('none')
-        ax.yaxis.set_ticks_position('none')
+        ax_main.xaxis.set_ticks_position('none')
+        ax_main.yaxis.set_ticks_position('none')
         # Style of ticks.
         plt.xticks(fontsize=10, alpha=0.7)
         plt.yticks(fontsize=10, alpha=0.7)
 
         # Draw tick lines on wanted axes.
         if grid:
-            ax.axes.grid(True, which='major', axis=grid, color='black',
-                         alpha=0.3, linestyle='--', lw=0.5)
+            ax_main.axes.grid(True, which='major', axis=grid, color='black',
+                              alpha=0.3, linestyle='--', lw=0.5)
 
         # Set a thousand separator axis.
-        ax.xaxis.set_major_formatter(
+        ax_main.xaxis.set_major_formatter(
             mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
         )
-        ax.yaxis.set_major_formatter(
+        ax_main.yaxis.set_major_formatter(
             mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
         )
 
-        return ax
+        return ax_main if not with_histograms else (ax_main, ax_right, ax_bottom)
