@@ -12,3 +12,4 @@ recommonmark
 Sphinx
 sphinx-autodoc-typehints
 sphinx-rtd-theme
+wheel

@@ -5,7 +5,6 @@ This module contains fancy plot functions.
 """
 import logging
 from typing import Sequence, Tuple, Union
-from scipy.stats import sem
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -21,8 +20,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 def plot_history(history, metric: Union[str, None] = None, title: str = 'Model history',
-                 axes: plt.axes = None, figsize: Tuple[int, int] = (12, 4),
-                 grid: bool = False, style: str = 'default',
+                 axes: plt.axes = None,
+                 loc: Union[str, int] = 'best',
+                 grid: Union[str, None] = None,
+                 figsize: Tuple[int, int] = (16, 5), dpi: int = 80,
+                 style: str = 'default',
                  **kwargs) -> Union[plt.axes, Sequence[plt.axes]]:
     """
     Plot the history of the model trained using Keras.
@@ -39,10 +41,16 @@ def plot_history(history, metric: Union[str, None] = None, title: str = 'Model h
     axes : plt.axes, default None
         Axes from matplotlib, if None, new figure and axes will be created.
         If metric is provided, need to have at least 2 axes.
-    figsize : Tuple[int, int], default (12, 4)
+    loc : str or int, default 'best'
+        Location of the legend on the plot.
+        Either the legend string or legend code are possible.
+    grid : str or None, default None
+        Axis where to activate the grid ('both', 'x', 'y').
+        To turn off, set to None.
+    figsize : Tuple[int, int], default (16, 5)
         Size of the figure to plot.
-    grid : bool, default False
-        Turn the axes grids on or off.
+    dpi : int, default 80
+        Resolution of the figure.
     style : str, default 'default'
         Style to use for matplotlib.pyplot.
         The style is use only in this context and not applied globally.
@@ -70,7 +78,8 @@ def plot_history(history, metric: Union[str, None] = None, title: str = 'Model h
         # Given axes are not check for now.
         # If metric is given, must have at least 2 axes.
         if axes is None:
-            fig, axes = plt.subplots(1, 2 if metric else 1, figsize=figsize)
+            fig, axes = plt.subplots(1, 2 if metric else 1,
+                                     figsize=figsize, dpi=dpi)
         else:
             fig = plt.gcf()
 
@@ -82,10 +91,10 @@ def plot_history(history, metric: Union[str, None] = None, title: str = 'Model h
             axes[0].plot(history.history[f'val_{metric}'],
                          label=f"Validation ({history.history[f'val_{metric}'][-1]:.4f})",
                          **kwargs)
-            axes[0].set_title(f'Model {metric}')
-            axes[0].set_xlabel('Epochs')
-            axes[0].set_ylabel(metric.capitalize())
-            axes[0].legend(loc='upper left')
+            axes[0].set_title(f'Model {metric}', fontsize=14)
+            axes[0].set_xlabel('Epochs', fontsize=12)
+            axes[0].set_ylabel(metric.capitalize(), fontsize=12)
+            axes[0].legend(loc=loc)
 
         # Summarize history for loss.
         ax_loss = axes[1] if metric else axes
@@ -95,19 +104,46 @@ def plot_history(history, metric: Union[str, None] = None, title: str = 'Model h
         ax_loss.plot(history.history['val_loss'],
                      label=f"Validation ({history.history['val_loss'][-1]:.4f})",
                      **kwargs)
-        ax_loss.set_title('Model loss')
-        ax_loss.set_xlabel('Epochs')
-        ax_loss.set_ylabel('Loss')
-        ax_loss.legend(loc='upper left')
+        ax_loss.set_xlabel('Epochs', fontsize=12)
+        ax_loss.set_ylabel('Loss', fontsize=12)
+        ax_loss.set_title('Model loss', fontsize=14)
+        ax_loss.legend(loc=loc)
 
-        # Put the grid on axes.
-        if metric:
-            for ax in axes.flatten():
-                ax.grid(grid)
-        else:
-            axes.grid(grid)
+        # Global title of the plot.
+        fig.suptitle(title, fontsize=16)
 
-        fig.suptitle(title)
+        # Style, applied on all axis.
+        axes_to_style = axes.flatten() if metric else [axes]
+        for ax in axes_to_style:
+            # Remove border on the top and right.
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            # Set alpha on remaining borders.
+            ax.spines['left'].set_alpha(0.4)
+            ax.spines['bottom'].set_alpha(0.4)
+
+            # Remove ticks on y axis.
+            ax.xaxis.set_ticks_position('bottom')
+            ax.yaxis.set_ticks_position('none')
+
+            # Draw tick lines on wanted axes.
+            if grid:
+                ax.axes.grid(True, which='major', axis=grid, color='black',
+                             alpha=0.3, linestyle='--', lw=0.5)
+
+            # Set a thousand separator axis.
+            ax.xaxis.set_major_formatter(
+                mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+            )
+            ax.yaxis.set_major_formatter(
+                mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+            )
+
+        if not metric:
+            # Style of ticks.
+            plt.xticks(fontsize=10, alpha=0.7)
+            plt.yticks(fontsize=10, alpha=0.7)
+
         return axes
 
 
@@ -117,7 +153,10 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
                      label_x: str = 'x', label_y: str = 'y',
                      title: str = 'Model predictions',
                      ax: plt.axes = None,
-                     figsize: Tuple[int, int] = (12, 4), grid: bool = False,
+                     loc: Union[str, int] = 'best',
+                     rotation_xticks: Union[float, None] = None,
+                     grid: Union[str, None] = 'y',
+                     figsize: Tuple[int, int] = (14, 5), dpi: int = 80,
                      style: str = 'default', **kwargs) -> plt.axes:
     """
     Plot the predictions of the model.
@@ -142,10 +181,19 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
         Title for the plot (axis level).
     ax : plt.axes, default None
         Axes from matplotlib, if None, new figure and axes will be created.
-    figsize : Tuple[int, int], default (12, 4)
+    loc : str or int, default 'best'
+        Location of the legend on the plot.
+        Either the legend string or legend code are possible.
+    rotation_xticks : float or None, default None
+        Rotation of x ticks if any.
+        Set to 90 to put them vertically.
+    grid : str or None, default 'y'
+        Axis where to activate the grid ('both', 'x', 'y').
+        To turn off, set to None.
+    figsize : Tuple[int, int], default (14, 5)
         Size of the figure to plot.
-    grid : bool, default False
-        Turn the axes grids on or off.
+    dpi : int, default 80
+        Resolution of the figure.
     style : str, default 'default'
         Style to use for matplotlib.pyplot.
         The style is use only in this context and not applied globally.
@@ -165,7 +213,7 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
     """
     with plt.style.context(style):
         if ax is None:
-            __, ax = plt.subplots(1, 1, figsize=figsize)
+            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
 
         # Plot predictions.
         ax.plot(np.array(y_pred).flatten(), color='r',
@@ -173,16 +221,43 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
         # Plot actual values on top of the predictions.
         ax.plot(np.array(y_true).flatten(), color='b',
                 label=label_true, **kwargs)
-        ax.set_xlabel(label_x)
-        ax.set_ylabel(label_y)
-        ax.set_title(title)
-        ax.grid(grid)
+        ax.set_xlabel(label_x, fontsize=12)
+        ax.set_ylabel(label_y, fontsize=12)
+        ax.set_title(title, fontsize=14)
+
+        # Style.
+        # Remove borders on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # Set alpha on remaining borders.
+        ax.spines['left'].set_alpha(0.4)
+        ax.spines['bottom'].set_alpha(0.4)
+
+        # Remove ticks on y axis.
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('none')
+        # Style of ticks.
+        plt.xticks(fontsize=10, alpha=0.7, rotation=rotation_xticks)
+        plt.yticks(fontsize=10, alpha=0.7)
+
+        # Draw tick lines on wanted axes.
+        if grid:
+            ax.axes.grid(True, which='major', axis=grid, color='black',
+                         alpha=0.3, linestyle='--', lw=0.5)
+
+        # Set a thousand separator axis.
+        ax.xaxis.set_major_formatter(
+            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+        )
+        ax.yaxis.set_major_formatter(
+            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+        )
 
         # Sort labels and handles by labels.
         handles, labels = ax.get_legend_handles_labels()
         labels, handles = zip(*sorted(zip(labels, handles),
                                       key=lambda t: t[0]))
-        ax.legend(handles, labels, loc='upper left')
+        ax.legend(handles, labels, loc=loc)
 
         return ax
 
@@ -194,6 +269,8 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
                 label_y: Union[str, None] = None, title: str = 'Plot of series',
                 ax: plt.axes = None, color: str = '#3F5D7D',
                 loc: Union[str, int] = 'best',
+                rotation_xticks: Union[float, None] = None,
+                grid: Union[str, None] = 'y',
                 figsize: Tuple[int, int] = (14, 6), dpi: int = 80,
                 style: str = 'default', **kwargs) -> plt.axes:
     """
@@ -233,6 +310,12 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
     loc : str or int, default 'best'
         Location of the legend on the plot.
         Either the legend string or legend code are possible.
+    rotation_xticks : float or None, default None
+        Rotation of x ticks if any.
+        Set to 90 to put them vertically.
+    grid : str or None, default 'y'
+        Axis where to activate the grid ('both', 'x', 'y').
+        To turn off, set to None.
     figsize : Tuple[int, int], default (14, 6)
         Size of the figure to plot.
     dpi : int, default 80
@@ -268,7 +351,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
         if ax is None:
             __, ax = plt.subplots(figsize=figsize, dpi=dpi)
 
-        # By default, the y label if the column name.
+        # By default, the y label is the column name.
         if label_y is None:
             label_y = column.capitalize()
 
@@ -314,17 +397,23 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
         # Remove border on the top and right.
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
+        # Set alpha on remaining borders.
+        ax.spines['left'].set_alpha(0.4)
+        ax.spines['bottom'].set_alpha(0.4)
 
         # Remove ticks on y axis.
-        ax.yaxis.set_ticks_position('none')
         ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('none')
+        # Style of ticks.
+        plt.xticks(fontsize=10, alpha=0.7, rotation=rotation_xticks)
+        plt.yticks(fontsize=10, alpha=0.7)
 
-        # Draw Horizontal Tick lines.
-        ax.xaxis.grid(False)
-        ax.yaxis.grid(which='major', color='black', alpha=0.5,
-                      linestyle='--', lw=0.5)
+        # Draw tick lines on wanted axes.
+        if grid:
+            ax.axes.grid(True, which='major', axis=grid, color='black',
+                         alpha=0.3, linestyle='--', lw=0.5)
 
-        # Set thousand separator for y axis.
+        # Set a thousand separator for y axis.
         ax.yaxis.set_major_formatter(
             mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
         )
@@ -355,14 +444,17 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
 
 def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                       y_pred: Union[np.array, pd.DataFrame],
-                      marker: Union[str, int] = 'k.', corr: bool = True,
+                      with_correlation: bool = True,
+                      marker: Union[str, int] = 'k.',
                       label_x: str = 'Ground truth',
                       label_y: str = 'Prediction',
                       title: str = 'Predicted vs Actual',
+                      ax: plt.axes = None,
                       lim_x: Union[Tuple[TNum, TNum], None] = None,
                       lim_y: Union[Tuple[TNum, TNum], None] = None,
-                      ax: plt.axes = None, figsize: Tuple[int, int] = (12, 5),
-                      grid: bool = False, style: str = 'default',
+                      grid: Union[str, None] = 'both',
+                      figsize: Tuple[int, int] = (14, 7), dpi: int = 80,
+                      style: str = 'default',
                       **kwargs) -> plt.axes:
     """
     Plot the ground truth against the predictions of the model.
@@ -375,24 +467,31 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
         Actual values.
     y_pred : np.array or pd.DataFrame
         Predicted values by the model.
+    with_correlation : bool, default True
+        If true, print correlation coefficients in the top left corner.
+    marker : str or int, default 'k.',
+        Style of the markers to plot, by default black points.
     label_x : str, default 'Ground truth'
         Label for x axis.
     label_y : str, default 'Prediction'
         Label for y axis.
     title : str, default 'Predicted vs Actual'
         Title for the plot (axis level).
+    ax : plt.axes, default None
+        Axes from matplotlib, if None, new figure and axes will be created.
     lim_x : Tuple[TNum, TNum], default None
         Limit for the x axis. If None, automatically calculated according
         to the limits of the data, with an extra 5% for readability.
     lim_y : Tuple[TNum, TNum], default None
         Limit for the y axis. If None, automatically calculated according
         to the limits of the data, with an extra 5% for readability.
-    ax : plt.axes, default None
-        Axes from matplotlib, if None, new figure and axes will be created.
-    figsize : Tuple[int, int], default (12, 5)
+    grid : str or None, default 'both'
+        Axis where to activate the grid ('both', 'x', 'y').
+        To turn off, set to None.
+    figsize : Tuple[int, int], default (14, 7)
         Size of the figure to plot.
-    grid : bool, default False
-        Turn the axes grids on or off.
+    dpi : int, default 80
+        Resolution of the figure.
     style : str, default 'default'
         Style to use for matplotlib.pyplot.
         The style is use only in this context and not applied globally.
@@ -412,15 +511,16 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
     """
     with plt.style.context(style):
         if ax is None:
-            __, ax = plt.subplots(1, 1, figsize=figsize)
+            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
 
         y_true = np.array(y_true).flatten()
         y_pred = np.array(y_pred).flatten()
+
         ax.plot(y_true, y_pred, marker, **kwargs)
-        ax.set_xlabel(label_x)
-        ax.set_ylabel(label_y)
-        ax.set_title(title)
-        ax.grid(grid)
+
+        ax.set_xlabel(label_x, fontsize=12)
+        ax.set_ylabel(label_y, fontsize=12)
+        ax.set_title(title, fontsize=14)
 
         # Calculate the limit of the plot if not provided,
         # add and extra 5% for readability.
@@ -432,13 +532,42 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                 limit = (lim_min - margin, lim_max + margin)
             return limit
 
+        # Set x and y limits.
         ax.set_xlim(get_limit(lim_x, y_true))
         ax.set_ylim(get_limit(lim_y, y_pred))
 
         # Add correlation in upper left position.
-        if corr:
+        if with_correlation:
             ax.text(0.025, 0.925,
                     f'R={np.round(np.corrcoef(y_true, y_pred)[0][1], 3)}',
-                    transform=ax.transAxes)
+                    fontsize=12, transform=ax.transAxes)
+
+        # Style.
+        # Remove borders on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # Set alpha on remaining borders.
+        ax.spines['left'].set_alpha(0.4)
+        ax.spines['bottom'].set_alpha(0.4)
+
+        # Remove ticks on axis.
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+        # Style of ticks.
+        plt.xticks(fontsize=10, alpha=0.7)
+        plt.yticks(fontsize=10, alpha=0.7)
+
+        # Draw tick lines on wanted axes.
+        if grid:
+            ax.axes.grid(True, which='major', axis=grid, color='black',
+                         alpha=0.3, linestyle='--', lw=0.5)
+
+        # Set a thousand separator axis.
+        ax.xaxis.set_major_formatter(
+            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+        )
+        ax.yaxis.set_major_formatter(
+            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+        )
 
         return ax

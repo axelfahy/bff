@@ -24,11 +24,11 @@ PROJECT_URLS = {
 }
 REQUIRES = [
     'matplotlib==3.1.1',
-    'numpy==1.16.4',
+    'numpy==1.17.0',
     'pandas==0.25.0',
     'python-dateutil==2.8.0',
-    'pyyaml==5.1.1',
-    'scipy==1.3.0',
+    'pyyaml==5.1.2',
+    'scipy==1.3.1',
     'typing==3.7.4'
 ]
 CLASSIFIERS = [
