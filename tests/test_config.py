@@ -6,6 +6,7 @@ This module test the configuration loader
 import filecmp
 from pathlib import Path
 import unittest
+import unittest.mock
 
 from bff.config import FancyConfig
 
@@ -40,6 +41,26 @@ class TestiFancyConfig(unittest.TestCase):
         self.assertFalse(filecmp.cmp(dest, path_conf_b))
         # Check that the configurations are the same.
         self.assertEqual(config_a, config_b)
+        # Check the size.
+        self.assertEqual(len(config_b), 3)
+
+        # Check the representation of the config.
+        print_pretty = (
+            "{ 'database': { 'host': '127.0.0.1',\n"
+            "                'name': 'porgs',\n"
+            "                'port': 3306,\n"
+            "                'pwd': 'bacca',\n"
+            "                'user': 'Chew'},\n"
+            "  'env': 'prod',\n"
+            "  'imports': {'star_wars': ['ewok', 'bantha']}}""")
+
+        self.assertEqual(str(config_b), print_pretty)
+
+        print_repr = ("{'database': {'user': 'Chew', 'pwd': 'bacca', 'host': '127.0.0.1', "
+                      "'port': 3306, 'name': 'porgs'}, "
+                      "'imports': {'star_wars': ['ewok', 'bantha']}, 'env': 'prod'}")
+
+        self.assertEqual(repr(config_b).split('\n')[1], print_repr)
 
         # Removes the configs.
         dest.unlink()
