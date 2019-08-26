@@ -19,10 +19,9 @@ TNum = Union[int, float]
 LOGGER = logging.getLogger(__name__)
 
 
-def plot_history(history, metric: Union[str, None] = None, title: str = 'Model history',
-                 axes: plt.axes = None,
-                 loc: Union[str, int] = 'best',
-                 grid: Union[str, None] = None,
+def plot_history(history: dict, metric: Union[str, None] = None,
+                 title: str = 'Model history', axes: plt.axes = None,
+                 loc: Union[str, int] = 'best', grid: Union[str, None] = None,
                  figsize: Tuple[int, int] = (16, 5), dpi: int = 80,
                  style: str = 'default',
                  **kwargs) -> Union[plt.axes, Sequence[plt.axes]]:
@@ -31,8 +30,8 @@ def plot_history(history, metric: Union[str, None] = None, title: str = 'Model h
 
     Parameters
     ----------
-    history : tensorflow.keras.callback.History
-        History of the training.
+    history : dict
+        Dictionary from the history object of the training.
     metric : str, default None
         Metric to plot.
         If no metric is provided, will only print the loss.
@@ -67,12 +66,12 @@ def plot_history(history, metric: Union[str, None] = None, title: str = 'Model h
     Examples
     --------
     >>> history = model.fit(...)
-    >>> plot_history(history, metric='acc', title='MyTitle', linestyle=':')
+    >>> plot_history(history.history, metric='acc', title='MyTitle', linestyle=':')
     """
     if metric:
-        assert metric in history.history.keys(), (
+        assert metric in history.keys(), (
             f'Metric {metric} does not exist in history.\n'
-            f'Possible metrics: {history.history.keys()}')
+            f'Possible metrics: {history.keys()}')
 
     with plt.style.context(style):
         # Given axes are not check for now.
@@ -85,11 +84,11 @@ def plot_history(history, metric: Union[str, None] = None, title: str = 'Model h
 
         if metric:
             # Summarize history for metric, if any.
-            axes[0].plot(history.history[metric],
-                         label=f"Train ({history.history[metric][-1]:.4f})",
+            axes[0].plot(history[metric],
+                         label=f"Train ({history[metric][-1]:.4f})",
                          **kwargs)
-            axes[0].plot(history.history[f'val_{metric}'],
-                         label=f"Validation ({history.history[f'val_{metric}'][-1]:.4f})",
+            axes[0].plot(history[f'val_{metric}'],
+                         label=f"Validation ({history[f'val_{metric}'][-1]:.4f})",
                          **kwargs)
             axes[0].set_title(f'Model {metric}', fontsize=14)
             axes[0].set_xlabel('Epochs', fontsize=12)
@@ -98,11 +97,11 @@ def plot_history(history, metric: Union[str, None] = None, title: str = 'Model h
 
         # Summarize history for loss.
         ax_loss = axes[1] if metric else axes
-        ax_loss.plot(history.history['loss'],
-                     label=f"Train ({history.history['loss'][-1]:.4f})",
+        ax_loss.plot(history['loss'],
+                     label=f"Train ({history['loss'][-1]:.4f})",
                      **kwargs)
-        ax_loss.plot(history.history['val_loss'],
-                     label=f"Validation ({history.history['val_loss'][-1]:.4f})",
+        ax_loss.plot(history['val_loss'],
+                     label=f"Validation ({history['val_loss'][-1]:.4f})",
                      **kwargs)
         ax_loss.set_xlabel('Epochs', fontsize=12)
         ax_loss.set_ylabel('Loss', fontsize=12)
