@@ -73,7 +73,6 @@ instance/
 doc/_build
 doc/build
 doc/source/generated
-doc/source/_static
 
 # PyBuilder
 target/

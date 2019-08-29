@@ -13,10 +13,10 @@ All of bff's functions.
    bff.idict
    bff.mem_usage_pd
    bff.parse_date
-   bff.plot_history
-   bff.plot_predictions
-   bff.plot_series
-   bff.plot_true_vs_pred
+   bff.plot.plot_history
+   bff.plot.plot_predictions
+   bff.plot.plot_series
+   bff.plot.plot_true_vs_pred
    bff.read_sql_by_chunks
    bff.sliding_window
    bff.value_2_list
