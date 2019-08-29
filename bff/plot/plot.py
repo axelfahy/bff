@@ -11,12 +11,15 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pandas.plotting import register_matplotlib_converters
 
 import bff.fancy
 
 TNum = Union[int, float]
 
 LOGGER = logging.getLogger(__name__)
+
+register_matplotlib_converters()
 
 
 def plot_history(history: dict, metric: Union[str, None] = None,
@@ -366,7 +369,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
         # With sem (standard error of the mean).
         sem_alpha = 0.3
         if groupby and with_sem:
-            df_sem = df_plot.resample(groupby).sem()
+            df_sem = df_plot.sem()
 
             ax.fill_between(x, df_plot - df_sem, df_plot + df_sem,
                             color='grey', alpha=sem_alpha)
@@ -379,9 +382,9 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
 
         # Plot vertical line where there is missing datetimes.
         if groupby and with_missing_datetimes:
-            df_date_missing = pd.date_range(start=df_plot.index.get_level_values(0).min(),
-                                            end=df_plot.index.get_level_values(0).max(),
-                                            freq=groupby).difference(df_plot.index)
+            df_date_missing = pd.date_range(start=df.index.min(),
+                                            end=df.index.max(),
+                                            freq=groupby).difference(df_plot.dropna().index)
             for date in df_date_missing.tolist():
                 ax.axvline(date, color='crimson')
 
