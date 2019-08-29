@@ -53,6 +53,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
 * 0.2.0
     * ADD: Separation of plots in submodule ``plot``. This breaks the previous API.
     * ADD: Tests for the plot module using ``pytest-mlp``.
+    * ADD: Images from plot in the documentation and notebook with examples.
     * FIX: Correction of resampling in the ``plot_series`` function.
 * 0.1.9
     * ADD: Option ``loc`` in ``plot_series`` function.

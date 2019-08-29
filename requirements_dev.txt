@@ -1,6 +1,8 @@
 coveralls
 flake8
+ipython
 mypy
+nbsphinx
 numpydoc
 pytest
 pytest-codestyle
