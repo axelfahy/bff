@@ -1,6 +1,3 @@
-# Baseline images for tests
-tests/baseline
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
