@@ -44,10 +44,15 @@ pip install -e .
 make all
 ```
 
+To test plots, images with baseline should be placed in `tests/baseline` and can be generated using `make build-baseline`.
+
+As of *v0.2*, plots are not yet tested in the travis build.
+
 ## Release History
 
 * 0.2.0
     * ADD: Separation of plots in submodule ``plot``. This breaks the previous API.
+    * ADD: Tests for the plot module using ``pytest-mlp``.
     * FIX: Correction of resampling in the ``plot_series`` function.
 * 0.1.9
     * ADD: Option ``loc`` in ``plot_series`` function.
@@ -68,16 +73,16 @@ make all
     * ADD: Add Makefile for testing code and style.
     * ADD: Add python-versioneer to handle version of package.
 * 0.1.3
-    * CHANGE: Restructuration of repo.
     * ADD: Travis, flake8, coveralls and PyUp configurations.
     * ADD: Function `get_peaks` to get the peaks of a time series.
     * ADD: Function `plot_series` to plot a time series.
+    * CHANGE: Restructuration of repo.
 * 0.1.2
-    * CHANGE: Add axes in plot functions.
     * ADD: Function `plot_predictions` function to plot the actual values and the predictions of a model.
+    * CHANGE: Add axes in plot functions.
 * 0.1.1
-    * CHANGE: Improvement of `plot_history` function.
     * ADD: Readme with instructions.
+    * CHANGE: Improvement of `plot_history` function.
     * FIX: Fix the imports in the test.
 * 0.1.0
     * Initial release.

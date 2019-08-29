@@ -6,6 +6,7 @@ pytest
 pytest-codestyle
 pytest-cov
 pytest-docstyle
+pytest-mpl
 pytest-pylint
 python-coveralls
 recommonmark

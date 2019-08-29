@@ -6,8 +6,10 @@ install:
   - pip install -r requirements_dev.txt
   - pip install -e .
 script:
-  - flake8 bff
-  - pytest --codestyle --docstyle --pylint --pylint-rcfile=.pylintrc --pylint-error-types=CWEF
+  - flake8
+  - mypy bff tests
+  - pytest --codestyle --docstyle
+  - pytest --pylint --pylint-rcfile=.pylintrc --pylint-error-types=CWEF
   - pytest --cov=bff tests
 after_success:
   - coveralls
