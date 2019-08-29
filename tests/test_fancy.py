@@ -43,7 +43,6 @@ class TestFancy(unittest.TestCase):
         country_type = CategoricalDtype(categories=['China', 'Switzerland'], ordered=False)
         optimized_types = {'name': np.dtype('O'), 'age': np.dtype('int64'),
                            'country': country_type}
-        print(df_optimized.dtypes.to_dict())
         self.assertDictEqual(df_optimized.dtypes.to_dict(), optimized_types)
 
     def test_concat_with_categories(self):
@@ -75,6 +74,11 @@ class TestFancy(unittest.TestCase):
         self.assertTrue(pd.api.types.is_categorical_dtype(
                         df_concat['country']))
 
+        # Check assertion if columns don't match.
+        df_left_wrong = pd.DataFrame([['John', 'XXL', 'China']],
+                                     columns=['name', 'size', 'country'])
+        self.assertRaises(AssertionError, concat_with_categories, df_left_wrong, df_right)
+
     def test_get_peaks(self):
         """
         Test of the `get_peaks` function.
@@ -93,6 +97,9 @@ class TestFancy(unittest.TestCase):
 
         assert_array_equal(peak_dates, peak_dates_res)
         assert_array_equal(peak_values, peak_values_res)
+
+        # Check assertion if index is not of type `datetime`.
+        self.assertRaises(AssertionError, get_peaks, pd.Series(values, index=range(len(values))))
 
     def test_idict(self):
         """

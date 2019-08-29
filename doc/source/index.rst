@@ -12,10 +12,25 @@ The bff package contains some utility functions from plots to data manipulations
 
 The goal of this package is to have easy access of the functions I am using frequently on projects.
 
-This is still a work in progress, contributions are welcome.
 
-Contents
---------
+.. |history_with_metric| image:: ../../tests/baseline/test_plot_history_with_metric.png
+   :width: 30%
+   :align: middle
+   :alt: History with metric
+
+.. |series_peaks| image:: ../../tests/baseline/test_plot_series_with_peaks.png
+   :width: 30%
+   :align: middle
+   :alt: Series with peaks
+
+.. |true_vs_pred| image:: ../../tests/baseline/test_plot_true_vs_pred_default.png
+   :width: 30%
+   :align: middle
+   :alt: True vs prediction
+
+|history_with_metric| |series_peaks| |true_vs_pred|
+
+This is still a work in progress, contributions are welcome.
 
 .. toctree::
    :maxdepth: 2
