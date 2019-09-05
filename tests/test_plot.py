@@ -5,6 +5,7 @@ This module test the various functions present in the plot module.
 
 Assertion and resulting images are tested.
 """
+from collections import Counter
 import unittest
 import matplotlib.pyplot as plt
 import numpy as np
@@ -68,6 +69,42 @@ class TestPlot(unittest.TestCase):
                  .drop(pd.date_range('2018-01-01 00:40', '2018-01-01 00:41', freq='S'))
                  .drop(pd.date_range('2018-01-01 00:57', '2018-01-01 00:59', freq='S'))
                  )
+    # Counter for bar chart.
+    counter = Counter({'xelqo': 3, 'nisqo': 397, 'bff': 7454, 'eszo': 300, 'hedo': 26,
+                       'sevcyk': 13, 'ajet': 31, 'zero': 10, 'exudes': 4, 'frazzio': 2})
+    # Dictionary for bar chart.
+    dict_to_plot = {'Red': 15, 'Green': 50, 'Blue': 24}
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_counter(self):
+        """
+        Test of the `plot_counter` function.
+        """
+        ax = bplt.plot_counter(self.counter)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_counter_horizontal(self):
+        """
+        Test of the `plot_counter` function.
+
+        Check the behaviour with `vertical=False`.
+        """
+        ax = bplt.plot_counter(self.counter, vertical=False, threshold=300,
+                               title='Bar chart of fake companies turnover [Bn.]',
+                               label_x='Company', label_y='Turnover',
+                               grid='x', rotation_xticks=45, figsize=(10, 7))
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_counter_dict(self):
+        """
+        Test of the `plot_counter` function.
+
+        Check the behaviour when using a dictionary.
+        """
+        ax = bplt.plot_counter(self.dict_to_plot, grid=None)
+        return ax.figure
 
     def test_plot_history(self):
         """

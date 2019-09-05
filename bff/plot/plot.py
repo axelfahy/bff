@@ -4,6 +4,7 @@
 This module contains fancy plot functions.
 """
 import logging
+from collections import Counter
 from typing import Sequence, Tuple, Union
 import matplotlib as mpl
 import matplotlib.lines as mlines
@@ -20,6 +21,141 @@ TNum = Union[int, float]
 LOGGER = logging.getLogger(__name__)
 
 register_matplotlib_converters()
+
+
+def plot_counter(counter: Union[Counter, dict],
+                 label_x: str = 'x', label_y: str = 'y',
+                 title: str = 'Bar chart', width: float = 0.9,
+                 threshold: int = 0, vertical: bool = True,
+                 ax: plt.axes = None,
+                 rotation_xticks: Union[float, None] = None,
+                 grid: Union[str, None] = 'y',
+                 figsize: Tuple[int, int] = (14, 5), dpi: int = 80,
+                 style: str = 'default', **kwargs) -> plt.axes:
+    """
+    Plot the values of a counter as an bar plot.
+
+    Values above the ratio are written as text on top of the bar.
+
+    Parameters
+    ----------
+    counter : collections.Counter or dictionary
+        Counter or dictionary to plot.
+    label_x : str, default 'x'
+        Label for x axis.
+    label_y : str, default 'y'
+        Label for y axis.
+    title : str, default 'Bar chart'
+        Title for the plot (axis level).
+    width : float, default 0.9
+        Width of the bar. If below 1.0, there will be space between them.
+    threshold : int, default = 0
+        Threshold above which the value is written on the plot as text.
+        By default, all bar have their text.
+    vertical : bool, default True
+        By default, vertical bar. If set to False, will plot using `plt.barh`
+        and inverse the labels.
+    ax : plt.axes, default None
+        Axes from matplotlib, if None, new figure and axes will be created.
+    loc : str or int, default 'best'
+        Location of the legend on the plot.
+        Either the legend string or legend code are possible.
+    rotation_xticks : float or None, default None
+        Rotation of x ticks if any.
+        Set to 90 to put them vertically.
+    grid : str or None, default 'y'
+        Axis where to activate the grid ('both', 'x', 'y').
+        To turn off, set to None.
+    figsize : Tuple[int, int], default (14, 5)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'default'
+        Style to use for matplotlib.pyplot.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.plot` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> from collections import Counter
+    >>> counter = Counter({'red': 4, 'blue': 2})
+    >>> plot_counter(counter, title='MyTitle', rotation_xticks=90)
+    """
+    with plt.style.context(style):
+        if ax is None:
+            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+
+        labels, values = zip(*sorted(counter.items()))
+
+        indexes = np.arange(len(labels))
+
+        if vertical:
+            ax.bar(indexes, values, width, **kwargs)
+        else:
+            ax.barh(indexes, values, width, **kwargs)
+            label_x, label_y = label_y, label_x
+
+        ax.set_xlabel(label_x, fontsize=12)
+        ax.set_ylabel(label_y, fontsize=12)
+        ax.set_title(title, fontsize=14)
+
+        # Write the real value on the bar if above a given threshold.
+        counter_max = max(counter.values())
+        space = counter_max * 1.01 - counter_max
+        for i in ax.patches:
+            if vertical:
+                if i.get_height() > threshold:
+                    ax.text(i.get_x() + i.get_width() / 2, i.get_height() + space,
+                            f'{i.get_height():^{len(str(counter_max))},}',
+                            ha='center', va='bottom',
+                            fontsize=10, color='black', alpha=0.6)
+            else:
+                if i.get_width() > threshold:
+                    ax.text(i.get_width() + space, i.get_y() + i.get_height() / 2,
+                            f'{i.get_width():>{len(str(counter_max))},}',
+                            ha='left', va='center',
+                            fontsize=10, color='black', alpha=0.6)
+
+        # Style.
+        # Remove border on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # Set alpha on remaining borders.
+        ax.spines['left'].set_alpha(0.4)
+        ax.spines['bottom'].set_alpha(0.4)
+
+        # Remove ticks on y axis.
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('none')
+
+        # Draw tick lines on wanted axes.
+        if grid:
+            ax.axes.grid(True, which='major', axis=grid, color='black',
+                         alpha=0.3, linestyle='--', lw=0.5)
+
+        # Style of ticks.
+        # Set a thousand separator axis.
+        ax.xaxis.set_major_formatter(
+            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+        )
+        ax.yaxis.set_major_formatter(
+            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
+        )
+        if vertical:
+            plt.xticks(indexes, labels, fontsize=10, alpha=0.7, rotation=rotation_xticks)
+            plt.yticks(fontsize=10, alpha=0.7)
+        else:
+            plt.xticks(fontsize=10, alpha=0.7, rotation=rotation_xticks)
+            plt.yticks(indexes, labels, fontsize=10, alpha=0.7)
+
+        return ax
 
 
 def plot_history(history: dict, metric: Union[str, None] = None,
