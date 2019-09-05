@@ -50,6 +50,8 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 ## Release History
 
+* 0.2.1
+    * ADD: Function ``plot_counter`` to plot counter as bar plot.
 * 0.2.0
     * ADD: Separation of plots in submodule ``plot``. This breaks the previous API.
     * ADD: Tests for the plot module using ``pytest-mlp``.
@@ -69,17 +71,17 @@ As of *v0.2*, plots are not yet tested in the travis build.
 * 0.1.5
     * ADD: Documentation of project on Read the Docs.
 * 0.1.4
-    * ADD: Function `mem_usage_pd` to calculate the memory usage of a pandas object.
-    * ADD: Function `idict` to invert the key / values of a dictionary.
+    * ADD: Function ``mem_usage_pd`` to calculate the memory usage of a pandas object.
+    * ADD: Function ``idict`` to invert the key / values of a dictionary.
     * ADD: Add Makefile for testing code and style.
     * ADD: Add python-versioneer to handle version of package.
 * 0.1.3
     * ADD: Travis, flake8, coveralls and PyUp configurations.
-    * ADD: Function `get_peaks` to get the peaks of a time series.
-    * ADD: Function `plot_series` to plot a time series.
+    * ADD: Function ``get_peaks`` to get the peaks of a time series.
+    * ADD: Function ``plot_series`` to plot a time series.
     * CHANGE: Restructuration of repo.
 * 0.1.2
-    * ADD: Function `plot_predictions` function to plot the actual values and the predictions of a model.
+    * ADD: Function ``plot_predictions`` function to plot the actual values and the predictions of a model.
     * CHANGE: Add axes in plot functions.
 * 0.1.1
     * ADD: Readme with instructions.
