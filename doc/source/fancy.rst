@@ -13,6 +13,7 @@ All of bff's functions.
    bff.idict
    bff.mem_usage_pd
    bff.parse_date
+   bff.plot.plot_counter
    bff.plot.plot_history
    bff.plot.plot_predictions
    bff.plot.plot_series
