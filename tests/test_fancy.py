@@ -13,7 +13,7 @@ from pandas.api.types import CategoricalDtype
 import pandas.util.testing as tm
 
 from bff.fancy import (cast_to_category_pd, concat_with_categories, get_peaks, idict,
-                       mem_usage_pd, parse_date, value_2_list, sliding_window)
+                       mem_usage_pd, parse_date, kwargs_2_list, sliding_window)
 
 
 class TestFancy(unittest.TestCase):
@@ -114,6 +114,30 @@ class TestFancy(unittest.TestCase):
         self.assertEqual(idict(another_valid_dict), {4: '1', '5': 2, '6': 3})
         self.assertEqual(idict(dataloss_dict), {4: 2, 6: 3})
         self.assertRaises(TypeError, idict, invalid_dict)
+
+    def test_kwargs_2_list(self):
+        """
+        Test of the `kwargs_2_list` function.
+        """
+        # A list should remain a list.
+        self.assertEqual(kwargs_2_list(seq=[1, 2, 3]), {'seq': [1, 2, 3]})
+        # A single integer should result in a list with one integer.
+        self.assertEqual(kwargs_2_list(age=42), {'age': [42]})
+        # A single string should result in a list with one string.
+        self.assertEqual(kwargs_2_list(name='John Doe'), {'name': ['John Doe']})
+        # A tuple should remain a tuple.
+        self.assertEqual(kwargs_2_list(children=('Jane Doe', 14)),
+                         {'children': ('Jane Doe', 14)})
+        # A dictionary should result in a list with a dictionary.
+        self.assertEqual(kwargs_2_list(info={'name': 'John Doe', 'age': 42}),
+                         {'info': [{'name': 'John Doe', 'age': 42}]})
+        # Passing a non-keyword argument should raise an exception.
+        self.assertRaises(TypeError, kwargs_2_list, [1, 2, 3])
+        # Passing multiple keyword arguments should work.
+        self.assertEqual(kwargs_2_list(name='John Doe', age=42,
+                                       children=('Jane Doe', 14)),
+                         {'name': ['John Doe'], 'age': [42],
+                          'children': ('Jane Doe', 14)})
 
     def test_mem_usage_pd(self):
         """
@@ -252,30 +276,6 @@ class TestFancy(unittest.TestCase):
         # is smaller than the window size.
         with self.assertRaises(ValueError):
             list(sliding_window('abc', 4, 1))
-
-    def test_value_2_list(self):
-        """
-        Test of the `value_2_list` function.
-        """
-        # A list should remain a list.
-        self.assertEqual(value_2_list(seq=[1, 2, 3]), {'seq': [1, 2, 3]})
-        # A single integer should result in a list with one integer.
-        self.assertEqual(value_2_list(age=42), {'age': [42]})
-        # A single string should result in a list with one string.
-        self.assertEqual(value_2_list(name='John Doe'), {'name': ['John Doe']})
-        # A tuple should remain a tuple.
-        self.assertEqual(value_2_list(children=('Jane Doe', 14)),
-                         {'children': ('Jane Doe', 14)})
-        # A dictionary should result in a list with a dictionary.
-        self.assertEqual(value_2_list(info={'name': 'John Doe', 'age': 42}),
-                         {'info': [{'name': 'John Doe', 'age': 42}]})
-        # Passing a non-keyword argument should raise an exception.
-        self.assertRaises(TypeError, value_2_list, [1, 2, 3])
-        # Passing multiple keyword arguments should work.
-        self.assertEqual(value_2_list(name='John Doe', age=42,
-                                      children=('Jane Doe', 14)),
-                         {'name': ['John Doe'], 'age': [42],
-                          'children': ('Jane Doe', 14)})
 
 
 if __name__ == '__main__':
