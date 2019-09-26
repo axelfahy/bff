@@ -16,6 +16,7 @@ from .fancy import (
     parse_date,
     read_sql_by_chunks,
     sliding_window,
+    value_2_list,
 )
 
 from .config import FancyConfig
@@ -33,6 +34,7 @@ __all__ = [
     'read_sql_by_chunks',
     'sliding_window',
     'FancyConfig',
+    'value_2_list',
 ]
 
 # Logging configuration.

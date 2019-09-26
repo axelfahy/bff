@@ -11,6 +11,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, Hashable, List, Sequence, Set, Union
 from dateutil import parser
 from scipy import signal
+import numpy as np
 import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
@@ -284,8 +285,7 @@ def kwargs_2_list(**kwargs) -> Dict[str, Sequence]:
     {'countries': ['Swiss', 'Spain']}
     """
     for k, v in kwargs.items():
-        if not isinstance(v, collections.abc.Sequence) or isinstance(v, str):
-            kwargs[k] = [v]
+        kwargs[k] = value_2_list(v)
     return kwargs
 
 
@@ -532,3 +532,36 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     if mod:
         start = len(sequence) - (window_size - step) - mod
         yield sequence[start:]
+
+
+def value_2_list(value: Any) -> Sequence:
+    """
+    Convert a single value into a list with a single value.
+
+    If the value is alredy a sequence, it is returned without modification.
+    Type `np.ndarray` is not put inside another sequence.
+
+    Strings are not considered as a sequence in this scenario.
+
+    Parameters
+    ----------
+    value
+        Value to convert to a sequence.
+
+    Returns
+    -------
+    sequence
+        Value put into a sequence.
+
+    Examples
+    --------
+    >>> value_2_list(42)
+    [42]
+    >>> value_2_list('Swiss')
+    ['Swiss']
+    >>> value_2_list('Swiss')
+    ['Swiss']
+    """
+    if (not isinstance(value, (collections.abc.Sequence, np.ndarray)) or isinstance(value, str)):
+        value = [value]
+    return value
