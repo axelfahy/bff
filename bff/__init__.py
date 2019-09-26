@@ -11,11 +11,11 @@ from .fancy import (
     concat_with_categories,
     get_peaks,
     idict,
+    kwargs_2_list,
     mem_usage_pd,
     parse_date,
     read_sql_by_chunks,
     sliding_window,
-    value_2_list,
 )
 
 from .config import FancyConfig
@@ -26,12 +26,12 @@ __all__ = [
     'concat_with_categories',
     'get_peaks',
     'idict',
+    'kwargs_2_list',
     'mem_usage_pd',
     'parse_date',
     'plot',
     'read_sql_by_chunks',
     'sliding_window',
-    'value_2_list',
     'FancyConfig',
 ]
 

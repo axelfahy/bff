@@ -182,7 +182,7 @@ def get_peaks(s: pd.Series, distance_scale: float = 0.04):
     """
     Get the peaks of a time series having datetime as index.
 
-    Only the peaks having an height higher than 0.75 quantile are returned
+    Only the peaks having a height higher than 0.75 quantile are returned
     and a distance between two peaks at least ``df.shape[0]*distance_scale``.
 
     Return the dates and the corresponding value of the peaks.
@@ -251,6 +251,42 @@ def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
         raise TypeError(f'TypeError: values of dict {d} are not hashable.')
 
     return {v: k for k, v in d.items()}
+
+
+def kwargs_2_list(**kwargs) -> Dict[str, Sequence]:
+    """
+    Convert all single values from keyword arguments into lists.
+
+    For each argument provided, if the type is not a sequence,
+    convert the single value into a list.
+    Strings are not considered as a sequence in this scenario.
+
+    Parameters
+    ----------
+    **kwargs
+        Parameters passed to the function.
+
+    Returns
+    -------
+    dict
+        Dictionary with the single values put into a list.
+
+    Raises
+    ------
+    TypeError
+        If a non-keyword argument is passed to the function.
+
+    Examples
+    --------
+    >>> kwargs_2_list(name='John Doe', age=42, children=('Jane Doe', 14))
+    {'name': ['John Doe'], 'age': [42], 'children': ('Jane Doe', 14)}
+    >>> kwargs_2_list(countries=['Swiss', 'Spain'])
+    {'countries': ['Swiss', 'Spain']}
+    """
+    for k, v in kwargs.items():
+        if not isinstance(v, collections.abc.Sequence) or isinstance(v, str):
+            kwargs[k] = [v]
+    return kwargs
 
 
 def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, deep: bool = True,
@@ -496,39 +532,3 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     if mod:
         start = len(sequence) - (window_size - step) - mod
         yield sequence[start:]
-
-
-def value_2_list(**kwargs) -> Dict[str, Sequence]:
-    """
-    Convert single values into list.
-
-    For each argument provided, if the type is not a sequence,
-    convert the single value into a list.
-    Strings are not considered as a sequence in this scenario.
-
-    Parameters
-    ----------
-    **kwargs
-        Parameters passed to the function.
-
-    Returns
-    -------
-    dict
-        Dictionary with the single values put into a list.
-
-    Raises
-    ------
-    TypeError
-        If a non-keyword argument is passed to the function.
-
-    Examples
-    --------
-    >>> value_2_list(name='John Doe', age=42, children=('Jane Doe', 14))
-    {'name': ['John Doe'], 'age': [42], 'children': ('Jane Doe', 14)}
-    >>> value_2_list(countries=['Swiss', 'Spain'])
-    {'countries': ['Swiss', 'Spain']}
-    """
-    for k, v in kwargs.items():
-        if not isinstance(v, collections.abc.Sequence) or isinstance(v, str):
-            kwargs[k] = [v]
-    return kwargs
