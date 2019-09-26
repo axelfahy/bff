@@ -50,6 +50,9 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 ## Release History
 
+* 0.2.2
+    * FIX: Function ``value_2_list`` renamed to ``kwargs_2_list``.
+    * ADD: Function ``value_2_list`` to cast a single value.
 * 0.2.1
     * ADD: Function ``plot_counter`` to plot counter as bar plot.
 * 0.2.0

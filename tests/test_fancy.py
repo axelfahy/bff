@@ -6,6 +6,7 @@ This module test the various functions present in the Fancy module.
 import datetime
 import unittest
 import unittest.mock
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy.testing import assert_array_equal
 import pandas as pd
@@ -13,7 +14,7 @@ from pandas.api.types import CategoricalDtype
 import pandas.util.testing as tm
 
 from bff.fancy import (cast_to_category_pd, concat_with_categories, get_peaks, idict,
-                       mem_usage_pd, parse_date, kwargs_2_list, sliding_window)
+                       kwargs_2_list, mem_usage_pd, parse_date, sliding_window, value_2_list)
 
 
 class TestFancy(unittest.TestCase):
@@ -276,6 +277,28 @@ class TestFancy(unittest.TestCase):
         # is smaller than the window size.
         with self.assertRaises(ValueError):
             list(sliding_window('abc', 4, 1))
+
+    def test_value_2_list(self):
+        """
+        Test of the `value_2_list` function.
+        """
+        # A list should remain a list.
+        self.assertEqual(value_2_list([1, 2, 3]), [1, 2, 3])
+        # A single integer should result in a list with one integer.
+        self.assertEqual(value_2_list(42), [42])
+        # A single string should result in a list with one string.
+        self.assertEqual(value_2_list('John Doe'), ['John Doe'])
+        # A tuple should remain a tuple.
+        self.assertEqual(value_2_list(('Jane Doe', 14)), ('Jane Doe', 14))
+        # A dictionary should result in a list with the dictionary.
+        self.assertEqual(value_2_list({'name': 'John Doe', 'age': 42}),
+                         [{'name': 'John Doe', 'age': 42}])
+        # A single axis should be put in a list.
+        __, axes_a = plt.subplots(nrows=1, ncols=1)
+        self.assertEqual(len(value_2_list(axes_a)), 1)
+        # A list of axis (`np.ndarray`) should not change.
+        __, axes_b = plt.subplots(nrows=2, ncols=1)
+        self.assertEqual(len(value_2_list(axes_b)), 2)
 
 
 if __name__ == '__main__':
