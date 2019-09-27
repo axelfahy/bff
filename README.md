@@ -52,6 +52,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 * 0.2.3
     * ADD: Function ``normalization_pd`` to normalize a DataFrame.
+    * ADD: Function ``plot_correlation`` to plot the correlation of variables in a DataFrame.
 * 0.2.2
     * FIX: Function ``value_2_list`` renamed to ``kwargs_2_list``.
     * ADD: Function ``value_2_list`` to cast a single value.
