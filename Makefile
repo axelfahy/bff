@@ -3,7 +3,7 @@
 .PHONY: all
 all: test
 
-.PHONY: all
+.PHONY: build-python
 build-python:
 	python setup.py sdist bdist_wheel
 

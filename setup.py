@@ -23,13 +23,14 @@ PROJECT_URLS = {
     'Source Code': 'https://github.com/axelfahy/bff'
 }
 REQUIRES = [
-    'matplotlib==3.1.1',
+    'matplotlib==3.1.0',
     'numpy==1.17.0',
     'pandas==0.25.0',
     'python-dateutil==2.8.0',
     'pyyaml==5.1.2',
     'scikit-learn==0.21.3',
     'scipy==1.3.1',
+    'seaborn==0.9.0',
     'typing==3.7.4'
 ]
 CLASSIFIERS = [

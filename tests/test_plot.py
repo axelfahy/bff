@@ -76,6 +76,29 @@ class TestPlot(unittest.TestCase):
     dict_to_plot = {'Red': 15, 'Green': 50, 'Blue': 24}
 
     @pytest.mark.mpl_image_compare
+    def test_plot_correlation(self):
+        """
+        Test of the `plot_correlation` function.
+        """
+        ax = bplt.plot_correlation(self.data)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_correlation_with_ax(self):
+        """
+        Test of the `plot_correlation` function.
+        """
+        # Create fake data for one of the plot.
+        df_tmp = pd.DataFrame({'x': [123, 27, 38, 45, 67], 'y': [456, 45.4, 32, 34, 90]})
+        df_corr = df_tmp.corr()
+
+        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 10), dpi=80)
+        bplt.plot_correlation(df_corr, already_computed=True, ax=axes[0],
+                              rotation_xticks=0, title='Correlation between x and y')
+        bplt.plot_correlation(self.data, ax=axes[1], method='spearman')
+        return fig
+
+    @pytest.mark.mpl_image_compare
     def test_plot_counter(self):
         """
         Test of the `plot_counter` function.
