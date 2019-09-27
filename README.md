@@ -50,6 +50,8 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 ## Release History
 
+* 0.2.3
+    * ADD: Function ``normalization_pd`` to normalize a DataFrame.
 * 0.2.2
     * FIX: Function ``value_2_list`` renamed to ``kwargs_2_list``.
     * ADD: Function ``value_2_list`` to cast a single value.
