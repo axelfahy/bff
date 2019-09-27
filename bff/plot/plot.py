@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
+import seaborn as sns
 
 import bff.fancy
 
@@ -21,6 +22,87 @@ TNum = Union[int, float]
 LOGGER = logging.getLogger(__name__)
 
 register_matplotlib_converters()
+
+
+def plot_correlation(df: pd.DataFrame, already_computed: bool = False,
+                     method: str = 'pearson', title: str = 'Correlation between variables',
+                     ax: plt.axes = None, rotation_xticks: Union[float, None] = 90,
+                     rotation_yticks: Union[float, None] = None,
+                     figsize: Tuple[int, int] = (13, 10), dpi: int = 80,
+                     style: str = 'white',
+                     **kwargs):
+    """
+    Plot the correlation between variables of a pandas DataFrame.
+
+    The computing of the correlation can be done either in the
+    function or before.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with the values or the correlations.
+    already_computed : bool, default False
+        Set to True if the DataFrame already contains the correlations.
+    method : str, default 'pearson'
+        Type of normalization. See pandas.DataFrame.corr for possible values.
+    title : str, default 'Correlation between variables'
+        Title for the plot (axis level).
+    ax : plt.axes, default None
+        Axes from matplotlib, if None, new figure and axes will be created.
+    rotation_xticks : float or None, default 90
+        Rotation of x ticks if any.
+    rotation_yticks : float or None, default None
+        Rotation of x ticks if any.
+        Set to 90 to put them vertically.
+    figsize : Tuple[int, int], default (13, 10)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'white'
+        Style to use for seaborn.axes_style.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `sns.heatmap` function from seaborn.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+    """
+    # Compute the correlation if needed.
+    if not already_computed:
+        df = df.corr(method=method)
+
+    # Generate a mask for the upper triangle.
+    mask = np.zeros_like(df, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True     # pylint: disable=unsupported-assignment-operation
+
+    # Generate a custom diverging colormap.
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    with sns.axes_style(style):
+        if ax is None:
+            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+
+        # Draw the heatmap with the mask and correct aspect ratio.
+        sns.heatmap(df, mask=mask, cmap=cmap, ax=ax, vmin=-1, vmax=1, center=0,
+                    annot=True, square=True, linewidths=0.5,
+                    cbar_kws={"shrink": 0.75}, **kwargs)
+
+        ax.set_title(title, fontsize=14)
+        # Style.
+        # Remove border on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # Only show ticks on the left and bottom spines
+        ax.yaxis.set_ticks_position('left')
+        ax.xaxis.set_ticks_position('bottom')
+        # Style of ticks.
+        plt.xticks(fontsize=10, alpha=0.7, rotation=rotation_xticks)
+        plt.yticks(fontsize=10, alpha=0.7, rotation=rotation_yticks)
+
+        return ax
 
 
 def plot_counter(counter: Union[Counter, dict],

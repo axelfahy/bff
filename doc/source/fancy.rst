@@ -15,6 +15,7 @@ All of bff's functions.
    bff.mem_usage_pd
    bff.normalization_pd
    bff.parse_date
+   bff.plot.plot_correlation
    bff.plot.plot_counter
    bff.plot.plot_history
    bff.plot.plot_predictions
