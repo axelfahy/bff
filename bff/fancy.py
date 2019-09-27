@@ -11,6 +11,8 @@ from functools import wraps
 from typing import Any, Callable, Dict, Hashable, List, Sequence, Set, Union
 from dateutil import parser
 from scipy import signal
+from sklearn.base import TransformerMixin
+from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import pandas as pd
 
@@ -19,7 +21,7 @@ LOGGER = logging.getLogger(__name__)
 
 def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
     """
-    Automatically converts columns that are worth stored as ``category`` dtype.
+    Automatically converts columns of pandas DataFrame that are worth stored as ``category`` dtype.
 
     To be casted a column must not be numerical and must have less than 50%
     of unique values.
@@ -322,6 +324,7 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
 
     Examples
     --------
+    >>> import pandas as pd
     >>> df = pd.DataFrame({'A': [f'value{i}' for i in range(100_000)],
     ...                    'B': [i for i in range(100_000)],
     ...                    'C': [float(i) for i in range(100_000)]}).set_index('A')
@@ -362,6 +365,79 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
         usage_mb = usage_mb.sum()
     res['total'] = f'{usage_mb:03.2f} MB'
     return res
+
+
+def normalization_pd(df: pd.DataFrame, scaler: TransformerMixin = MinMaxScaler,
+                     columns: Union[str, Sequence[str], None] = None,
+                     suffix: Union[str, None] = None, new_type: np.dtype = np.float32,
+                     **kwargs) -> pd.DataFrame:
+    """
+    Normalize columns of a pandas DataFrame using the given scaler.
+
+    If the columns are not provided, will normalize all the numerical columns.
+
+    By default, if the suffix is not provided, columns are overridden.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to normalize.
+    scaler : TransformerMixin, default MinMaxScaler
+        Scaler of sklearn to use for the normalization.
+    columns : sequence of str, default None
+        Columns to normalize. If None, normalize all numerical columns.
+    suffix : str, default None
+        If provided, create the normalization in new columns having this suffix.
+    new_type : np.dtype, default np.float32
+        New type for the columns.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        scaler function from sklearn.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with the normalized columns.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from sklearn.preprocessing import StandardScaler
+    >>> data = {'x': [123, 27, 38, 45, 67], 'y': [456, 45.4, 32, 34, 90]}
+    >>> df = pd.DataFrame(data)
+    >>> df
+         x      y
+    0  123  456.0
+    1   27   45.4
+    2   38   32.0
+    3   45   34.0
+    4   67   90.0
+    >>> df_std = df.pipe(normalization_pd, columns=['x'], scaler=StandardScaler)
+    >>> df_std
+              x      y
+    0  1.847198  456.0
+    1 -0.967580   45.4
+    2 -0.645053   32.0
+    3 -0.439809   34.0
+    4  0.205244   90.0
+    >>> df_min_max = normalization_pd(df, suffix='_norm', feature_range=(0, 2),
+    ...                               new_type=np.float64)
+    >>> df_min_max
+         x      y    x_norm    y_norm
+    0  123  456.0  2.000000  2.000000
+    1   27   45.4  0.000000  0.063208
+    2   38   32.0  0.229167  0.000000
+    3   45   34.0  0.375000  0.009434
+    4   67   90.0  0.833333  0.273585
+    """
+    # If columns are not provided, select all the numerical columns of the DataFrame.
+    # If provided, select only the numerical ones.
+    cols_to_norm = ([col for col in value_2_list(columns) if np.issubdtype(df[col], np.number)]
+                    if columns else df.select_dtypes(include=[np.number]).columns)
+    return df.assign(**{f'{col}{suffix}' if suffix else col:
+                        scaler(**kwargs).fit_transform(df[[col]].values.astype(new_type))
+                        for col in cols_to_norm})
 
 
 def parse_date(func: Union[Callable, None] = None,

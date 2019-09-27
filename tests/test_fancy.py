@@ -12,9 +12,11 @@ from numpy.testing import assert_array_equal
 import pandas as pd
 from pandas.api.types import CategoricalDtype
 import pandas.util.testing as tm
+from sklearn.preprocessing import StandardScaler
 
 from bff.fancy import (cast_to_category_pd, concat_with_categories, get_peaks, idict,
-                       kwargs_2_list, mem_usage_pd, parse_date, sliding_window, value_2_list)
+                       kwargs_2_list, mem_usage_pd, normalization_pd, parse_date,
+                       sliding_window, value_2_list)
 
 
 class TestFancy(unittest.TestCase):
@@ -172,6 +174,30 @@ class TestFancy(unittest.TestCase):
 
         # Check for exception if not a pandas object.
         self.assertRaises(AttributeError, mem_usage_pd, {'a': 1, 'b': 2})
+
+    def test_normalization_pd(self):
+        """
+        Test of the `normalization_pd` function.
+        """
+        data = {'x': [123, 27, 38, 45, 67],
+                'y': [456, 45.4, 32, 34, 90],
+                'color': ['r', 'b', 'g', 'g', 'b']}
+        df = pd.DataFrame(data)
+
+        # Check the function in a pipe with columns including one that does not exist.
+        df_std = df.pipe(normalization_pd, columns=['x'], scaler=StandardScaler)
+        data_std = data.copy()
+        data_std['x'] = [1.847198, -0.967580, -0.645053, -0.439809, 0.205244]
+        df_std_res = pd.DataFrame(data_std).astype({'x': np.float32})
+        tm.assert_frame_equal(df_std, df_std_res, check_dtype=True, check_categorical=False)
+
+        # Check with a suffix and a keyword argument for the scaler.
+        df_min_max = normalization_pd(df, suffix='_norm', feature_range=(0, 2), new_type=np.float64)
+        data_min_max = data.copy()
+        data_min_max['x_norm'] = [2.000000, 0.000000, 0.229167, 0.375000, 0.833333]
+        data_min_max['y_norm'] = [2.000000, 0.06320755, 0.000000, 0.009434, 0.273585]
+        df_min_max_res = pd.DataFrame(data_min_max)
+        tm.assert_frame_equal(df_min_max, df_min_max_res, check_dtype=True, check_categorical=False)
 
     def test_parse_date(self):
         """
