@@ -223,13 +223,7 @@ def plot_counter(counter: Union[Counter, dict],
                          alpha=0.3, linestyle='--', lw=0.5)
 
         # Style of ticks.
-        # Set a thousand separator axis.
-        ax.xaxis.set_major_formatter(
-            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-        )
-        ax.yaxis.set_major_formatter(
-            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-        )
+        set_thousands_separator(ax, which='both', nb_decimals=1)
         if vertical:
             plt.xticks(indexes, labels, fontsize=10, alpha=0.7, rotation=rotation_xticks)
             plt.yticks(fontsize=10, alpha=0.7)
@@ -351,13 +345,7 @@ def plot_history(history: dict, metric: Union[str, None] = None,
                 ax.axes.grid(True, which='major', axis=grid, color='black',
                              alpha=0.3, linestyle='--', lw=0.5)
 
-            # Set a thousand separator axis.
-            ax.xaxis.set_major_formatter(
-                mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-            )
-            ax.yaxis.set_major_formatter(
-                mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-            )
+            set_thousands_separator(ax, which='both', nb_decimals=1)
 
         if not metric:
             # Style of ticks.
@@ -465,13 +453,7 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
             ax.axes.grid(True, which='major', axis=grid, color='black',
                          alpha=0.3, linestyle='--', lw=0.5)
 
-        # Set a thousand separator axis.
-        ax.xaxis.set_major_formatter(
-            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-        )
-        ax.yaxis.set_major_formatter(
-            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-        )
+        set_thousands_separator(ax, which='both', nb_decimals=1)
 
         # Sort labels and handles by labels.
         handles, labels = ax.get_legend_handles_labels()
@@ -633,10 +615,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
             ax.axes.grid(True, which='major', axis=grid, color='black',
                          alpha=0.3, linestyle='--', lw=0.5)
 
-        # Set a thousand separator for y axis.
-        ax.yaxis.set_major_formatter(
-            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-        )
+        set_thousands_separator(ax, which='y', nb_decimals=1)
 
         handles, labels = ax.get_legend_handles_labels()
         labels_cap = [label.capitalize() for label in labels]
@@ -821,12 +800,43 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
             ax_main.axes.grid(True, which='major', axis=grid, color='black',
                               alpha=0.3, linestyle='--', lw=0.5)
 
-        # Set a thousand separator axis.
-        ax_main.xaxis.set_major_formatter(
-            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-        )
-        ax_main.yaxis.set_major_formatter(
-            mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.1f}')
-        )
+        set_thousands_separator(ax_main, which='both', nb_decimals=1)
 
         return ax_main if not with_histograms else (ax_main, ax_right, ax_bottom)
+
+
+def set_thousands_separator(axes: plt.axes, which: str = 'both', nb_decimals: int = 1) -> plt.axes:
+    """
+    Set thousands separator on the axes.
+
+    Parameters
+    ----------
+    axes : plt.axes
+        Axes from matplotlib, can be a single ax or an array of axes.
+    which : str, default 'both'
+        Which axis to format with the thousand separator ('both', 'x', 'y').
+    nb_decimals: int, default 1
+        Number of decimals to use for the number.
+
+    Returns
+    -------
+    plt.axes
+        Axis with the formatted axes.
+
+    Examples
+    --------
+    >>> fig, ax = plt.subplots(1, 1)
+    >>> ax.plot(...)
+    >>> set_thousands_separator(ax, which='x', nb_decimals=3)
+    """
+    for ax in np.asarray(bff.value_2_list(axes)).flatten():
+        # Set a thousand separator for axis.
+        if which in ('x', 'both'):
+            ax.xaxis.set_major_formatter(
+                mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.{nb_decimals}f}')
+            )
+        if which in ('y', 'both'):
+            ax.yaxis.set_major_formatter(
+                mpl.ticker.FuncFormatter(lambda x, p: f'{x:,.{nb_decimals}f}')
+            )
+    return axes

@@ -50,6 +50,8 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 ## Release History
 
+* 0.2.4
+    * ADD: Function ``set_thousands_separator`` to add thousand separator and set the number of decimals on x and/or y ticks.
 * 0.2.3
     * ADD: Function ``normalization_pd`` to normalize a DataFrame.
     * ADD: Function ``plot_correlation`` to plot the correlation of variables in a DataFrame.
