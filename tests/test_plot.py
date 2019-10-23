@@ -74,6 +74,7 @@ class TestPlot(unittest.TestCase):
                        'sevcyk': 13, 'ajet': 31, 'zero': 10, 'exudes': 4, 'frazzio': 2})
     # Dictionary for bar chart.
     dict_to_plot = {'Red': 15, 'Green': 50, 'Blue': 24}
+    dict_to_plot_numerical = {1: 1_798, 2: 12_000, 3: 2_933}
 
     @pytest.mark.mpl_image_compare
     def test_plot_correlation(self):
@@ -306,3 +307,34 @@ class TestPlot(unittest.TestCase):
         axes = bplt.plot_true_vs_pred(self.y_true, self.y_pred,
                                       with_histograms=True, marker='.', c='r')
         return axes[0].figure
+
+    @pytest.mark.mpl_image_compare
+    def test_set_thousands_separator_both(self):
+        """
+        Test of the `set_thousands_separator` function.
+
+        The option `which='both'` is used with a custom value for
+        the number of decimal.
+        """
+        ax = bplt.plot_counter(self.dict_to_plot_numerical,
+                               title='Bar chart with custom thousands separator')
+        ax = bplt.set_thousands_separator(ax, nb_decimals=3)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_set_thousands_separator_x(self):
+        """
+        Test of the `set_thousands_separator` function.
+
+        Test with multiple subplots.
+
+        The option `which='x'` is used.
+
+        Note: formatting of first ax is weird with pytest.
+        """
+        fig, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(20, 10), dpi=80)
+        bplt.plot_true_vs_pred(self.y_true, self.y_pred, ax=axes[0], title='Left plot')
+        bplt.plot_true_vs_pred(self.y_true, self.y_pred, ax=axes[1], title='Right plot')
+        bplt.set_thousands_separator(axes[1], 'x', 3)
+        bplt.set_thousands_separator(axes, 'y', 2)
+        return fig

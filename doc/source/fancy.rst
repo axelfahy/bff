@@ -21,6 +21,7 @@ All of bff's functions.
    bff.plot.plot_predictions
    bff.plot.plot_series
    bff.plot.plot_true_vs_pred
+   bff.plot.set_thousands_separator
    bff.read_sql_by_chunks
    bff.sliding_window
    bff.value_2_list

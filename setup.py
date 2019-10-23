@@ -24,23 +24,23 @@ PROJECT_URLS = {
 }
 REQUIRES = [
     'matplotlib==3.1.0',
-    'numpy==1.17.2',
-    'pandas==0.25.1',
-    'python-dateutil==2.8.0',
-    'pyyaml==5.1.2',
-    'scikit-learn==0.21.3',
-    'scipy==1.3.1',
-    'seaborn==0.9.0',
-    'typing==3.7.4.1'
+    'numpy',
+    'pandas>=0.25.0',
+    'python-dateutil>=2.8.0',
+    'pyyaml',
+    'scikit-learn',
+    'scipy',
+    'seaborn',
+    'typing'
 ]
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
     'Environment :: Console',
     'Intended Audience :: Developers',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7']
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8']
 
 
 class NoopTestCommand(TestCommand):
