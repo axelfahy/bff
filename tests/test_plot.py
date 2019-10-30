@@ -177,6 +177,28 @@ class TestPlot(unittest.TestCase):
         ax = bplt.plot_predictions(self.y_true, self.y_pred)
         return ax.figure
 
+    @pytest.mark.mpl_image_compare
+    def test_plot_predictions_with_x(self):
+        """
+        Test of the `plot_predictions` function with x parameters for plot.
+
+        Size of both given x are not the same.
+        """
+        x_true = pd.date_range('2018-01-01', periods=len(self.y_true), freq='H')
+        x_pred = pd.date_range('2018-01-01', periods=len(self.y_pred), freq='H')
+        ax = bplt.plot_predictions(self.y_true[:-5], self.y_pred, x_true=x_true[:-5], x_pred=x_pred,
+                                   title='Model predictions with datetime')
+        return ax.figure
+
+    def test_plot_predictions_wrong_length(self):
+        """
+        Test of the `plot_predictions` function with x length different from y.
+        """
+        x_true = pd.date_range('2018-01-01', periods=len(self.y_true), freq='H')
+        x_pred = pd.date_range('2018-01-01', periods=len(self.y_pred), freq='H')
+        self.assertRaises(AssertionError, bplt.plot_predictions, self.y_true[:-5],
+                          self.y_pred, x_true=x_true, x_pred=x_pred)
+
     def test_plot_series(self):
         """
         Test of the `plot_series` function.

@@ -355,8 +355,10 @@ def plot_history(history: dict, metric: Union[str, None] = None,
         return axes
 
 
-def plot_predictions(y_true: Union[np.array, pd.DataFrame],
-                     y_pred: Union[np.array, pd.DataFrame],
+def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
+                     y_pred: Union[np.array, pd.Series, pd.DataFrame],
+                     x_true: Union[np.array, pd.Series, pd.DataFrame, None] = None,
+                     x_pred: Union[np.array, pd.Series, pd.DataFrame, None] = None,
                      label_true: str = 'Actual', label_pred: str = 'Predicted',
                      label_x: str = 'x', label_y: str = 'y',
                      title: str = 'Model predictions',
@@ -373,10 +375,16 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
 
     Parameters
     ----------
-    y_true : np.array or pd.DataFrame
+    y_true : np.array, pd.Series or pd.DataFrame
         Actual values.
-    y_pred : np.array or pd.DataFrame
+    y_pred : np.array, pd.Series or pd.DataFrame
         Predicted values by the model.
+    x_true : np.array, pd.Series, pd.DataFrame or None, default None
+        X coordinates for actual values.
+        If not given, will be integer starting from 0.
+    x_pred : np.array, pd.Series, pd.DataFrame or None, default None
+        X coordinates for predicted values.
+        If not given, will be integer starting from 0.
     label_true : str, default 'Actual'
         Label for the actual values.
     label_pred : str, default 'Predicted'
@@ -423,12 +431,27 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
         if ax is None:
             __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
 
+        # If x is given, it must be the same length as y.
+        if x_pred is not None:
+            assert len(x_pred) == len(y_pred), '`x_pred` and `y_pred` must have the same size.'
+        if x_true is not None:
+            assert len(x_true) == len(y_true), '`x_true` and `y_true` must have the same size.'
+
         # Plot predictions.
-        ax.plot(np.array(y_pred).flatten(), color='r',
-                label=label_pred, **kwargs)
+        if x_pred is not None:
+            ax.plot(x_pred, np.array(y_pred).flatten(), color='r',
+                    label=label_pred, **kwargs)
+        else:
+            ax.plot(np.array(y_pred).flatten(), color='r',
+                    label=label_pred, **kwargs)
         # Plot actual values on top of the predictions.
-        ax.plot(np.array(y_true).flatten(), color='b',
-                label=label_true, **kwargs)
+        if x_true is not None:
+            ax.plot(x_true, np.array(y_true).flatten(), color='b',
+                    label=label_true, **kwargs)
+        else:
+            ax.plot(np.array(y_true).flatten(), color='b',
+                    label=label_true, **kwargs)
+
         ax.set_xlabel(label_x, fontsize=12)
         ax.set_ylabel(label_y, fontsize=12)
         ax.set_title(title, fontsize=14)
@@ -453,7 +476,9 @@ def plot_predictions(y_true: Union[np.array, pd.DataFrame],
             ax.axes.grid(True, which='major', axis=grid, color='black',
                          alpha=0.3, linestyle='--', lw=0.5)
 
-        set_thousands_separator(ax, which='both', nb_decimals=1)
+        # If x are given, it might not be numerical.
+        if x_pred is None and x_true is None:
+            set_thousands_separator(ax, which='both', nb_decimals=1)
 
         # Sort labels and handles by labels.
         handles, labels = ax.get_legend_handles_labels()
