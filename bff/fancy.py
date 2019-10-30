@@ -164,7 +164,7 @@ def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
     """
     assert sorted(df_left.columns.values) == sorted(df_right.columns.values), (
         f'DataFrames must have identical columns '
-        f'({df_left.columns.values} != {df_right.columns.values})')
+        f'({df_left.columns.values} != {df_right.columns.values}).')
 
     df_a = df_left.copy()
     df_b = df_right.copy()
@@ -376,6 +376,9 @@ def normalization_pd(df: pd.DataFrame, scaler: TransformerMixin = MinMaxScaler,
 
     If the columns are not provided, will normalize all the numerical columns.
 
+    If the original columns are integers (`RangeIndex`), it is not possible to replace
+    them. This will create new columns having the same integer, but as a string name.
+
     By default, if the suffix is not provided, columns are overridden.
 
     Parameters
@@ -435,7 +438,7 @@ def normalization_pd(df: pd.DataFrame, scaler: TransformerMixin = MinMaxScaler,
     # If provided, select only the numerical ones.
     cols_to_norm = ([col for col in value_2_list(columns) if np.issubdtype(df[col], np.number)]
                     if columns else df.select_dtypes(include=[np.number]).columns)
-    return df.assign(**{f'{col}{suffix}' if suffix else col:
+    return df.assign(**{f'{col}{suffix}' if suffix else str(col):
                         scaler(**kwargs).fit_transform(df[[col]].values.astype(new_type))
                         for col in cols_to_norm})
 
