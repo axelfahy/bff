@@ -589,7 +589,15 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
 
         x = df_plot.index
 
-        ax.plot(x, df_plot, label=column, color=color, lw=2, **kwargs)
+        # If the label is not provided, set the column as label.
+        if 'label' not in kwargs:
+            kwargs['label'] = column
+
+        # Set default linewidth if none of the possible arguments are provided.
+        if not any(k in kwargs for k in ['lw', 'linewidth']):
+            kwargs['lw'] = 2
+
+        ax.plot(x, df_plot, color=color, **kwargs)
 
         # With sem (standard error of the mean).
         sem_alpha = 0.3

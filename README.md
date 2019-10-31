@@ -54,6 +54,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
     * ADD: Function ``set_thousands_separator`` to add thousand separator and set the number of decimals on x and/or y ticks.
     * ADD: Option to define x axis in ``plot_predictions`` function.
     * FIX: Cast columns to string in ``normalization_pd`` function.
+    * FIX: Add possibility to define custom label in ``plot_series`` function using the kwargs instead of an argument.
 * 0.2.3
     * ADD: Function ``normalization_pd`` to normalize a DataFrame.
     * ADD: Function ``plot_correlation`` to plot the correlation of variables in a DataFrame.
