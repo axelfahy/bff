@@ -291,6 +291,52 @@ def kwargs_2_list(**kwargs) -> Dict[str, Sequence]:
     return kwargs
 
 
+def log_df(df: pd.DataFrame, f: Callable[[pd.DataFrame], Any] = lambda x: x.shape,
+           msg: str = '') -> pd.DataFrame:
+    r"""
+    Log information on a DataFrame before returning it.
+
+    The given function is applied and the result is printed.
+    The original DataFrame is returned, unmodified.
+
+    This allows to print debug information in method chaining.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to log.
+    f : Callable, default is the shape of the DataFrame
+        Function to apply on the DataFrame and to log.
+
+    Returns
+    -------
+    pd.DataFrame
+        The DataFrame, unmodified.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import pandas.util.testing as tm
+    >>> df = tm.makeDataFrame().head()
+    >>> df_res = (df.pipe(log_df)
+    ...           .assign(E=2)
+    ...           .pipe(log_df, f=lambda x: x.head(), msg='My df: \n')
+    ...           .pipe(log_df, lambda x: x.shape, 'New shape=')
+    ...          )
+    2019-11-04 13:31:34,742 [INFO   ] bff.fancy: (5, 4)
+    2019-11-04 13:31:34,758 [INFO   ] bff.fancy: My df:
+                       A         B         C         D  E
+    7t93kTGSqJ -0.104845 -1.296579 -0.487572  0.928964  2
+    P8CEEHf07x -0.462075 -2.426990 -0.538038  0.487148  2
+    0DlwZOOj83 -1.964108 -1.272991  0.622618 -0.562890  2
+    LcrsmbFAjk -0.827403 -0.015269 -0.970148  0.683915  2
+    kHfxaURF8t  0.654381  0.353666 -0.830602  1.788581  2
+    2019-11-04 13:31:34,758 [INFO   ] bff.fancy: New shape=(5, 5)
+    """
+    LOGGER.info(f'{msg}{f(df)}')
+    return df
+
+
 def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, deep: bool = True,
                  details: bool = False) -> Dict[str, Union[str, Set[Any]]]:
     """

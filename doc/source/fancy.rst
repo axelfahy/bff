@@ -12,6 +12,7 @@ All of bff's functions.
    bff.get_peaks
    bff.idict
    bff.kwargs_2_list
+   bff.log_df
    bff.mem_usage_pd
    bff.normalization_pd
    bff.parse_date

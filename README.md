@@ -50,6 +50,8 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 ## Release History
 
+* 0.2.5
+    * ADD: Function ``log_df`` to print function results during method chaining.
 * 0.2.4
     * ADD: Function ``set_thousands_separator`` to add thousand separator and set the number of decimals on x and/or y ticks.
     * ADD: Option to define x axis in ``plot_predictions`` function.

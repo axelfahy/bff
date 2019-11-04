@@ -15,7 +15,7 @@ import pandas.util.testing as tm
 from sklearn.preprocessing import StandardScaler
 
 from bff.fancy import (cast_to_category_pd, concat_with_categories, get_peaks, idict,
-                       kwargs_2_list, mem_usage_pd, normalization_pd, parse_date,
+                       kwargs_2_list, log_df, mem_usage_pd, normalization_pd, parse_date,
                        sliding_window, value_2_list)
 
 
@@ -23,25 +23,26 @@ class TestFancy(unittest.TestCase):
     """
     Unittest of Fancy module.
     """
+    # Variables used for multiple tests.
+    columns = ['name', 'age', 'country']
+    df = pd.DataFrame([['John', 24, 'China'],
+                       ['Mary', 20, 'China'],
+                       ['Jane', 25, 'Switzerland'],
+                       ['Greg', 23, 'China'],
+                       ['James', 28, 'China']],
+                      columns=columns)
 
     def test_cast_to_category_pd(self):
         """
         Test of the `cast_to_category_pd` function.
         """
-        columns = ['name', 'age', 'country']
-        df = pd.DataFrame([['John', 24, 'China'],
-                           ['Mary', 20, 'China'],
-                           ['Jane', 25, 'Switzerland'],
-                           ['Greg', 23, 'China'],
-                           ['James', 28, 'China']],
-                          columns=columns)
         original_types = {'name': np.dtype('O'), 'age': np.dtype('int64'),
                           'country': np.dtype('O')}
-        self.assertDictEqual(df.dtypes.to_dict(), original_types)
+        self.assertDictEqual(self.df.dtypes.to_dict(), original_types)
 
-        df_optimized = cast_to_category_pd(df)
+        df_optimized = cast_to_category_pd(self.df)
 
-        tm.assert_frame_equal(df, df_optimized, check_dtype=False, check_categorical=False)
+        tm.assert_frame_equal(self.df, df_optimized, check_dtype=False, check_categorical=False)
 
         country_type = CategoricalDtype(categories=['China', 'Switzerland'], ordered=False)
         optimized_types = {'name': np.dtype('O'), 'age': np.dtype('int64'),
@@ -141,6 +142,23 @@ class TestFancy(unittest.TestCase):
                                        children=('Jane Doe', 14)),
                          {'name': ['John Doe'], 'age': [42],
                           'children': ('Jane Doe', 14)})
+
+    def test_log_df(self):
+        """
+        Test of the `log_df` function.
+
+        All tests of logger are done using a mock.
+        """
+        # Should work directly on DataFrame.
+        with unittest.mock.patch('logging.Logger.info') as mock_logging:
+            log_df(self.df)
+            mock_logging.assert_called_with(f'{self.df.shape}')
+
+        # Should work with the `pipe` function.
+
+        # Should work with another function to log.
+
+        pass
 
     def test_mem_usage_pd(self):
         """
