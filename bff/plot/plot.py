@@ -24,6 +24,47 @@ LOGGER = logging.getLogger(__name__)
 register_matplotlib_converters()
 
 
+def add_identity(ax: plt.axes, *args, **kwargs) -> plt.axes:
+    """
+    Add identity line on axis.
+
+    The identify line (diagonal) is useful to have a better visualization
+    of predicted values y against the ground truth x.
+
+    Lower and upper limits must be retrieved in case they are not
+    equal on each axes.
+
+    Parameters
+    ----------
+    ax : plt.axes
+        Axes from matplotlib on which to add the identity line.
+    *args
+        Additional positional arguments to be passed to the
+        `plt.plot` function from matplotlib.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.plot` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Modified axes with the identity line on it.
+    """
+    identity, = ax.plot([], [], *args, **kwargs)
+
+    def callback(axes):
+        low_x, high_x = axes.get_xlim()
+        low_y, high_y = axes.get_ylim()
+        low = max(low_x, low_y)
+        high = min(high_x, high_y)
+        identity.set_data([low, high], [low, high])
+
+    callback(ax)
+    ax.callbacks.connect('xlim_changed', callback)
+    ax.callbacks.connect('ylim_changed', callback)
+    return ax
+
+
 def plot_correlation(df: pd.DataFrame, already_computed: bool = False,
                      method: str = 'pearson', title: str = 'Correlation between variables',
                      ax: plt.axes = None, rotation_xticks: Union[float, None] = 90,
@@ -678,6 +719,7 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                       y_pred: Union[np.array, pd.DataFrame],
                       with_correlation: bool = True,
                       with_histograms: bool = False,
+                      with_identity: bool = False,
                       label_x: str = 'Ground truth',
                       label_y: str = 'Prediction',
                       title: str = 'Predicted vs Actual',
@@ -704,6 +746,8 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
     with_histograms : bool, default False
         If true, plot histograms of `y_true` and `y_pred` on the sides.
         Not possible if the `ax` is provided.
+    with_identity : bool, default False
+        If true, plot the identity line on the scatter plot.
     label_x : str, default 'Ground truth'
         Label for x axis.
     label_y : str, default 'Prediction'
@@ -812,6 +856,10 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
             ax_bottom.yaxis.set_ticks_position('none')
             ax_right.xaxis.set_ticks_position('none')
             ax_right.yaxis.set_ticks_position('none')
+
+        # Add identity line on main plot.
+        if with_identity:
+            add_identity(ax_main, color='royalblue')
 
         # Style.
         # Remove borders on the top and right.

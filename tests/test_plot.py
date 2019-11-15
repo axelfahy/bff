@@ -331,6 +331,17 @@ class TestPlot(unittest.TestCase):
         return axes[0].figure
 
     @pytest.mark.mpl_image_compare
+    def test_plot_true_vs_pred_with_identity(self):
+        """
+        Test of the `plot_predictions` function.
+
+        The option `with_identity=True` is used.
+        """
+        ax = bplt.plot_true_vs_pred(self.y_true, self.y_pred,
+                                    with_identity=True, marker='.', c='r')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
     def test_set_thousands_separator_both(self):
         """
         Test of the `set_thousands_separator` function.
