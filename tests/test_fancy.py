@@ -168,11 +168,11 @@ class TestFancy(unittest.TestCase):
                            'B': [i for i in range(100000)],
                            'C': [float(i) for i in range(100000)]}).set_index('A')
 
-        test_1 = mem_usage_pd(df)
+        test_1 = mem_usage_pd(df, details=False)
         res_1 = {'total': '7.90 MB'}
         self.assertDictEqual(test_1, res_1)
 
-        test_2 = mem_usage_pd(df, details=True)
+        test_2 = mem_usage_pd(df)
         res_2 = {'Index': {'6.38 MB', 'Index type'},
                  'B': {'0.76 MB', np.dtype('int64')},
                  'C': {'0.76 MB', np.dtype('float64')},
@@ -181,7 +181,7 @@ class TestFancy(unittest.TestCase):
 
         serie = df.reset_index()['B']
 
-        test_3 = mem_usage_pd(serie)
+        test_3 = mem_usage_pd(serie, details=False)
         res_3 = {'total': '0.76 MB'}
         self.assertDictEqual(test_3, res_3)
 

@@ -338,7 +338,7 @@ def log_df(df: pd.DataFrame, f: Callable[[pd.DataFrame], Any] = lambda x: x.shap
 
 
 def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, deep: bool = True,
-                 details: bool = False) -> Dict[str, Union[str, Set[Any]]]:
+                 details: bool = True) -> Dict[str, Union[str, Set[Any]]]:
     """
     Calculate the memory usage of a pandas object.
 
@@ -355,7 +355,7 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
     deep : bool, default True
         If True, introspect the data deeply by interrogating object dtypes for system-level
         memory consumption.
-    details : bool, default False
+    details : bool, default True
         If True and a DataFrame is given, give the detail (memory and type) of each column.
 
     Returns
@@ -487,75 +487,6 @@ def normalization_pd(df: pd.DataFrame, scaler: TransformerMixin = MinMaxScaler,
     return df.assign(**{f'{col}{suffix}' if suffix else str(col):
                         scaler(**kwargs).fit_transform(df[[col]].values.astype(new_type))
                         for col in cols_to_norm})
-
-
-def fit_transform_pd(df: pd.DataFrame, transformer,
-                     columns: Union[str, Sequence[str]],
-                     suffix: Union[str, None] = None,
-                     **kwargs) -> pd.DataFrame:
-    """
-    Fit and transform columns of a pandas DataFrame using the given transformer.
-
-    Content of the columns can be different according to the transformer used.
-
-    By default, if the suffix is not provided, columns are overridden.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame to normalize.
-    transformer : sklearn transformer
-        Transformer of sklearn to use. Must have a `fit_transform` method.
-    columns : sequence of str
-        Columns to transform.
-    suffix : str, default None
-        If provided, create the transformation in new columns having this suffix.
-    **kwargs
-        Additional keyword arguments to be passed to the
-        transformer from sklearn.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with the transformed columns.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> import pandas as pd
-    >>> from sklearn.preprocessing import StandardScaler
-    >>> data = {'x': [123, 27, 38, 45, 67], 'y': [456, 45.4, 32, 34, 90]}
-    >>> df = pd.DataFrame(data)
-    >>> df
-         x      y
-    0  123  456.0
-    1   27   45.4
-    2   38   32.0
-    3   45   34.0
-    4   67   90.0
-    >>> df_std = df.pipe(normalization_pd, columns=['x'], scaler=StandardScaler)
-    >>> df_std
-              x      y
-    0  1.847198  456.0
-    1 -0.967580   45.4
-    2 -0.645053   32.0
-    3 -0.439809   34.0
-    4  0.205244   90.0
-    >>> df_min_max = normalization_pd(df, suffix='_norm', feature_range=(0, 2),
-    ...                               new_type=np.float64)
-    >>> df_min_max
-         x      y    x_norm    y_norm
-    0  123  456.0  2.000000  2.000000
-    1   27   45.4  0.000000  0.063208
-    2   38   32.0  0.229167  0.000000
-    3   45   34.0  0.375000  0.009434
-    4   67   90.0  0.833333  0.273585
-    """
-    assert getattr(transformer, 'fit_transform', None), "Object has no method 'fit_transform'."
-    cols_to_transform = value_2_list(columns)
-    return df.assign(**{f'{col}{suffix}' if suffix else col:
-                        transformer(**kwargs).fit_transform(df[[col]].values)
-                        for col in cols_to_transform})
 
 
 def parse_date(func: Union[Callable, None] = None,
