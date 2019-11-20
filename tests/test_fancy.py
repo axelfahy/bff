@@ -149,16 +149,27 @@ class TestFancy(unittest.TestCase):
 
         All tests of logger are done using a mock.
         """
-        # Should work directly on DataFrame.
+        # Should work directly on a DataFrame.
         with unittest.mock.patch('logging.Logger.info') as mock_logging:
             log_df(self.df)
             mock_logging.assert_called_with(f'{self.df.shape}')
 
         # Should work with the `pipe` function.
+        df = tm.makeDataFrame().head()
+        with unittest.mock.patch('logging.Logger.info') as mock_logging:
+            df_res = (df
+                      .assign(E=2)
+                      .pipe(log_df, lambda x: x.shape, 'New shape=')
+                      )
+            mock_logging.assert_called_with(f'New shape={df_res.shape}')
 
         # Should work with another function to log.
-
-        pass
+        with unittest.mock.patch('logging.Logger.info') as mock_logging:
+            df_res = (df
+                      .assign(F=3)
+                      .pipe(log_df, lambda x: x.shape, 'My df: \n')
+                      )
+            mock_logging.assert_called_with(f'My df: \n{df_res.shape}')
 
     def test_mem_usage_pd(self):
         """
