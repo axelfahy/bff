@@ -717,7 +717,8 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
 
 def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                       y_pred: Union[np.array, pd.DataFrame],
-                      with_correlation: bool = True,
+                      with_correlation: bool = False,
+                      with_determination: bool = True,
                       with_histograms: bool = False,
                       with_identity: bool = False,
                       label_x: str = 'Ground truth',
@@ -741,8 +742,12 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
         Actual values.
     y_pred : np.array or pd.DataFrame
         Predicted values by the model.
-    with_correlation : bool, default True
-        If true, print correlation coefficients in the top left corner.
+    with_correlation : bool, default False
+        If true, print correlation coefficient in the top left corner.
+    with_determination : bool, default True
+        If true, print the determination coefficient in the top left corner.
+        If both `with_correlation` and `with_determination` are set to true,
+        the correlation coefficient is printed.
     with_histograms : bool, default False
         If true, plot histograms of `y_true` and `y_pred` on the sides.
         Not possible if the `ax` is provided.
@@ -833,7 +838,14 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
         # Add correlation in upper left position.
         if with_correlation:
             ax_main.text(0.025, 0.925,
-                         f'R={np.round(np.corrcoef(y_true, y_pred)[0][1], 3)}',
+                         f'$R={np.round(np.corrcoef(y_true, y_pred)[0][1], 3)}$',
+                         fontsize=12, transform=ax_main.transAxes)
+
+        # Add coefficient of determination in upper left position.
+        # If both `with_determination` and `with_correlation`, prints only the correlation.
+        if with_determination and not with_correlation:
+            ax_main.text(0.025, 0.925,
+                         f'$R^2={np.round(np.corrcoef(y_true, y_pred)[0][1] ** 2, 3)}$',
                          fontsize=12, transform=ax_main.transAxes)
 
         if with_histograms:

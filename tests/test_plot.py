@@ -303,7 +303,7 @@ class TestPlot(unittest.TestCase):
     @pytest.mark.mpl_image_compare
     def test_plot_true_vs_pred_default(self):
         """
-        Test of the `plot_predictions` function.
+        Test of the `plot_true_vs_pred` function.
         """
         ax = bplt.plot_true_vs_pred(self.y_true, self.y_pred)
         return ax.figure
@@ -311,29 +311,40 @@ class TestPlot(unittest.TestCase):
     @pytest.mark.mpl_image_compare
     def test_plot_true_vs_pred_with_ax(self):
         """
-        Test of the `plot_predictions` function.
+        Test of the `plot_true_vs_pred` function.
 
         An ax is provided for the plot.
         """
-        __, ax = plt.subplots(1, 1, figsize=(14, 7), dpi=80)
-        ax = bplt.plot_true_vs_pred(self.y_true, self.y_pred, ax=ax)
+        fig, ax = plt.subplots(1, 1, figsize=(14, 7), dpi=80)
+        bplt.plot_true_vs_pred(self.y_true, self.y_pred, ax=ax)
+        return fig
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_true_vs_pred_with_correlation(self):
+        """
+        Test of the `plot_true_vs_pred` function.
+
+        The option `with_correlation=True` is used.
+        """
+        ax = bplt.plot_true_vs_pred(self.y_true, self.y_pred,
+                                    with_correlation=True, marker='.', c='r')
         return ax.figure
 
     @pytest.mark.mpl_image_compare
     def test_plot_true_vs_pred_with_histograms(self):
         """
-        Test of the `plot_predictions` function.
+        Test of the `plot_true_vs_pred` function.
 
         The option `with_histograms=True` is used.
         """
-        axes = bplt.plot_true_vs_pred(self.y_true, self.y_pred,
+        axes = bplt.plot_true_vs_pred(self.y_true, self.y_pred, with_determination=False,
                                       with_histograms=True, marker='.', c='r')
         return axes[0].figure
 
     @pytest.mark.mpl_image_compare
     def test_plot_true_vs_pred_with_identity(self):
         """
-        Test of the `plot_predictions` function.
+        Test of the `plot_true_vs_pred` function.
 
         The option `with_identity=True` is used.
         """
