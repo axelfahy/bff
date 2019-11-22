@@ -21,7 +21,7 @@ class TestiFancyConfig(unittest.TestCase):
         Test of loading the config when it does not exists.
         """
         # Default configuration
-        config_default = FancyConfig()
+        __ = FancyConfig()
 
         default_path_ok = Path(__file__).resolve().parent.parent.joinpath('bff/config.yml')
         default_path_ko = Path.home().resolve().joinpath('config.yml')
@@ -93,7 +93,7 @@ class TestiFancyConfig(unittest.TestCase):
 
         # Check the error message using a mock.
         with unittest.mock.patch('logging.Logger.error') as mock_logging:
-            config['error']
+            __ = config['error']
             mock_logging.assert_called_with('Configuration for error does not exist.')
 
         # Remove the file.

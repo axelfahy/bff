@@ -44,7 +44,7 @@ lint:
 style:
 	flake8
 	mypy bff tests
-	pytest --codestyle --docstyle
+	pytest --pycodestyle --pydocstyle
 
 .PHONY: coverage
 coverage:

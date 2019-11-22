@@ -9,7 +9,7 @@ install:
 script:
   - flake8
   - mypy bff tests
-  - pytest --codestyle --docstyle
+  - pytest --pycodestyle --pydocstyle
   - pytest --pylint --pylint-rcfile=.pylintrc --pylint-error-types=CWEF
   - pytest --cov=bff tests
 after_success:
