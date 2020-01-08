@@ -3,12 +3,12 @@
 
 This module contains various useful fancy functions.
 """
-import collections
+from collections import abc, Counter
 import logging
 import math
 import sys
 from functools import wraps
-from typing import Any, Callable, Dict, Hashable, List, Sequence, Set, Union
+from typing import Any, Callable, Dict, Hashable, List, Sequence, Set, Tuple, Union
 from dateutil import parser
 from scipy import signal
 from sklearn.base import TransformerMixin
@@ -17,6 +17,36 @@ import numpy as np
 import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
+
+
+def avg_dicts(*args):
+    """
+    Average all the values in the given dictionaries.
+
+    Dictionaries must only have numerical values.
+    If a key is not present in one of the dictionary, the value is 0.
+
+    Parameters
+    ----------
+    *args
+        Dictionaries to average, as positional arguments.
+
+    Returns
+    -------
+    dict
+        Dictionary with the average of all inputs.
+
+    Raises
+    ------
+    TypeError
+        If a value is not a number.
+    """
+    try:
+        total = sum(map(Counter, args), Counter())
+        n_dict = len(args)
+        return {k: v / n_dict for k, v in total.items()}
+    except TypeError:
+        raise TypeError('Some values of the dictionaries are not numbers.')
 
 
 def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
@@ -687,6 +717,6 @@ def value_2_list(value: Any) -> Sequence:
     >>> value_2_list('Swiss')
     ['Swiss']
     """
-    if (not isinstance(value, (collections.abc.Sequence, np.ndarray)) or isinstance(value, str)):
+    if (not isinstance(value, (abc.Sequence, np.ndarray)) or isinstance(value, str)):
         value = [value]
     return value

@@ -52,12 +52,14 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 * 0.2.5
     * ADD: Function ``log_df`` to print function results during method chaining.
-    * ADD: Option ``with_identity`` to plot a identity line in the ``plot_true_vs_pred`` function.
+    * ADD: Function ``avg_dicts`` to make the average of multiple similar dictionaries.
+    * ADD: Option ``with_identity`` to plot an identity line in the ``plot_true_vs_pred`` function.
     * ADD: Option ``with_determination`` to plot the coefficient of determination in the ``plot_true_vs_pred`` function.
+    * ADD: Function ``size_to_square`` to calculate automatically the size of the side of a square needed to store all the elements.
     * CHANGE: Default value of option ``details`` in ``mem_usage_pd`` function is now ``True``.
 * 0.2.4
-    * ADD: Function ``set_thousands_separator`` to add thousand separator and set the number of decimals on x and/or y ticks.
-    * ADD: Option to define x axis in ``plot_predictions`` function.
+    * ADD: Function ``set_thousands_separator`` to add a thousand separator and set the number of decimals on x and/or y ticks.
+    * ADD: Option to define x-axis in ``plot_predictions`` function.
     * FIX: Cast columns to string in ``normalization_pd`` function.
     * FIX: Add possibility to define custom label in ``plot_series`` function using the kwargs instead of an argument.
 * 0.2.3

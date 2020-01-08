@@ -7,6 +7,7 @@ from ._version import get_versions
 from . import plot
 
 from .fancy import (
+    avg_dicts,
     cast_to_category_pd,
     concat_with_categories,
     get_peaks,
@@ -25,6 +26,7 @@ from .config import FancyConfig
 
 # Public object of the module.
 __all__ = [
+    'avg_dicts',
     'cast_to_category_pd',
     'concat_with_categories',
     'get_peaks',

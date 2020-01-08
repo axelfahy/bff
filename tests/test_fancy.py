@@ -14,9 +14,9 @@ from pandas.api.types import CategoricalDtype
 import pandas.util.testing as tm
 from sklearn.preprocessing import StandardScaler
 
-from bff.fancy import (cast_to_category_pd, concat_with_categories, get_peaks, idict,
-                       kwargs_2_list, log_df, mem_usage_pd, normalization_pd, parse_date,
-                       sliding_window, value_2_list)
+from bff.fancy import (avg_dicts, cast_to_category_pd, concat_with_categories, get_peaks,
+                       idict, kwargs_2_list, log_df, mem_usage_pd, normalization_pd,
+                       parse_date, sliding_window, value_2_list)
 
 
 class TestFancy(unittest.TestCase):
@@ -31,6 +31,39 @@ class TestFancy(unittest.TestCase):
                        ['Greg', 23, 'China'],
                        ['James', 28, 'China']],
                       columns=columns)
+
+    def test_avg_dicts(self):
+        """
+        Test of the `avg_dicts` function.
+        """
+        # Test the standard case, all dicts with numerical values.
+        dic_std_a = {'a': 0.8, 'b': 0.3}
+        dic_std_b = {'a': 2, 'b': 0.8}
+        dic_std_c = {'a': 0.01, 'b': 1.3}
+        res_std = avg_dicts(dic_std_a, dic_std_b, dic_std_c)
+        self.assertEqual(res_std['a'],
+                         (dic_std_a['a'] + dic_std_b['a'] + dic_std_c['a']) / 3)
+        self.assertEqual(res_std['b'],
+                         (dic_std_a['b'] + dic_std_b['b'] + dic_std_c['b']) / 3)
+
+        # Test with dicts not having the same keys.
+        dic_miss_d = {'a': 3.4, 'c': 0.4}
+        dic_miss_e = {'d': 0.2, 'c': 3.9}
+        res_missing_key = avg_dicts(dic_std_a, dic_miss_d, dic_miss_e)
+        self.assertEqual(res_missing_key['a'],
+                         (dic_std_a['a'] + dic_miss_d['a']) / 3)
+        self.assertEqual(res_missing_key['c'],
+                         (dic_miss_d['c'] + dic_miss_e['c']) / 3)
+        self.assertEqual(res_missing_key['d'],
+                         (dic_miss_e['d']) / 3)
+
+        # Test with dicts having other types. Should raise exception.
+        # Test with string.
+        dic_str_f = {'a': 3, 'b': 'str'}
+        # Test with list.
+        dic_str_g = {'a': 3, 'b': [1, 2, 3]}
+        self.assertRaises(TypeError, avg_dicts, dic_std_a, dic_str_f)
+        self.assertRaises(TypeError, avg_dicts, dic_std_a, dic_std_b, dic_str_g)
 
     def test_cast_to_category_pd(self):
         """
