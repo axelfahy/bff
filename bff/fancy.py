@@ -631,6 +631,28 @@ def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict, None] = None,
     return res
 
 
+def size_2_square(n: int) -> Tuple[int, int]:
+    """
+    Return the size of the side to create a square able to contain n elements.
+
+    This is mainly used to have the correct sizes of the sides when creating squared subplots.
+
+    Parameters
+    ----------
+    n: int
+        Number of elements that need to fit inside the square.
+
+    Returns
+    -------
+    Tuple of int
+        Tuple of int with the size of each part of the square.
+        Both element of the tuple are similar.
+    """
+    size_float = math.sqrt(n)
+    size_int = int(size_float) if size_float.is_integer() else math.ceil(size_float)
+    return (size_int, size_int)
+
+
 def sliding_window(sequence: Sequence, window_size: int, step: int):
     """
     Apply a sliding window over the sequence.

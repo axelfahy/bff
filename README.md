@@ -53,6 +53,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
 * 0.2.5
     * ADD: Function ``log_df`` to print function results during method chaining.
     * ADD: Function ``avg_dicts`` to make the average of multiple similar dictionaries.
+    * ADD: Function ``size_2_square`` to calculate the square needed for the given size (e.g. in subplots).
     * ADD: Option ``with_identity`` to plot an identity line in the ``plot_true_vs_pred`` function.
     * ADD: Option ``with_determination`` to plot the coefficient of determination in the ``plot_true_vs_pred`` function.
     * ADD: Function ``size_to_square`` to calculate automatically the size of the side of a square needed to store all the elements.

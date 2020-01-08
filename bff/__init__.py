@@ -18,6 +18,7 @@ from .fancy import (
     normalization_pd,
     parse_date,
     read_sql_by_chunks,
+    size_2_square,
     sliding_window,
     value_2_list,
 )
@@ -38,6 +39,7 @@ __all__ = [
     'parse_date',
     'plot',
     'read_sql_by_chunks',
+    'size_2_square',
     'sliding_window',
     'FancyConfig',
     'value_2_list',

@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler
 
 from bff.fancy import (avg_dicts, cast_to_category_pd, concat_with_categories, get_peaks,
                        idict, kwargs_2_list, log_df, mem_usage_pd, normalization_pd,
-                       parse_date, sliding_window, value_2_list)
+                       parse_date, size_2_square, sliding_window, value_2_list)
 
 
 class TestFancy(unittest.TestCase):
@@ -297,6 +297,16 @@ class TestFancy(unittest.TestCase):
         # Should not parse if wrong format
         self.assertEqual(dummy_function(date='wrong format')['date'],
                          'wrong format')
+
+    def test_size_2_square(self):
+        """
+        Test of the `size_2_square` function.
+        """
+        # Test when result is  a square.
+        self.assertEqual(size_2_square(9), (3, 3))
+
+        # Test when not a square.
+        self.assertEqual(size_2_square(10), (4, 4))
 
     def test_sliding_window(self):
         """
