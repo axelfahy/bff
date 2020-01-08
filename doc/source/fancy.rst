@@ -7,6 +7,7 @@ All of bff's functions.
    :nosignatures:
    :toctree: generated/
 
+   bff.avg_dicts
    bff.cast_to_category_pd
    bff.concat_with_categories
    bff.get_peaks
@@ -24,6 +25,7 @@ All of bff's functions.
    bff.plot.plot_true_vs_pred
    bff.plot.set_thousands_separator
    bff.read_sql_by_chunks
+   bff.size_2_square
    bff.sliding_window
    bff.value_2_list
 
