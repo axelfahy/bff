@@ -396,6 +396,113 @@ def plot_history(history: dict, metric: Union[str, None] = None,
         return axes
 
 
+def plot_pca_explained_variance_ratio(pca,
+                                      label_x: str = 'Number of components',
+                                      label_y: str = 'Cumulative explained variance',
+                                      title: str = 'PCA explained variance ratio',
+                                      hline: Union[float, None] = None,
+                                      ax: plt.axes = None,
+                                      lim_x: Union[Tuple[TNum, TNum], None] = None,
+                                      lim_y: Union[Tuple[TNum, TNum], None] = None,
+                                      grid: Union[str, None] = None,
+                                      figsize: Tuple[int, int] = (10, 4), dpi: int = 80,
+                                      style: str = 'default', **kwargs) -> plt.axes:
+    """
+    Plot the explained variance ratio of PCA.
+
+    PCA must be already fitted.
+
+    Parameters
+    ----------
+    pca : sklearn.decomposition.PCA
+        PCA object to plot.
+    label_x : str, default 'Number of components'
+        Label for x axis.
+    label_y : str, default 'Cumulative explained variance'
+        Label for y axis.
+    title : str, default 'PCA explained variance ratio'
+        Title for the plot (axis level).
+    hline : float or None, default None
+        Horizontal line (darkorange) to draw on the plot (e.g. at 0.8 to see
+        the number of components needed to keep 80% of the variance).
+    ax : plt.axes, default None
+        Axes from matplotlib, if None, new figure and axes will be created.
+    lim_x : Tuple[TNum, TNum], default None
+        Limit for the x axis.
+    lim_y : Tuple[TNum, TNum], default None
+        Limit for the y axis.
+    grid : str or None, default None
+        Axis where to activate the grid ('both', 'x', 'y').
+        To turn off, set to None.
+    figsize : Tuple[int, int], default (10, 4)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'default'
+        Style to use for matplotlib.pyplot.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.plot` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> from sklearn.decomposition import PCA
+    >>> pca = PCA(n_components=20)
+    >>> pca.fit(data)
+    >>> plot_pca_explained_variance_ratio(pca)
+    """
+    with plt.style.context(style):
+        if ax is None:
+            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+
+        ax.plot(np.cumsum(pca.explained_variance_ratio_))
+
+        if hline:
+            ax.axhline(hline, color='darkorange', alpha=0.5)
+
+        if lim_x:
+            ax.set_xlim(lim_x)
+        if lim_y:
+            ax.set_ylim(lim_y)
+
+        ax.set_xlabel(label_x, fontsize=12)
+        ax.set_ylabel(label_y, fontsize=12)
+        ax.set_title(title, fontsize=14)
+
+        # Style.
+        # Remove border on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # Set alpha on remaining borders.
+        ax.spines['left'].set_alpha(0.4)
+        ax.spines['bottom'].set_alpha(0.4)
+
+        # Remove ticks on y axis.
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
+        # Style of ticks.
+        plt.xticks(fontsize=10, alpha=0.7)
+        plt.yticks(fontsize=10, alpha=0.7)
+
+        # Draw tick lines on wanted axes.
+        if grid:
+            ax.axes.grid(True, which='major', axis=grid, color='black',
+                         alpha=0.3, linestyle='--', lw=0.5)
+
+        set_thousands_separator(ax, which='x', nb_decimals=0)
+        set_thousands_separator(ax, which='y', nb_decimals=2)
+
+        plt.tight_layout()
+
+        return ax
+
+
 def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
                      y_pred: Union[np.array, pd.Series, pd.DataFrame],
                      x_true: Union[np.array, pd.Series, pd.DataFrame, None] = None,

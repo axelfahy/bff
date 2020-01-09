@@ -50,6 +50,8 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 ## Release History
 
+* 0.2.6
+    * ADD: Function ``plot_pca_explained_variance_ratio`` to plot the explained variance of PCA.
 * 0.2.5
     * ADD: Function ``log_df`` to print function results during method chaining.
     * ADD: Function ``avg_dicts`` to make the average of multiple similar dictionaries.

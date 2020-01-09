@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.decomposition import PCA
 
 import bff.plot as bplt
 
@@ -46,6 +47,7 @@ class TestPlot(unittest.TestCase):
                     0.10362048, 0.096129835, 0.09238452, 0.09113608, 0.09113608,
                     0.08739076, 0.08988764, 0.09113608, 0.096129835, 0.09363296]
     }
+
     y_true = [1.87032178, 1.22725664, 9.38496685, 7.91451104, 7.60794146,
               9.65912261, 2.54053964, 7.31815866, 5.91692937, 2.78676838,
               7.92586481, 2.31337877, 1.78432016, 9.55596989, 6.64471696,
@@ -168,6 +170,28 @@ class TestPlot(unittest.TestCase):
         """
         axes = bplt.plot_history(self.history, metric='acc')
         return axes[0].figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_pca_explained_variance_ratio(self):
+        """
+        Test of the `plot_pca_explained_variance_ratio` function.
+        """
+        pca = PCA(n_components=30)
+        pca.fit(np.random.randint(0, 100, size=(1000, 60)))
+        ax = bplt.plot_pca_explained_variance_ratio(pca)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_pca_explained_variance_ratio_with_hline(self):
+        """
+        Test of the `plot_pca_explained_variance_ratio` function.
+
+        The `hline` option is given.
+        """
+        pca = PCA(n_components=30)
+        pca.fit(np.random.randint(0, 100, size=(1000, 60)))
+        ax = bplt.plot_pca_explained_variance_ratio(pca, title='PCA with hline option', hline=0.55)
+        return ax.figure
 
     @pytest.mark.mpl_image_compare
     def test_plot_predictions(self):

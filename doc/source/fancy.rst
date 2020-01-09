@@ -20,6 +20,7 @@ All of bff's functions.
    bff.plot.plot_correlation
    bff.plot.plot_counter
    bff.plot.plot_history
+   bff.plot.plot_pca_explained_variance_ratio
    bff.plot.plot_predictions
    bff.plot.plot_series
    bff.plot.plot_true_vs_pred

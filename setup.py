@@ -23,8 +23,8 @@ PROJECT_URLS = {
     'Source Code': 'https://github.com/axelfahy/bff'
 }
 REQUIRES = [
-    'matplotlib==3.1.0',
-    'numpy',
+    'matplotlib',
+    'numpy<1.18.0',
     'pandas>=0.25.0',
     'python-dateutil>=2.8.0',
     'pyyaml',
