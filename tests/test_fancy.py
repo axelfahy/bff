@@ -6,6 +6,7 @@ This module test the various functions present in the Fancy module.
 import datetime
 import unittest
 import unittest.mock
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -16,7 +17,23 @@ from sklearn.preprocessing import StandardScaler
 
 from bff.fancy import (avg_dicts, cast_to_category_pd, concat_with_categories, get_peaks,
                        idict, kwargs_2_list, log_df, mem_usage_pd, normalization_pd,
-                       parse_date, size_2_square, sliding_window, value_2_list)
+                       parse_date, pipe_multiprocessing_pd, size_2_square,
+                       sliding_window, value_2_list)
+
+
+def df_dummy_func_one(df, i=1):
+    """Dummy function for multiprocessing on DataFrame.
+
+    This function uses `itertuples`."""
+    df = df.assign(d=None)
+    for row in df.itertuples():
+        df.at[row.Index, 'd'] = df.at[row.Index, 'a'] + i
+    return df
+
+
+def df_dummy_func_two(df, i=2):
+    """Dummy function for multiprocessing on DataFrame."""
+    return df.assign(d=lambda x: x['a'] ** i)
 
 
 class TestFancy(unittest.TestCase):
@@ -209,7 +226,7 @@ class TestFancy(unittest.TestCase):
         Test of the `mem_usage_pd` function.
         """
         df = pd.DataFrame({'A': [f'value{i}' for i in range(100000)],
-                           'B': [i for i in range(100000)],
+                           'B': range(100000),
                            'C': [float(i) for i in range(100000)]}).set_index('A')
 
         test_1 = mem_usage_pd(df, details=False)
@@ -297,6 +314,38 @@ class TestFancy(unittest.TestCase):
         # Should not parse if wrong format
         self.assertEqual(dummy_function(date='wrong format')['date'],
                          'wrong format')
+
+    def test_pipe_multiprocessing_pd_one(self):
+        """
+        Test of the `pipe_multiprocessing_pd` function.
+
+        If one of the tests fails, tests might hang and need to be killed.
+        """
+
+        df_a = pd.DataFrame({'a': [1, 2, 3]})
+
+        tm.assert_frame_equal(pipe_multiprocessing_pd(df_a, df_dummy_func_one, nb_proc=2),
+                              pd.DataFrame({'a': [1, 2, 3], 'd': [2, 3, 4]}),
+                              check_dtype=False, check_categorical=False)
+        tm.assert_frame_equal(pipe_multiprocessing_pd(df_a, df_dummy_func_one, i=4, nb_proc=2),
+                              pd.DataFrame({'a': [1, 2, 3], 'd': [5, 6, 7]}),
+                              check_dtype=False, check_categorical=False)
+
+    def test_pipe_multiprocessing_pd_two(self):
+        """
+        Test of the `pipe_multiprocessing_pd` function.
+
+        If one of the tests fails, tests might hang and need to be killed.
+        """
+        df_a = pd.DataFrame({'a': [1, 2, 3]})
+
+        tm.assert_frame_equal(pipe_multiprocessing_pd(df_a, df_dummy_func_two, nb_proc=2),
+                              pd.DataFrame({'a': [1, 2, 3], 'd': [1, 4, 9]}),
+                              check_dtype=False, check_categorical=False)
+
+        tm.assert_frame_equal(pipe_multiprocessing_pd(df_a, df_dummy_func_two, i=3, nb_proc=2),
+                              pd.DataFrame({'a': [1, 2, 3], 'd': [1, 8, 27]}),
+                              check_dtype=False, check_categorical=False)
 
     def test_size_2_square(self):
         """
@@ -400,4 +449,5 @@ class TestFancy(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    from pkg_resources import load_entry_point
+    sys.exit(load_entry_point('pytest', 'console_scripts', 'py.test')())  # type: ignore

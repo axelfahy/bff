@@ -30,23 +30,23 @@ test: code lint style coverage
 
 .PHONY: baseline-plot
 baseline-plot:
-	pytest --mpl-generate-path=tests/baseline tests
+	pytest --mpl-generate-path=tests/baseline tests/test_plot.py
 
 .PHONY: code
 code:
-	pytest --mpl tests
+	pytest --mpl tests/test_plot.py
+	python -m pytest --pycodestyle --pydocstyle
 
 .PHONY: lint
 lint:
-	pytest --pylint --pylint-rcfile=.pylintrc --pylint-error-types=CWEF
+	python -m pytest --pylint --pylint-rcfile=.pylintrc --pylint-error-types=CWEF
 
 .PHONY: style
 style:
 	flake8
 	mypy bff tests
-	pytest --pycodestyle --pydocstyle
 
 .PHONY: coverage
 coverage:
 	rm -rf coverage_html_report .coverage
-	pytest --cov=bff tests --cov-report=html:coverage_html_report
+	python -m pytest --cov=bff tests --cov-report=html:coverage_html_report

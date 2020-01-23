@@ -6,9 +6,10 @@ This module contains various useful fancy functions.
 from collections import abc, Counter
 import logging
 import math
+import multiprocessing
 import sys
-from functools import wraps
-from typing import Any, Callable, Dict, Hashable, List, Sequence, Set, Tuple, Union
+from functools import partial, wraps
+from typing import Any, Callable, Dict, Hashable, List, Optional, Sequence, Set, Tuple, Union
 from dateutil import parser
 from scipy import signal
 from sklearn.base import TransformerMixin
@@ -58,9 +59,9 @@ def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
 
     Parameters
     ----------
-    df: pd.DataFrame
+    df : pd.DataFrame
         DataFrame with the columns to cast.
-    deep: bool, default True
+    deep : bool, default True
         Whether or not to perform a deep copy of the original DataFrame.
 
     Returns
@@ -584,6 +585,46 @@ def parse_date(func: Union[Callable, None] = None,
     return _parse_date(func) if func else _parse_date
 
 
+def pipe_multiprocessing_pd(df: pd.DataFrame, func: Callable, *,
+                            nb_proc: Optional[int] = None, **kwargs) -> pd.DataFrame:
+    """
+    Compute function on DataFrame with `nb_proc` processes.
+
+    The given function must return a new DataFrame.
+    Rows must be independant and not depend from a value generated using the whole DataFrame.
+
+    The function uses as many processes as cpu available on the machine.
+
+    The DataFrame is splitted in `nb_proc` processes and then each
+    splitted DataFrame is computed by a different process.
+    The results are then concatenated an returned.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame that must be computed by the function.
+    func : function
+        Function that takes the DataFrame as input.
+    nb_proc : Union[int, None], default None
+        Number of processor to use. If not provided,
+        uses `multiprocessing.cpu_count()` number of processes.
+    **kwargs
+        Additional keyword arguments to be passed to `func`.
+
+    Returns
+    -------
+    pd.DataFrame
+        Return the DataFrame computed by `func`.
+    """
+    nb_proc = nb_proc or multiprocessing.cpu_count()
+    chunks = np.array_split(df, nb_proc)
+    with multiprocessing.Pool(processes=nb_proc) as pool:
+        # Results of pool.map is in the same order as given,
+        # so we can concatenate the DataFrames directly.
+        results = pool.map(partial(func, **kwargs), chunks)
+    return pd.concat(results, axis='index')
+
+
 def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict, None] = None,
                        chunksize: int = 8_000_000, column_types: Union[Dict, None] = None,
                        **kwargs) -> pd.DataFrame:
@@ -736,7 +777,7 @@ def value_2_list(value: Any) -> Sequence:
     [42]
     >>> value_2_list('Swiss')
     ['Swiss']
-    >>> value_2_list('Swiss')
+    >>> value_2_list(['Swiss'])
     ['Swiss']
     """
     if (not isinstance(value, (abc.Sequence, np.ndarray)) or isinstance(value, str)):
