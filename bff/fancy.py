@@ -46,8 +46,8 @@ def avg_dicts(*args):
         total = sum(map(Counter, args), Counter())
         n_dict = len(args)
         return {k: v / n_dict for k, v in total.items()}
-    except TypeError:
-        raise TypeError('Some values of the dictionaries are not numbers.')
+    except TypeError as e:
+        raise TypeError('Some values of the dictionaries are not numbers.') from e
 
 
 def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
@@ -281,8 +281,8 @@ def idict(d: Dict[Any, Hashable]) -> Dict[Hashable, Any]:
         if len(s) < len(d.values()):
             LOGGER.warning('[DATA LOSS] Same values for multiple keys, '
                            'inverted dict will not contain all keys')
-    except TypeError:
-        raise TypeError(f'TypeError: values of dict {d} are not hashable.')
+    except TypeError as e:
+        raise TypeError(f'TypeError: values of dict {d} are not hashable.') from e
 
     return {v: k for k, v in d.items()}
 
@@ -421,9 +421,9 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
     """
     try:
         usage_b = pd_obj.memory_usage(index=index, deep=deep)
-    except AttributeError:
+    except AttributeError as e:
         raise AttributeError(f'Object does not have a `memory_usage` function, '
-                             'use only pandas objects.')
+                             'use only pandas objects.') from e
 
     # Convert bytes to megabytes.
     usage_mb = usage_b / 1024 ** 2
@@ -726,8 +726,8 @@ def sliding_window(sequence: Sequence, window_size: int, step: int):
     # Check for types.
     try:
         __ = iter(sequence)
-    except TypeError:
-        raise TypeError('Sequence must be iterable.')
+    except TypeError as e:
+        raise TypeError('Sequence must be iterable.') from e
 
     if not isinstance(step, int):
         raise TypeError('Step must be an integer.')
