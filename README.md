@@ -51,6 +51,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
 ## Release History
 
 * 0.2.6
+    * CHANGE: Use of ``Optional`` keyword from ``typing`` for optional arguments.
     * ADD: Function ``plot_pca_explained_variance_ratio`` to plot the explained variance of PCA.
     * ADD: Function ``pipe_multiprocessing_pd`` to apply a function on a DataFrame using multiple processes.
 * 0.2.5
@@ -59,7 +60,6 @@ As of *v0.2*, plots are not yet tested in the travis build.
     * ADD: Function ``size_2_square`` to calculate the square needed for the given size (e.g. in subplots).
     * ADD: Option ``with_identity`` to plot an identity line in the ``plot_true_vs_pred`` function.
     * ADD: Option ``with_determination`` to plot the coefficient of determination in the ``plot_true_vs_pred`` function.
-    * ADD: Function ``size_to_square`` to calculate automatically the size of the side of a square needed to store all the elements.
     * CHANGE: Default value of option ``details`` in ``mem_usage_pd`` function is now ``True``.
 * 0.2.4
     * ADD: Function ``set_thousands_separator`` to add a thousand separator and set the number of decimals on x and/or y ticks.

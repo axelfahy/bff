@@ -444,9 +444,9 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
     return res
 
 
-def normalization_pd(df: pd.DataFrame, scaler: TransformerMixin = MinMaxScaler,
-                     columns: Union[str, Sequence[str], None] = None,
-                     suffix: Union[str, None] = None, new_type: np.dtype = np.float32,
+def normalization_pd(df: pd.DataFrame, scaler=None,
+                     columns: Optional[Union[str, Sequence[str]]] = None,
+                     suffix: Optional[str] = None, new_type: np.dtype = np.float32,
                      **kwargs) -> pd.DataFrame:
     """
     Normalize columns of a pandas DataFrame using the given scaler.
@@ -520,7 +520,7 @@ def normalization_pd(df: pd.DataFrame, scaler: TransformerMixin = MinMaxScaler,
                         for col in cols_to_norm})
 
 
-def parse_date(func: Union[Callable, None] = None,
+def parse_date(func: Optional[Callable] = None,
                date_fields: Sequence[str] = ('date')) -> Callable:
     """
     Cast str date into datetime format.
@@ -625,8 +625,8 @@ def pipe_multiprocessing_pd(df: pd.DataFrame, func: Callable, *,
     return pd.concat(results, axis='index')
 
 
-def read_sql_by_chunks(sql: str, cnxn, params: Union[List, Dict, None] = None,
-                       chunksize: int = 8_000_000, column_types: Union[Dict, None] = None,
+def read_sql_by_chunks(sql: str, cnxn, params: Optional[Union[List, Dict]] = None,
+                       chunksize: int = 8_000_000, column_types: Optional[Dict] = None,
                        **kwargs) -> pd.DataFrame:
     """
     Read SQL query by chunks into a DataFrame.
