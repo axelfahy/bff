@@ -12,10 +12,9 @@ from functools import partial, wraps
 from typing import Any, Callable, Dict, Hashable, List, Optional, Sequence, Set, Tuple, Union
 from dateutil import parser
 from scipy import signal
-from sklearn.base import TransformerMixin
-from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_hashable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
     """
     Automatically converts columns of pandas DataFrame that are worth stored as ``category`` dtype.
 
-    To be casted a column must not be numerical and must have less than 50%
+    To be casted a column must not be numerical, must be hashable and must have less than 50%
     of unique values.
 
     Parameters
@@ -99,6 +98,7 @@ def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
     return (df.copy(deep=deep)
             .astype({col: 'category' for col in df.columns
                      if (df[col].dtype == 'object'
+                         and is_hashable(df[col].iloc[0])
                          and df[col].nunique() / df[col].shape[0] < 0.5)
                      }
                     )

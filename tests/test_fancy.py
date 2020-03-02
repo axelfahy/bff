@@ -99,6 +99,19 @@ class TestFancy(unittest.TestCase):
                            'country': country_type}
         self.assertDictEqual(df_optimized.dtypes.to_dict(), optimized_types)
 
+        # Unashable type should not be casted and not raise exception.
+        df_unhashable = self.df.copy().assign(dummy=None)
+        for row in df_unhashable.itertuples():
+            df_unhashable.at[row.Index, 'dummy'] = np.array([1, 2, 3])
+        print(df_unhashable)
+        df_unhashable_optimized = cast_to_category_pd(df_unhashable)
+        tm.assert_frame_equal(df_unhashable, df_unhashable_optimized,
+                              check_dtype=False, check_categorical=False)
+        # Check the types.
+        optimized_types['dummy'] = np.dtype('O')
+        self.assertDictEqual(df_unhashable_optimized.dtypes.to_dict(),
+                             optimized_types)
+
     def test_concat_with_categories(self):
         """
         Test of the `concat_with_categories` function.
