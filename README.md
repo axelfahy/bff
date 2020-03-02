@@ -54,6 +54,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
     * CHANGE: Use of ``Optional`` keyword from ``typing`` for optional arguments.
     * ADD: Function ``plot_pca_explained_variance_ratio`` to plot the explained variance of PCA.
     * ADD: Function ``pipe_multiprocessing_pd`` to apply a function on a DataFrame using multiple processes.
+    * ADD: Function ``_check_sklearn_support`` to check if ``scikit-learn`` is installed instead of having it in the dependencies of the project.
 * 0.2.5
     * ADD: Function ``log_df`` to print function results during method chaining.
     * ADD: Function ``avg_dicts`` to make the average of multiple similar dictionaries.

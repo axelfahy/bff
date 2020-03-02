@@ -28,7 +28,6 @@ REQUIRES = [
     'pandas>=0.25.0',
     'python-dateutil>=2.8.0',
     'pyyaml',
-    'scikit-learn',
     'scipy',
     'seaborn',
     'typing'

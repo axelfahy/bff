@@ -12,6 +12,7 @@ pytest-mpl
 pytest-pylint
 python-coveralls
 recommonmark
+scikit-learn
 Sphinx
 sphinx-autodoc-typehints
 sphinx-rtd-theme
