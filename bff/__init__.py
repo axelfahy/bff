@@ -47,6 +47,7 @@ __all__ = [
     'value_2_list',
 ]
 
+
 # Logging configuration.
 FORMAT = '%(asctime)s [%(levelname)-7s] %(name)s: %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO)

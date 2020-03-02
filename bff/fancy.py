@@ -105,6 +105,30 @@ def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
             )
 
 
+def _check_sklearn_support(caller_name: str):
+    """
+    Raise ImportError with detailed error message if sklearn is not installed.
+
+    Used by function that might need to import sklearn to have a default Transformer
+    if one is not provided by the user. This is to avoid setting sklearn as a dependency.
+
+    Parameters
+    ----------
+    caller_name : str
+        The name of the caller that requires sklearn.
+    Raises
+    ------
+    ImportError
+        If sklearn is not installed.
+    """
+    try:
+        import sklearn  # noqa
+    except ImportError as e:
+        raise ImportError(
+            f'{caller_name} requires sklearn. You can install scikit-learn with '
+            '`pip install scikit-learn`') from e
+
+
 def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
                            **kwargs) -> pd.DataFrame:
     """
@@ -511,6 +535,10 @@ def normalization_pd(df: pd.DataFrame, scaler=None,
     3   45   34.0  0.375000  0.009434
     4   67   90.0  0.833333  0.273585
     """
+    if scaler is None:
+        _check_sklearn_support('normalization_pd')
+        from sklearn.preprocessing import MinMaxScaler
+        scaler = MinMaxScaler
     # If columns are not provided, select all the numerical columns of the DataFrame.
     # If provided, select only the numerical ones.
     cols_to_norm = ([col for col in value_2_list(columns) if np.issubdtype(df[col], np.number)]
