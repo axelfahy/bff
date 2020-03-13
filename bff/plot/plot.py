@@ -5,7 +5,7 @@ This module contains fancy plot functions.
 """
 import logging
 from collections import Counter
-from typing import Sequence, Tuple, Union
+from typing import Optional, Sequence, Tuple, Union
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -65,13 +65,17 @@ def add_identity(ax: plt.axes, *args, **kwargs) -> plt.axes:
     return ax
 
 
-def plot_correlation(df: pd.DataFrame, already_computed: bool = False,
-                     method: str = 'pearson', title: str = 'Correlation between variables',
-                     ax: plt.axes = None, rotation_xticks: Union[float, None] = 90,
-                     rotation_yticks: Union[float, None] = None,
-                     figsize: Tuple[int, int] = (13, 10), dpi: int = 80,
+def plot_correlation(df: pd.DataFrame,
+                     already_computed: bool = False,
+                     method: str = 'pearson',
+                     title: str = 'Correlation between variables',
+                     ax: Optional[plt.axes] = None,
+                     rotation_xticks: Optional[float] = 90,
+                     rotation_yticks: Optional[float] = None,
+                     figsize: Tuple[int, int] = (13, 10),
+                     dpi: int = 80,
                      style: str = 'white',
-                     **kwargs):
+                     **kwargs) -> plt.axes:
     """
     Plot the correlation between variables of a pandas DataFrame.
 
@@ -88,11 +92,11 @@ def plot_correlation(df: pd.DataFrame, already_computed: bool = False,
         Type of normalization. See pandas.DataFrame.corr for possible values.
     title : str, default 'Correlation between variables'
         Title for the plot (axis level).
-    ax : plt.axes, default None
+    ax : plt.axes, optional
         Axes from matplotlib, if None, new figure and axes will be created.
     rotation_xticks : float or None, default 90
         Rotation of x ticks if any.
-    rotation_yticks : float or None, default None
+    rotation_yticks : float, optional
         Rotation of x ticks if any.
         Set to 90 to put them vertically.
     figsize : Tuple[int, int], default (13, 10)
@@ -129,7 +133,7 @@ def plot_correlation(df: pd.DataFrame, already_computed: bool = False,
         # Draw the heatmap with the mask and correct aspect ratio.
         sns.heatmap(df, mask=mask, cmap=cmap, ax=ax, vmin=-1, vmax=1, center=0,
                     annot=True, square=True, linewidths=0.5,
-                    cbar_kws={"shrink": 0.75}, **kwargs)
+                    cbar_kws={'shrink': 0.75}, **kwargs)
 
         ax.set_title(title, fontsize=14)
         # Style.
@@ -147,14 +151,19 @@ def plot_correlation(df: pd.DataFrame, already_computed: bool = False,
 
 
 def plot_counter(counter: Union[Counter, dict],
-                 label_x: str = 'x', label_y: str = 'y',
-                 title: str = 'Bar chart', width: float = 0.9,
-                 threshold: int = 0, vertical: bool = True,
-                 ax: plt.axes = None,
-                 rotation_xticks: Union[float, None] = None,
+                 label_x: str = 'x',
+                 label_y: str = 'y',
+                 title: str = 'Bar chart',
+                 width: float = 0.9,
+                 threshold: int = 0,
+                 vertical: bool = True,
+                 ax: Optional[plt.axes] = None,
+                 rotation_xticks: Optional[float] = None,
                  grid: Union[str, None] = 'y',
-                 figsize: Tuple[int, int] = (14, 5), dpi: int = 80,
-                 style: str = 'default', **kwargs) -> plt.axes:
+                 figsize: Tuple[int, int] = (14, 5),
+                 dpi: int = 80,
+                 style: str = 'default',
+                 **kwargs) -> plt.axes:
     """
     Plot the values of a counter as an bar plot.
 
@@ -178,12 +187,12 @@ def plot_counter(counter: Union[Counter, dict],
     vertical : bool, default True
         By default, vertical bar. If set to False, will plot using `plt.barh`
         and inverse the labels.
-    ax : plt.axes, default None
+    ax : plt.axes, optional
         Axes from matplotlib, if None, new figure and axes will be created.
     loc : str or int, default 'best'
         Location of the legend on the plot.
         Either the legend string or legend code are possible.
-    rotation_xticks : float or None, default None
+    rotation_xticks : float, optional
         Rotation of x ticks if any.
         Set to 90 to put them vertically.
     grid : str or None, default 'y'
@@ -275,10 +284,14 @@ def plot_counter(counter: Union[Counter, dict],
         return ax
 
 
-def plot_history(history: dict, metric: Union[str, None] = None,
-                 title: str = 'Model history', axes: plt.axes = None,
-                 loc: Union[str, int] = 'best', grid: Union[str, None] = None,
-                 figsize: Tuple[int, int] = (16, 5), dpi: int = 80,
+def plot_history(history: dict,
+                 metric: Optional[str] = None,
+                 title: str = 'Model history',
+                 axes: Optional[plt.axes] = None,
+                 loc: Union[str, int] = 'best',
+                 grid: Optional[str] = None,
+                 figsize: Tuple[int, int] = (16, 5),
+                 dpi: int = 80,
                  style: str = 'default',
                  **kwargs) -> Union[plt.axes, Sequence[plt.axes]]:
     """
@@ -288,18 +301,18 @@ def plot_history(history: dict, metric: Union[str, None] = None,
     ----------
     history : dict
         Dictionary from the history object of the training.
-    metric : str, default None
+    metric : str, optional
         Metric to plot.
         If no metric is provided, will only print the loss.
     title : str, default 'Model history'
         Main title for the plot (figure level).
-    axes : plt.axes, default None
+    axes : plt.axes, optional
         Axes from matplotlib, if None, new figure and axes will be created.
         If metric is provided, need to have at least 2 axes.
     loc : str or int, default 'best'
         Location of the legend on the plot.
         Either the legend string or legend code are possible.
-    grid : str or None, default None
+    grid : str, optional
         Axis where to activate the grid ('both', 'x', 'y').
         To turn off, set to None.
     figsize : Tuple[int, int], default (16, 5)
@@ -400,11 +413,11 @@ def plot_pca_explained_variance_ratio(pca,
                                       label_x: str = 'Number of components',
                                       label_y: str = 'Cumulative explained variance',
                                       title: str = 'PCA explained variance ratio',
-                                      hline: Union[float, None] = None,
-                                      ax: plt.axes = None,
-                                      lim_x: Union[Tuple[TNum, TNum], None] = None,
-                                      lim_y: Union[Tuple[TNum, TNum], None] = None,
-                                      grid: Union[str, None] = None,
+                                      hline: Optional[float] = None,
+                                      ax: Optional[plt.axes] = None,
+                                      lim_x: Optional[Tuple[TNum, TNum]] = None,
+                                      lim_y: Optional[Tuple[TNum, TNum]] = None,
+                                      grid: Optional[str] = None,
                                       figsize: Tuple[int, int] = (10, 4), dpi: int = 80,
                                       style: str = 'default', **kwargs) -> plt.axes:
     """
@@ -422,16 +435,16 @@ def plot_pca_explained_variance_ratio(pca,
         Label for y axis.
     title : str, default 'PCA explained variance ratio'
         Title for the plot (axis level).
-    hline : float or None, default None
+    hline : float, optional
         Horizontal line (darkorange) to draw on the plot (e.g. at 0.8 to see
         the number of components needed to keep 80% of the variance).
-    ax : plt.axes, default None
+    ax : plt.axes, optional
         Axes from matplotlib, if None, new figure and axes will be created.
-    lim_x : Tuple[TNum, TNum], default None
+    lim_x : Tuple[TNum, TNum], optional
         Limit for the x axis.
-    lim_y : Tuple[TNum, TNum], default None
+    lim_y : Tuple[TNum, TNum], optional
         Limit for the y axis.
-    grid : str or None, default None
+    grid : str, optional
         Axis where to activate the grid ('both', 'x', 'y').
         To turn off, set to None.
     figsize : Tuple[int, int], default (10, 4)
@@ -505,17 +518,21 @@ def plot_pca_explained_variance_ratio(pca,
 
 def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
                      y_pred: Union[np.array, pd.Series, pd.DataFrame],
-                     x_true: Union[np.array, pd.Series, pd.DataFrame, None] = None,
-                     x_pred: Union[np.array, pd.Series, pd.DataFrame, None] = None,
-                     label_true: str = 'Actual', label_pred: str = 'Predicted',
-                     label_x: str = 'x', label_y: str = 'y',
+                     x_true: Optional[Union[np.array, pd.Series, pd.DataFrame]] = None,
+                     x_pred: Optional[Union[np.array, pd.Series, pd.DataFrame]] = None,
+                     label_true: str = 'Actual',
+                     label_pred: str = 'Predicted',
+                     label_x: str = 'x',
+                     label_y: str = 'y',
                      title: str = 'Model predictions',
-                     ax: plt.axes = None,
+                     ax: Optional[plt.axes] = None,
                      loc: Union[str, int] = 'best',
-                     rotation_xticks: Union[float, None] = None,
+                     rotation_xticks: Optional[float] = None,
                      grid: Union[str, None] = 'y',
-                     figsize: Tuple[int, int] = (14, 5), dpi: int = 80,
-                     style: str = 'default', **kwargs) -> plt.axes:
+                     figsize: Tuple[int, int] = (14, 5),
+                     dpi: int = 80,
+                     style: str = 'default',
+                     **kwargs) -> plt.axes:
     """
     Plot the predictions of the model.
 
@@ -527,10 +544,10 @@ def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
         Actual values.
     y_pred : np.array, pd.Series or pd.DataFrame
         Predicted values by the model.
-    x_true : np.array, pd.Series, pd.DataFrame or None, default None
+    x_true : np.array, pd.Series, pd.DataFrame, optional
         X coordinates for actual values.
         If not given, will be integer starting from 0.
-    x_pred : np.array, pd.Series, pd.DataFrame or None, default None
+    x_pred : np.array, pd.Series, pd.DataFrame, optional
         X coordinates for predicted values.
         If not given, will be integer starting from 0.
     label_true : str, default 'Actual'
@@ -548,7 +565,7 @@ def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
     loc : str or int, default 'best'
         Location of the legend on the plot.
         Either the legend string or legend code are possible.
-    rotation_xticks : float or None, default None
+    rotation_xticks : float, optional
         Rotation of x ticks if any.
         Set to 90 to put them vertically.
     grid : str or None, default 'y'
@@ -637,17 +654,25 @@ def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
         return ax
 
 
-def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
-                with_sem: bool = False, with_peaks: bool = False,
+def plot_series(df: pd.DataFrame,
+                column: str,
+                groupby: Optional[str] = None,
+                with_sem: bool = False,
+                with_peaks: bool = False,
                 with_missing_datetimes: bool = False,
-                distance_scale: float = 0.04, label_x: str = 'Datetime',
-                label_y: Union[str, None] = None, title: str = 'Plot of series',
-                ax: plt.axes = None, color: str = '#3F5D7D',
+                distance_scale: float = 0.04,
+                label_x: str = 'Datetime',
+                label_y: Optional[str] = None,
+                title: str = 'Plot of series',
+                ax: Optional[plt.axes] = None,
+                color: str = '#3F5D7D',
                 loc: Union[str, int] = 'best',
-                rotation_xticks: Union[float, None] = None,
+                rotation_xticks: Optional[float] = None,
                 grid: Union[str, None] = 'y',
-                figsize: Tuple[int, int] = (14, 6), dpi: int = 80,
-                style: str = 'default', **kwargs) -> plt.axes:
+                figsize: Tuple[int, int] = (14, 6),
+                dpi: int = 80,
+                style: str = 'default',
+                **kwargs) -> plt.axes:
     """
     Plot time series with datetime with the given resample (`groupby`).
 
@@ -657,7 +682,7 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
         DataFrame to plot, with datetime as index.
     column : str
         Column of the DataFrame to display.
-    groupby : str or None, default None
+    groupby : str, optional
         Grouping for the resampling by mean of the data.
         For example, can resample from seconds ('S') to minutes ('T').
         By default, no resampling is applied.
@@ -678,14 +703,14 @@ def plot_series(df: pd.DataFrame, column: str, groupby: Union[str, None] = None,
         Label for y axis. If None, will take the column name as label.
     title : str, default 'Plot of series'
         Title for the plot (axis level).
-    ax : plt.axes, default None
+    ax : plt.axes, optional
         Axes from matplotlib, if None, new figure and ax will be created.
     color : str, default '#3F5D7D'
         Default color for the plot.
     loc : str or int, default 'best'
         Location of the legend on the plot.
         Either the legend string or legend code are possible.
-    rotation_xticks : float or None, default None
+    rotation_xticks : float, optional
         Rotation of x ticks if any.
         Set to 90 to put them vertically.
     grid : str or None, default 'y'
@@ -831,11 +856,12 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                       label_x: str = 'Ground truth',
                       label_y: str = 'Prediction',
                       title: str = 'Predicted vs Actual',
-                      ax: plt.axes = None,
-                      lim_x: Union[Tuple[TNum, TNum], None] = None,
-                      lim_y: Union[Tuple[TNum, TNum], None] = None,
+                      ax: Optional[plt.axes] = None,
+                      lim_x: Optional[Tuple[TNum, TNum]] = None,
+                      lim_y: Optional[Tuple[TNum, TNum]] = None,
                       grid: Union[str, None] = 'both',
-                      figsize: Tuple[int, int] = (14, 7), dpi: int = 80,
+                      figsize: Tuple[int, int] = (14, 7),
+                      dpi: int = 80,
                       style: str = 'default',
                       **kwargs) -> plt.axes:
     """
@@ -866,12 +892,12 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
         Label for y axis.
     title : str, default 'Predicted vs Actual'
         Title for the plot (axis level).
-    ax : plt.axes, default None
+    ax : plt.axes, optional
         Axes from matplotlib, if None, new figure and axes will be created.
-    lim_x : Tuple[TNum, TNum], default None
+    lim_x : Tuple[TNum, TNum], optional
         Limit for the x axis. If None, automatically calculated according
         to the limits of the data, with an extra 5% for readability.
-    lim_y : Tuple[TNum, TNum], default None
+    lim_y : Tuple[TNum, TNum], optional
         Limit for the y axis. If None, automatically calculated according
         to the limits of the data, with an extra 5% for readability.
     grid : str or None, default 'both'
@@ -1005,7 +1031,8 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
         return ax_main if not with_histograms else (ax_main, ax_right, ax_bottom)
 
 
-def set_thousands_separator(axes: plt.axes, which: str = 'both', nb_decimals: int = 1) -> plt.axes:
+def set_thousands_separator(axes: plt.axes, which: str = 'both',
+                            nb_decimals: int = 1) -> plt.axes:
     """
     Set thousands separator on the axes.
 
