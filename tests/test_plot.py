@@ -72,8 +72,10 @@ class TestPlot(unittest.TestCase):
                  .drop(pd.date_range('2018-01-01 00:57', '2018-01-01 00:59', freq='S'))
                  )
     # Counter for bar chart.
-    counter = Counter({'xelqo': 3, 'nisqo': 397, 'bff': 7454, 'eszo': 300, 'hedo': 26,
+    counter = Counter({'xelqo': 300, 'nisqo': 397, 'bff': 7454, 'eszo': 300, 'hedo': 26,
                        'sevcyk': 13, 'ajet': 31, 'zero': 10, 'exudes': 4, 'frazzio': 2})
+    # Counter for pie chart.
+    counter_pie = Counter({'xelqo': 300, 'nisqo': 397, 'bff': 454, 'eszo': 300, 'hedo': 100})
     # Dictionary for bar chart.
     dict_to_plot = {'Red': 15, 'Green': 50, 'Blue': 24}
     dict_to_plot_numerical = {1: 1_798, 2: 12_000, 3: 2_933}
@@ -191,6 +193,45 @@ class TestPlot(unittest.TestCase):
         pca = PCA(n_components=30)
         pca.fit(np.random.randint(0, 100, size=(1000, 60)))
         ax = bplt.plot_pca_explained_variance_ratio(pca, title='PCA with hline option', hline=0.55)
+        return ax.figure
+
+    def test_plot_pie(self):
+        """
+        Test of the `plot_pie` function.
+
+        Only checks the assertions.
+        """
+        self.assertRaises(AssertionError, bplt.plot_pie, self.dict_to_plot, colors=['r', 'b'])
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_pie_counter(self):
+        """
+        Test of the `plot_pie` function.
+        """
+        data = {k: v for k, v in self.counter_pie.most_common(4)}
+        ax = bplt.plot_pie(data, explode=0.01, title='', startangle=10)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_pie_full(self):
+        """
+        Test of the `plot_pie` function.
+
+        Check the behaviour with `circle=False` and legend.
+        """
+        ax = bplt.plot_pie(self.counter_pie, circle=False,
+                           title='Pie chart of fake companies turnover [Bn.]',
+                           loc='best')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_pie_dict(self):
+        """
+        Test of the `plot_pie` function.
+
+        Check the behaviour when using a dictionary and custom colors.
+        """
+        ax = bplt.plot_pie(self.dict_to_plot, colors=['r', 'g', 'b'])
         return ax.figure
 
     @pytest.mark.mpl_image_compare

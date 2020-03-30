@@ -28,7 +28,7 @@ def add_identity(ax: plt.axes, *args, **kwargs) -> plt.axes:
     """
     Add identity line on axis.
 
-    The identify line (diagonal) is useful to have a better visualization
+    The identity line (diagonal) is useful to have a better visualization
     of predicted values y against the ground truth x.
 
     Lower and upper limits must be retrieved in case they are not
@@ -514,6 +514,110 @@ def plot_pca_explained_variance_ratio(pca,
         plt.tight_layout()
 
         return ax
+
+
+def plot_pie(data: Union[Counter, dict],
+             explode: float = 0.0,
+             circle: bool = True,
+             colors: Optional[Sequence[str]] = None,
+             textprops: Optional[dict] = None,
+             title: str = 'Pie chart',
+             ax: Optional[plt.axes] = None,
+             loc: Optional[Union[str, int]] = None,
+             figsize: Tuple[int, int] = (14, 8),
+             dpi: int = 80,
+             style: str = 'default',
+             **kwargs) -> plt.axes:
+    """
+    Plot the values of a dictionary as a pie chart or a circle.
+
+    Parameters
+    ----------
+    data : collections.Counter or dictionary
+        Data to plot in the pie, labels as keys and count as values.
+    explode : float, default 0.0
+        If provided, explode the pie with the given value.
+    circle : bool, default True
+        If True, empty the center of the pie, making it look like a circle.
+    colors : sequence of str, optional
+        If provided, use the given colors, else use a default cmap (`plt.cm.rainbow`).
+    textprops : dict, optional
+        Dict of arguments to pass to the text objects.
+    title : str, default 'Pie chart'
+        Title for the plot (axis level).
+    ax : plt.axes, optional
+        Axes from matplotlib, if None, new figure and axes will be created.
+    loc : str or int, optional
+        If provided, show the legend on the plot.
+    rotation_xticks : float, optional
+        Rotation of x ticks if any.
+        Set to 90 to put them vertically.
+    grid : str or None, default 'y'
+        Axis where to activate the grid ('both', 'x', 'y').
+        To turn off, set to None.
+    figsize : Tuple[int, int], default (14, 8)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'default'
+        Style to use for matplotlib.pyplot.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.pie` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> from collections import Counter
+    >>> counter = Counter({'red': 4, 'blue': 2, 'green': 7})
+    >>> plot_pie(counter, title='MyTitle')
+    """
+    with plt.style.context(style):
+        if ax is None:
+            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+
+            # Function to format the labels on the pie chart.
+            # Percent, with real value in parenthesis.
+            def format_label(percent, values):
+                absolute = int(percent / 100. * sum(values))
+                return f'{percent:.1f}%\n({absolute:,})'
+
+            if colors is None:
+                colors = list(plt.cm.rainbow(np.linspace(0, 1, len(data))))
+            else:
+                assert len(colors) == len(data), (
+                    'The number of colors does not match the number of labels.')
+
+            wedges, texts, autotexts = ax.pie(data.values(), labels=data.keys(),
+                                              colors=colors,
+                                              autopct=lambda pct: format_label(pct, data.values()),
+                                              explode=[explode] * len(data),
+                                              pctdistance=0.85 if circle else 0.5,
+                                              textprops=textprops, **kwargs)
+            # Draw the inside circle.
+            if circle:
+                plt.setp(wedges, width=0.3)
+                # Ensure that the pie is a circle.
+                ax.set_aspect('equal')
+
+            # Change the size of the labels.
+            for text in texts:
+                text.set_fontsize(14)
+            plt.setp(autotexts, size=12, weight='bold')
+
+            ax.set_title(title, fontsize=14)
+
+            if loc:
+                ax.legend(loc=loc)
+
+            plt.tight_layout()
+
+            return ax
 
 
 def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
