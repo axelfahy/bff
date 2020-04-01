@@ -846,7 +846,7 @@ def plot_series(df: pd.DataFrame,
     ...     plot_series(df_acceleration, acc, groupby='T',
     ...                 ax=axes[i], color=colors[acc])
     """
-    assert 'datetime' in df.index.names, (
+    assert isinstance(df.index, pd.DatetimeIndex), (
         'DataFrame must have a datetime index.')
     assert column in df.columns, (
         f'DataFrame does not contain column: {column}')
