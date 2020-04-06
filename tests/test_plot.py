@@ -7,6 +7,7 @@ Assertion and resulting images are tested.
 """
 from collections import Counter
 import unittest
+import unittest.mock
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -52,11 +53,16 @@ class TestPlot(unittest.TestCase):
               9.65912261, 2.54053964, 7.31815866, 5.91692937, 2.78676838,
               7.92586481, 2.31337877, 1.78432016, 9.55596989, 6.64471696,
               3.33907423, 7.49321025, 7.14822795, 4.11686499, 2.40202043]
-
     y_pred = [1.85161709, 1.33317135, 9.45246137, 7.91986758, 7.54877922,
               9.71532022, 3.56777447, 7.88673475, 5.56090322, 2.78851836,
               6.70636033, 2.67531555, 1.13061356, 8.29287223, 6.27275223,
               2.49572863, 7.14305019, 8.53578604, 3.99890533, 2.35510298]
+
+    y_true_matrix = [1, 2, 3, 1, 2, 3, 1, 2, 3]
+    y_pred_matrix = [1, 2, 3, 2, 3, 1, 1, 2, 3]
+
+    y_true_matrix_cat = ['dog', 'cat', 'bird', 'dog', 'cat', 'bird', 'dog', 'cat', 'bird']
+    y_pred_matrix_cat = ['dog', 'cat', 'bird', 'cat', 'bird', 'dog', 'dog', 'cat', 'bird']
 
     # Timeseries for testing.
     AXIS = {'x': 'darkorange', 'y': 'green', 'z': 'steelblue'}
@@ -79,6 +85,129 @@ class TestPlot(unittest.TestCase):
     # Dictionary for bar chart.
     dict_to_plot = {'Red': 15, 'Green': 50, 'Blue': 24}
     dict_to_plot_numerical = {1: 1_798, 2: 12_000, 3: 2_933}
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_labels_filter(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `labels_filter` option.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        labels_filter=[3, 1])
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_normalize(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `normalize` option.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        normalize='all')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_sample_weight(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `sample_weigth` option.
+        """
+        weights = range(1, len(self.y_true_matrix) + 1)
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        sample_weight=weights)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_stats_acc(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `stats` option.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        stats='accuracy')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_stats_error(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `stats` option when the key of the stat is wrong.
+        """
+        # Check the error message using a mock.
+        with unittest.mock.patch('logging.Logger.error') as mock_logging:
+            ax = bplt.plot_confusion_matrix(self.y_true_matrix_cat, self.y_pred_matrix_cat,
+                                            stats='acc')
+            mock_logging.assert_called_with("Wrong key acc, possible values: "
+                                            "['precision', 'recall', 'f1-score', 'support'].")
+            return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_stats_prec(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `stats` option with precision for all classes.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        stats='precision')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_stats_fscore(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `stats` option with categorical values.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix_cat, self.y_pred_matrix_cat,
+                                        stats='f1-score')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_ticklabels_cat(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Use categorical predictions.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix_cat, self.y_pred_matrix_cat)
+
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_ticklabels_false(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `ticklabels` option set to False.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        ticklabels=False)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_ticklabels_n_labels(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `ticklabels` option and print every 2 labels.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        ticklabels=2)
+        return ax.figure
 
     @pytest.mark.mpl_image_compare
     def test_plot_correlation(self):
@@ -208,7 +337,7 @@ class TestPlot(unittest.TestCase):
         """
         Test of the `plot_pie` function.
         """
-        data = {k: v for k, v in self.counter_pie.most_common(4)}
+        data = dict(self.counter_pie.most_common(4))
         ax = bplt.plot_pie(data, explode=0.01, title='', startangle=10)
         return ax.figure
 

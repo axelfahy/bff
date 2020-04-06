@@ -50,6 +50,9 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 ## Release History
 
+* 0.2.7
+    * ADD: Function ``plot_pie`` to plot counter as a pie chart.
+    * ADD: Function ``plot_confusion_matrix`` to calculate and plot a confusion matrix.
 * 0.2.6
     * CHANGE: Use of ``Optional`` keyword from ``typing`` for optional arguments.
     * ADD: Function ``plot_pca_explained_variance_ratio`` to plot the explained variance of PCA.

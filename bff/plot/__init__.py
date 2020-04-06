@@ -1,6 +1,7 @@
 """Plot module of bff."""
 
 from .plot import (
+    plot_confusion_matrix,
     plot_correlation,
     plot_counter,
     plot_history,
@@ -14,6 +15,7 @@ from .plot import (
 
 # Public object of the module.
 __all__ = [
+    'plot_confusion_matrix',
     'plot_correlation',
     'plot_counter',
     'plot_history',

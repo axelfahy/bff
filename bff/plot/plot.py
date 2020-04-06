@@ -5,7 +5,7 @@ This module contains fancy plot functions.
 """
 import logging
 from collections import Counter
-from typing import Optional, Sequence, Tuple, Union
+from typing import Any, Optional, Sequence, Tuple, Union
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -63,6 +63,135 @@ def add_identity(ax: plt.axes, *args, **kwargs) -> plt.axes:
     ax.callbacks.connect('xlim_changed', callback)
     ax.callbacks.connect('ylim_changed', callback)
     return ax
+
+
+def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
+                          y_pred: Union[np.array, pd.Series, Sequence],
+                          labels_filter: Optional[Union[np.array, Sequence]] = None,
+                          ticklabels: Any = 'auto',
+                          sample_weight: Optional[str] = None,
+                          normalize: Optional[str] = None,
+                          stats: Optional[str] = None,
+                          title: str = 'Confusion matrix',
+                          ax: Optional[plt.axes] = None,
+                          rotation_xticks: Union[float, None] = 90,
+                          rotation_yticks: Optional[float] = None,
+                          figsize: Tuple[int, int] = (13, 10),
+                          dpi: int = 80,
+                          style: str = 'white') -> plt.axes:
+    """
+    Plot the confusion matrix.
+
+    The confusion matrix is computed in the function.
+
+    Parameters
+    ----------
+    y_true : np.array, pd.Series or Sequence
+        Actual values.
+    y_pred : np.array, pd.Series or Sequence
+        Predicted values by the model.
+    labels_filter : array-like of shape (n_classes,), default None
+        List of labels to index the matrix. This may be used to reorder or
+        select a subset of labels. If `None` is given, those that appear at
+        least once in `y_true` or `y_pred` are used in sorted order.
+    ticklabels : 'auto', bool, list-like, or int, default 'auto'
+        If True, plot the column names of the dataframe. If False, don’t plot the column names.
+        If list-like, plot these alternate labels as the xticklabels. If an integer,
+        use the column names but plot only every n label. If “auto”,
+        try to densely plot non-overlapping labels.
+    sample_weight : array-like of shape (n_samples,), optional
+        Sample weights.
+    normalize : str {'true', 'pred', 'all'}, optional
+        Normalizes confusion matrix over the true (rows), predicted (columns)
+        conditions or all the population. If None, confusion matrix will not be
+        normalized.
+    stats : str {'accuracy', 'precision', 'recall', 'f1-score'}, optional
+        Calculate and display the wanted statistic below the figure.
+    title : str, default 'Confusion matrix'
+        Title for the plot (axis level).
+    ax : plt.axes, optional
+        Axes from matplotlib, if None, new figure and axes will be created.
+    rotation_xticks : float or None, default 90
+        Rotation of x ticks if any.
+    rotation_yticks : float, optional
+        Rotation of x ticks if any.
+        Set to 90 to put them vertically.
+    figsize : Tuple[int, int], default (13, 10)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'white'
+        Style to use for seaborn.axes_style.
+        The style is use only in this context and not applied globally.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> y_true = ['dog', 'cat', 'bird', 'cat', 'dog', 'dog']
+    >>> y_pred = ['cat', 'cat', 'bird', 'dog', 'bird', 'dog']
+    >>> plot_confusion_matrix(y_true, y_pred, stats='accuracy')
+    """
+    bff.fancy._check_sklearn_support('plot_confusion_matrix')
+    from sklearn.metrics import classification_report, confusion_matrix
+
+    # Compute the confusion matrix.
+    cm = confusion_matrix(y_true, y_pred, sample_weight=sample_weight,
+                          labels=labels_filter, normalize=normalize)
+
+    with sns.axes_style(style):
+        if ax is None:
+            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+
+        if ticklabels in (True, 'auto') and labels_filter is None:
+            ticklabels = sorted(set(list(y_true) + list(y_pred)))
+
+        # Draw the heatmap with the mask and correct aspect ratio.
+        sns.heatmap(cm, cmap=plt.cm.Blues, ax=ax, annot=True, square=True,
+                    linewidths=0.5, cbar_kws={"shrink": 0.75},
+                    xticklabels=ticklabels, yticklabels=ticklabels)
+
+        if stats:
+            report = classification_report(y_true, y_pred, labels=labels_filter,
+                                           sample_weight=sample_weight, output_dict=True)
+            if stats == 'accuracy':
+                ax.text(1.05, 0.05, f'{report[stats]:.2f}', horizontalalignment='left',
+                        verticalalignment='center', transform=ax.transAxes)
+            else:
+                if ticklabels in (None, 'auto'):
+                    ticklabels = report.keys()[:-3]
+
+                # Depending on the metric, there is one value by class.
+                # For each class, print the value of the metric.
+                for i, label in enumerate(ticklabels):
+                    # Label might be an integer, cast to be sure.
+                    label = str(label)
+
+                    if stats in report[label].keys():
+                        ax.text(1.05, 0.05 - (0.03 * i),
+                                f'{label}: {report[label][stats]:.2f}',
+                                horizontalalignment='left',
+                                verticalalignment='center', transform=ax.transAxes)
+                    else:
+                        LOGGER.error(f'Wrong key {stats}, possible values: '
+                                     f'{list(report[label].keys())}.')
+            # Print the metric used.
+            if stats in report.keys() or stats in report[str(ticklabels[0])].keys():
+                ax.text(1.05, 0.08, f'{stats.capitalize()}', fontweight='bold',
+                        horizontalalignment='left',
+                        verticalalignment='center', transform=ax.transAxes)
+
+        ax.set_xlabel('Predicted label', fontsize=12)
+        ax.set_ylabel('True label', fontsize=12)
+        ax.set_title(title, fontsize=14)
+        # Style of the ticks.
+        plt.xticks(fontsize=12, alpha=1, rotation=rotation_xticks)
+        plt.yticks(fontsize=12, alpha=1, rotation=rotation_yticks)
+
+        return ax
 
 
 def plot_correlation(df: pd.DataFrame,
