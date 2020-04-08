@@ -10,6 +10,7 @@ from .plot import (
     plot_predictions,
     plot_series,
     plot_true_vs_pred,
+    plot_tsne,
     set_thousands_separator,
 )
 
@@ -24,5 +25,6 @@ __all__ = [
     'plot_predictions',
     'plot_series',
     'plot_true_vs_pred',
+    'plot_tsne',
     'set_thousands_separator',
 ]
