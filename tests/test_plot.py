@@ -309,7 +309,7 @@ class TestPlot(unittest.TestCase):
         """
         pca = PCA(n_components=30)
         pca.fit(np.random.randint(0, 100, size=(1000, 60)))
-        ax = bplt.plot_pca_explained_variance_ratio(pca)
+        ax = bplt.plot_pca_explained_variance_ratio(pca, grid='y')
         return ax.figure
 
     @pytest.mark.mpl_image_compare
@@ -322,6 +322,16 @@ class TestPlot(unittest.TestCase):
         pca = PCA(n_components=30)
         pca.fit(np.random.randint(0, 100, size=(1000, 60)))
         ax = bplt.plot_pca_explained_variance_ratio(pca, title='PCA with hline option', hline=0.55)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_pca_explained_variance_ratio_with_limits(self):
+        """
+        Test of the `plot_pca_explained_variance_ratio` function.
+        """
+        pca = PCA(n_components=30)
+        pca.fit(np.random.randint(0, 100, size=(1000, 60)))
+        ax = bplt.plot_pca_explained_variance_ratio(pca, lim_x=(0, 20), lim_y=(0, 0.5))
         return ax.figure
 
     def test_plot_pie(self):
