@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn import datasets
+from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
@@ -95,6 +96,12 @@ class TestPlot(unittest.TestCase):
     tsne = TSNE(n_iter=250)
     tsne_results = tsne.fit_transform(df.drop('label', axis='columns'))
     df_tsne = df[['label']].assign(tsne_1=tsne_results[:, 0], tsne_2=tsne_results[:, 1])
+
+    # Data for kmeans.
+    pca = PCA(n_components=2).fit_transform(tsne_results)
+    kmeans = KMeans(n_clusters=3, random_state=0).fit(pca)
+    df_kmeans = pd.DataFrame({'kmeans_1': pca[:, 0], 'kmeans_2': pca[:, 1],
+                              'label': kmeans.predict(pca)})
 
     @pytest.mark.mpl_image_compare
     def test_plot_confusion_matrix(self):
@@ -311,6 +318,24 @@ class TestPlot(unittest.TestCase):
         """
         axes = bplt.plot_history(self.history, metric='acc')
         return axes[0].figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_kmeans(self):
+        """
+        Test of the `plot_kmeans` function.
+        """
+        ax = bplt.plot_kmeans(self.df_kmeans, cmap='plasma')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_kmeans_with_centroids(self):
+        """
+        Test of the `plot_kmeans` function.
+
+        Check the behaviour with centroids.
+        """
+        ax = bplt.plot_kmeans(self.df_kmeans, centroids=self.kmeans.cluster_centers_)
+        return ax.figure
 
     @pytest.mark.mpl_image_compare
     def test_plot_pca_explained_variance_ratio(self):

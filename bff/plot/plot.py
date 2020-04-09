@@ -536,6 +536,136 @@ def plot_history(history: dict,
         return axes
 
 
+def plot_kmeans(df: pd.DataFrame,
+                kmeans_col_1: str = 'kmeans_1',
+                kmeans_col_2: str = 'kmeans_2',
+                label_col: Optional[str] = 'label',
+                centroids: Optional[Sequence[Tuple[float, float]]] = None,
+                cmap: str = 'viridis',
+                label_x: str = 'Dimension 1',
+                label_y: str = 'Dimension 2',
+                title: str = 'K-Means',
+                ax: Optional[plt.axes] = None,
+                loc: Union[str, int] = 'best',
+                s: TNum = mpl.rcParams['lines.markersize'] * 2,
+                figsize: Tuple[int, int] = (14, 7),
+                dpi: int = 80,
+                style: str = 'default',
+                **kwargs) -> plt.axes:
+    """
+    Plot K-Means clustering in two dimensions.
+
+    K-Means must be already computed and stored inside two separate column of the DataFrame.
+    See the example for more information.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with the data and the classes to plot.
+    kmeans_col_1 : str, default 'kmeans_1'
+        First column of the DataFrame containing the kmeans values.
+    kmeans_col_2 : str, default 'kmeans_2'
+        Second column of the DataFrame containing the kmeans values.
+    label_col : str, default 'label'
+        Column of the DataFrame containing the results of kmeans.
+    centroids : sequence of tuples of two floats, optional
+        Centroids of the clusters to plot, if provided.
+        There should be two coordinates by centroid.
+    cmap : str, default 'viridis'
+        Color map for the color of the kmeans' classes.
+    label_x : str, default 'Dimension 1'
+        Label for x axis.
+    label_y : str, default 'Dimension 2'
+        Label for y axis.
+    title : str, default 'K-Means'
+        Title for the plot (axis level).
+    ax : plt.axes, optional
+        Axes from matplotlib, if None, new figure and axes will be created.
+    loc : str or int, default 'best'
+        Location of the legend on the plot.
+        Either the legend string or legend code are possible.
+    s : number
+        Size of the points on the graph. Default is the matplotlib markersize * 2.
+    figsize : Tuple[int, int], default (14, 7)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'default'
+        Style to use for matplotlib.pyplot.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.scatter` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> from sklearn.cluster import KMeans
+    >>> kmeans = KMeans(n_clusters=3, random_state=0).fit(pca)
+    >>> y = kmeans.predict(pca)
+    >>> centers = kmeans.cluster_centers_
+    >>> df = pd.DataFrame({'kmeans_1': pca[:, 0], 'kmeans_2': pca[:, 1], 'label': y})
+    >>> plot_kmeans(df, centroids=centers)
+    """
+    assert kmeans_col_1 in df.columns, (
+        f'DataFrame does not contain column: {kmeans_col_1}')
+    assert kmeans_col_2 in df.columns, (
+        f'DataFrame does not contain column: {kmeans_col_2}')
+    assert label_col in df.columns, (
+        f'DataFrame does not contain column: {label_col}')
+
+    with plt.style.context(style):
+        if ax is None:
+            __, ax = plt.subplots(figsize=figsize, dpi=dpi)
+
+        ax.scatter(
+            df[kmeans_col_1].values,
+            df[kmeans_col_2].values,
+            s=s,
+            c=df[label_col].values,
+            cmap=cmap,
+            lw=0.1,
+            alpha=1,
+            **kwargs
+        )
+
+        if centroids is not None:
+            centroids_x = [v[0] for v in centroids]
+            centroids_y = [v[1] for v in centroids]
+            ax.scatter(centroids_x, centroids_y, label='Centroids',
+                       c='black', s=s * 10, alpha=0.6)
+            ax.legend(loc=loc)
+
+        ax.set_xlabel(label_x, fontsize=12)
+        ax.set_ylabel(label_y, fontsize=12)
+        ax.set_title(title, fontsize=14)
+
+        # Style.
+        # Remove border on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # Set alpha on remaining borders.
+        ax.spines['left'].set_alpha(0.4)
+        ax.spines['bottom'].set_alpha(0.4)
+
+        # Only show ticks on the left and bottom spines
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
+        # Style of ticks.
+        plt.xticks(fontsize=10, alpha=0.7)
+        plt.yticks(fontsize=10, alpha=0.7)
+
+        set_thousands_separator(ax, which='both', nb_decimals=0)
+
+        plt.tight_layout()
+
+        return ax
+
+
 def plot_pca_explained_variance_ratio(pca,
                                       label_x: str = 'Number of components',
                                       label_y: str = 'Cumulative explained variance',

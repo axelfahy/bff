@@ -50,6 +50,8 @@ As of *v0.2*, plots are not yet tested in the travis build.
 
 ## Release History
 
+* 0.2.8
+    * ADD: Function ``plot_kmeans`` to plot K-Means results.
 * 0.2.7
     * ADD: Function ``plot_pie`` to plot counter as a pie chart.
     * ADD: Function ``plot_confusion_matrix`` to calculate and plot a confusion matrix.
