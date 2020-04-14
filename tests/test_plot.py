@@ -596,7 +596,7 @@ class TestPlot(unittest.TestCase):
         """
         Test of the `plot_tsne` function.
         """
-        ax = bplt.plot_tsne(self.df_tsne, label_col='label', labels=['Ok', 'Ko'])
+        ax = bplt.plot_tsne(self.df_tsne, label_col='label', labels=['Ko', 'Ok'])
         return ax.figure
 
     @pytest.mark.mpl_image_compare

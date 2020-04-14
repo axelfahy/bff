@@ -1418,6 +1418,9 @@ def plot_tsne(df: pd.DataFrame,
     If there are some labels (and the `label_col` is given), there will be one color by label,
     if there are no label, you can specify a list of colors to be applied for each point of data.
 
+    The `label_col` will create a plot by label. The label will be sorted and the `labels`
+    argument must be given in the same order as the sorted labels.
+
     If no label and no color are provided, a default color will be used for all points.
 
     Parameters
@@ -1430,13 +1433,14 @@ def plot_tsne(df: pd.DataFrame,
         Second column of the DataFrame containing the tsne values.
     label_col : str, optional
         Column of the DataFrame containing the labels of the data.
+        The labels will be sorted so the `labels` parameter must be in the same order.
         If given, there will be one color by label. Colors can be
         provided with the `colors` argument.
     colors : sequence of str, optional
         Colors for each classes to plot or for each point of data if there is no label.
     labels : str or sequence of str, optional
-        Labels of the plotted classes, must be in the same order as the real labels
-        and the same length. If no class, can be a single value.
+        Labels of the plotted classes, must be in the same order as the real labels,
+        which are ordered, and the same length. If no class, can be a single value.
     label_x : str, default 'Dimension 1'
         Label for x axis.
     label_y : str, default 'Dimension 2'
@@ -1516,7 +1520,7 @@ def plot_tsne(df: pd.DataFrame,
                 print_legend = False
                 labels = [None] * len(labels_unique)  # type: ignore
 
-            for i, l in enumerate(df[label_col].unique()):
+            for i, l in enumerate(sorted(df[label_col].unique())):
                 data_1 = df.query(f'{label_col} == @l')[tsne_col_1].values
                 data_2 = df.query(f'{label_col} == @l')[tsne_col_2].values
                 ax.scatter(
@@ -1526,7 +1530,6 @@ def plot_tsne(df: pd.DataFrame,
                     c=np.array([colors[i]]),  # type: ignore
                     label=labels[i],  # type: ignore
                     lw=0.1,
-                    alpha=1,
                     **kwargs
                 )
         # If there is no label, plot all the points.
