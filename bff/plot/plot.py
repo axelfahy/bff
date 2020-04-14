@@ -5,7 +5,7 @@ This module contains fancy plot functions.
 """
 import logging
 from collections import Counter
-from typing import Any, Optional, Sequence, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, Union
 import matplotlib as mpl
 import matplotlib.cm as cm
 import matplotlib.lines as mlines
@@ -64,6 +64,29 @@ def add_identity(ax: plt.axes, *args, **kwargs) -> plt.axes:
     ax.callbacks.connect('xlim_changed', callback)
     ax.callbacks.connect('ylim_changed', callback)
     return ax
+
+
+def get_n_colors(n: int, cmap: str = 'rainbow') -> List:
+    """
+    Get `n` colors from a color map.
+
+    A color is represented by an array having 4 components (r, g, b, a).
+    A list of array is return containing the `n` colors.
+
+    Parameters
+    ----------
+    n : int
+        Number of colors to get.
+    cmap : str, default 'rainbow'
+        Color map for the colors to retrieve.
+
+    Returns
+    -------
+    list
+        List of colors from the color map.
+    """
+    assert cmap in plt.colormaps(), f'Colormap {cmap} does not exist.'
+    return list(cm.get_cmap(cmap)(np.linspace(0, 1, n)))
 
 
 def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
@@ -845,8 +868,7 @@ def plot_pie(data: Union[Counter, dict],
                 return f'{percent:.1f}%\n({absolute:,})'
 
             if colors is None:
-                cmap = cm.get_cmap('rainbow')
-                colors = list(cmap(np.linspace(0, 1, len(data))))
+                colors = get_n_colors(len(data), 'rainbow')
             else:
                 assert len(colors) == len(data), (
                     'The number of colors does not match the number of labels.')
@@ -1500,8 +1522,7 @@ def plot_tsne(df: pd.DataFrame,
         if label_col is not None:
             labels_unique = df[label_col].unique()
             if colors is None:
-                cmap = cm.get_cmap('rainbow')
-                colors = list(cmap(np.linspace(0, 1, len(labels_unique))))
+                colors = get_n_colors(len(labels_unique), 'rainbow')
             else:
                 colors = bff.value_2_list(colors)
                 if len(colors) != len(labels_unique):

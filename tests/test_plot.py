@@ -103,6 +103,19 @@ class TestPlot(unittest.TestCase):
     df_kmeans = pd.DataFrame({'kmeans_1': pca[:, 0], 'kmeans_2': pca[:, 1],
                               'label': kmeans.predict(pca)})
 
+    def test_get_n_colors(self):
+        """
+        Test of the `get_n_colors` function.
+        """
+        # Check assertion if cmap does not exists.
+        self.assertRaises(AssertionError, bplt.get_n_colors, 10, 'fakecmap')
+
+        colors = bplt.get_n_colors(3)
+        res = [np.array([0.5, 0., 1., 1.]),
+               np.array([0.50392157, 0.99998103, 0.70492555, 1.]),
+               np.array([1.0000000e+00, 1.2246468e-16, 6.1232340e-17, 1.0000000e+00])]
+        np.testing.assert_allclose(colors, res)
+
     @pytest.mark.mpl_image_compare
     def test_plot_confusion_matrix(self):
         """
