@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 import pprint
 import yaml
+from typing import Union
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,9 +35,11 @@ class FancyConfig(Mapping):
       'imports': {'star_wars': ['ewok', 'bantha']}}
     """
 
-    def __init__(self, path_config_to_load: Path = Path.home().joinpath('.config/fancyconfig.yml'),
-                 default_config_path: Path = (Path(__file__).resolve()
-                                              .parent.joinpath('config.yml'))):
+    def __init__(self,
+                 path_config_to_load: Union[str, Path] = (Path.home()
+                                                          .joinpath('.config/fancyconfig.yml')),
+                 default_config_path: Union[str, Path] = (Path(__file__).resolve()
+                                                          .parent.joinpath('config.yml'))):
         """
         Initialization of configuration.
 
@@ -51,6 +54,13 @@ class FancyConfig(Mapping):
             Name of the configuration file.
         """
         # Create config file if does not exist.
+
+        if isinstance(path_config_to_load, str):
+            path_config_to_load = Path(path_config_to_load).resolve()
+
+        if isinstance(default_config_path, str):
+            default_config_path = Path(default_config_path).resolve()
+
         if not path_config_to_load.exists():
             LOGGER.info((f'Configuration file does not exist, '
                          f'creating it from {default_config_path}'))
