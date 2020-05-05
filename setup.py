@@ -24,7 +24,7 @@ PROJECT_URLS = {
 }
 REQUIRES = [
     'matplotlib',
-    'numpy<1.18.0',
+    'numpy',
     'pandas>=0.25.0',
     'python-dateutil>=2.8.0',
     'pyyaml',

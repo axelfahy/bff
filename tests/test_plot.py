@@ -10,6 +10,7 @@ import unittest
 import unittest.mock
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 import pytest
@@ -122,6 +123,39 @@ class TestPlot(unittest.TestCase):
         Test of the `plot_confusion_matrix` function.
         """
         ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_annotation_fmt(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `annotation_fmt` option.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        normalize='all', annotation_fmt='.4f')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_cbar_fmt(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check with the `cbar_fmt` option.
+        """
+        cbar_fmt = FuncFormatter(lambda x, p: format(float(x), ',g'))
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix, self.y_pred_matrix,
+                                        normalize='all', cbar_fmt=cbar_fmt)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_confusion_matrix_fmt_thousand(self):
+        """
+        Test of the `plot_confusion_matrix` function.
+
+        Check the format when there are more than on thousand examples.
+        """
+        ax = bplt.plot_confusion_matrix(self.y_true_matrix * 2000, self.y_pred_matrix * 2000)
         return ax.figure
 
     @pytest.mark.mpl_image_compare

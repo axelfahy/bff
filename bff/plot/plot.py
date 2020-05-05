@@ -11,6 +11,7 @@ import matplotlib.cm as cm
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
@@ -96,6 +97,8 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
                           sample_weight: Optional[str] = None,
                           normalize: Optional[str] = None,
                           stats: Optional[str] = None,
+                          annotation_fmt: Optional[str] = None,
+                          cbar_fmt: Optional[FuncFormatter] = None,
                           title: str = 'Confusion matrix',
                           ax: Optional[plt.axes] = None,
                           rotation_xticks: Union[float, None] = 90,
@@ -119,7 +122,7 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
         select a subset of labels. If `None` is given, those that appear at
         least once in `y_true` or `y_pred` are used in sorted order.
     ticklabels : 'auto', bool, list-like, or int, default 'auto'
-        If True, plot the column names of the dataframe. If False, don’t plot the column names.
+        If True, plot the column names of the DataFrame. If False, don’t plot the column names.
         If list-like, plot these alternate labels as the xticklabels. If an integer,
         use the column names but plot only every n label. If “auto”,
         try to densely plot non-overlapping labels.
@@ -131,6 +134,12 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
         normalized.
     stats : str {'accuracy', 'precision', 'recall', 'f1-score'}, optional
         Calculate and display the wanted statistic below the figure.
+    annotation_fmt : str, optional
+        Format for the annotation on the confusion matrix.
+        If not provided, default value is ',d' or '.2f' if normalize is given.
+    cbar_fmt : FuncFormatter, optional
+        Formatter for the colorbar. Default is with thousand separator and one decimal.
+        If normalize and not provided, cbar format is not changed.
     title : str, default 'Confusion matrix'
         Title for the plot (axis level).
     ax : plt.axes, optional
@@ -173,9 +182,15 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
         if ticklabels in (True, 'auto') and labels_filter is None:
             ticklabels = sorted(set(list(y_true) + list(y_pred)))
 
+        if annotation_fmt is None:
+            annotation_fmt = '.2g' if normalize else ',d'
+
+        if cbar_fmt is None:
+            if np.max(cm) > 1_000:
+                cbar_fmt = FuncFormatter(lambda x, p: format(int(x), ',d'))
         # Draw the heatmap with the mask and correct aspect ratio.
-        sns.heatmap(cm, cmap=plt.cm.Blues, ax=ax, annot=True, square=True,
-                    linewidths=0.5, cbar_kws={"shrink": 0.75},
+        sns.heatmap(cm, cmap=plt.cm.Blues, ax=ax, annot=True, fmt=annotation_fmt, square=True,
+                    linewidths=0.5, cbar_kws={'shrink': 0.75, 'format': cbar_fmt},
                     xticklabels=ticklabels, yticklabels=ticklabels)
 
         if stats:
