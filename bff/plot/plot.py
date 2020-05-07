@@ -194,8 +194,11 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
                     xticklabels=ticklabels, yticklabels=ticklabels)
 
         if stats:
-            report = classification_report(y_true, y_pred, labels=labels_filter,
-                                           sample_weight=sample_weight, output_dict=True)
+            report = classification_report(y_true, y_pred,
+                                           labels=labels_filter,
+                                           target_names=ticklabels,
+                                           sample_weight=sample_weight,
+                                           output_dict=True)
             if stats == 'accuracy':
                 ax.text(1.05, 0.05, f'{report[stats]:.2f}', horizontalalignment='left',
                         verticalalignment='center', transform=ax.transAxes)
@@ -203,9 +206,6 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
                 # Depending on the metric, there is one value by class.
                 # For each class, print the value of the metric.
                 for i, label in enumerate(ticklabels):
-                    # Label might be an integer, cast to be sure.
-                    label = str(label)
-
                     if stats in report[label].keys():
                         ax.text(1.05, 0.05 - (0.03 * i),
                                 f'{label}: {report[label][stats]:.2f}',
@@ -215,7 +215,7 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
                         LOGGER.error(f'Wrong key {stats}, possible values: '
                                      f'{list(report[label].keys())}.')
             # Print the metric used.
-            if stats in report.keys() or stats in report[str(ticklabels[0])].keys():
+            if stats in report.keys() or stats in report[ticklabels[0]].keys():
                 ax.text(1.05, 0.08, f'{stats.capitalize()}', fontweight='bold',
                         horizontalalignment='left',
                         verticalalignment='center', transform=ax.transAxes)
