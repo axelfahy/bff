@@ -546,7 +546,7 @@ class TestPlot(unittest.TestCase):
 
         Check the behaviour with all plots on the same ax.
         """
-        ax = bplt.plot_series(self.data, 'x', groupby='3T', title=f'Plot of all axis',
+        ax = bplt.plot_series(self.data, 'x', groupby='3T', title='Plot of all axis',
                               color=self.AXIS['x'])
         for k in list(self.AXIS.keys())[1:]:
             bplt.plot_series(self.data, k, groupby='3T', ax=ax, color=self.AXIS[k])
@@ -574,7 +574,7 @@ class TestPlot(unittest.TestCase):
         Check the behaviour with peaks and resampling.
         """
         ax = bplt.plot_series(self.data, 'x', groupby='2T', with_peaks=True,
-                              title=f'Plot of x with peaks')
+                              title='Plot of x with peaks')
         return ax.figure
 
     @pytest.mark.mpl_image_compare
@@ -585,7 +585,7 @@ class TestPlot(unittest.TestCase):
         Check the behaviour with missing datetimes.
         """
         ax = bplt.plot_series(self.data_miss, 'x', groupby='S', with_missing_datetimes=True,
-                              title=f'Plot of x with missing datetimes')
+                              title='Plot of x with missing datetimes')
         return ax.figure
 
     @pytest.mark.mpl_image_compare
@@ -596,7 +596,7 @@ class TestPlot(unittest.TestCase):
         Check the behaviour with missing datetimes and groupby.
         """
         ax = bplt.plot_series(self.data_miss, 'x', groupby='T', with_missing_datetimes=True,
-                              title=f'Plot of x with missing datetimes')
+                              title='Plot of x with missing datetimes')
         return ax.figure
 
     @pytest.mark.mpl_image_compare
@@ -607,7 +607,7 @@ class TestPlot(unittest.TestCase):
         Check the behaviour with sem and resampling.
         """
         ax = bplt.plot_series(self.data, 'x', groupby='3T', with_sem=True,
-                              title=f'Plot of x with standard error of the mean (sem)')
+                              title='Plot of x with standard error of the mean (sem)')
         return ax.figure
 
     def test_plot_true_vs_pred(self):

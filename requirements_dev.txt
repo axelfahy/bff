@@ -4,10 +4,10 @@ ipython
 mypy
 nbsphinx
 numpydoc
-pytest
-pytest-codestyle
+pytest>=5.4
 pytest-cov
-pytest-docstyle
+pytest-pycodestyle
+pytest-pydocstyle
 pytest-mpl
 pytest-pylint
 python-coveralls

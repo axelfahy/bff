@@ -446,7 +446,7 @@ def mem_usage_pd(pd_obj: Union[pd.DataFrame, pd.Series], index: bool = True, dee
     try:
         usage_b = pd_obj.memory_usage(index=index, deep=deep)
     except AttributeError as e:
-        raise AttributeError(f'Object does not have a `memory_usage` function, '
+        raise AttributeError('Object does not have a `memory_usage` function, '
                              'use only pandas objects.') from e
 
     # Convert bytes to megabytes.
