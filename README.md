@@ -53,6 +53,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
 * 0.2.8
     * ADD: Function ``plot_kmeans`` to plot K-Means results.
     * ADD: Function ``get_n_colors`` to get N colors from a color map.
+    * CHANGE: Function ``plot_history`` is now superposed and works without validation.
     * FIX: Correction of format for annotation and color bar in ``plot_confusion_matrix``.
 * 0.2.7
     * ADD: Function ``plot_pie`` to plot counter as a pie chart.

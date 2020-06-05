@@ -455,7 +455,7 @@ def plot_history(history: dict,
                  axes: Optional[plt.axes] = None,
                  loc: Union[str, int] = 'best',
                  grid: Optional[str] = None,
-                 figsize: Tuple[int, int] = (16, 5),
+                 figsize: Tuple[int, int] = (12, 7),
                  dpi: int = 80,
                  style: str = 'default',
                  **kwargs) -> Union[plt.axes, Sequence[plt.axes]]:
@@ -510,8 +510,10 @@ def plot_history(history: dict,
     with plt.style.context(style):
         # Given axes are not check for now.
         # If metric is given, must have at least 2 axes.
+        # If two axes, share the x.
         if axes is None:
-            fig, axes = plt.subplots(1, 2 if metric else 1,
+            fig, axes = plt.subplots(2 if metric else 1, 1,
+                                     sharex=bool(metric),
                                      figsize=figsize, dpi=dpi)
         else:
             fig = plt.gcf()
@@ -519,27 +521,26 @@ def plot_history(history: dict,
         if metric:
             # Summarize history for metric, if any.
             axes[0].plot(history[metric],
-                         label=f"Train ({history[metric][-1]:.4f})",
+                         label=f"Training ({history[metric][-1]:.3f})",
                          **kwargs)
-            axes[0].plot(history[f'val_{metric}'],
-                         label=f"Validation ({history[f'val_{metric}'][-1]:.4f})",
-                         **kwargs)
-            axes[0].set_title(f'Model {metric}', fontsize=14)
-            axes[0].set_xlabel('Epochs', fontsize=12)
+            if f'val_{metric}' in history.keys():
+                axes[0].plot(history[f'val_{metric}'],
+                             label=f"Validation ({history[f'val_{metric}'][-1]:.3f})",
+                             **kwargs)
             axes[0].set_ylabel(metric.capitalize(), fontsize=12)
             axes[0].legend(loc=loc)
 
         # Summarize history for loss.
         ax_loss = axes[1] if metric else axes
         ax_loss.plot(history['loss'],
-                     label=f"Train ({history['loss'][-1]:.4f})",
+                     label=f"Training ({history['loss'][-1]:.3f})",
                      **kwargs)
-        ax_loss.plot(history['val_loss'],
-                     label=f"Validation ({history['val_loss'][-1]:.4f})",
-                     **kwargs)
+        if 'val_loss' in history.keys():
+            ax_loss.plot(history['val_loss'],
+                         label=f"Validation ({history['val_loss'][-1]:.3f})",
+                         **kwargs)
         ax_loss.set_xlabel('Epochs', fontsize=12)
         ax_loss.set_ylabel('Loss', fontsize=12)
-        ax_loss.set_title('Model loss', fontsize=14)
         ax_loss.legend(loc=loc)
 
         # Global title of the plot.
@@ -556,7 +557,6 @@ def plot_history(history: dict,
             ax.spines['bottom'].set_alpha(0.4)
 
             # Remove ticks on y axis.
-            ax.xaxis.set_ticks_position('bottom')
             ax.yaxis.set_ticks_position('none')
 
             # Draw tick lines on wanted axes.
@@ -564,12 +564,19 @@ def plot_history(history: dict,
                 ax.axes.grid(True, which='major', axis=grid, color='black',
                              alpha=0.3, linestyle='--', lw=0.5)
 
-            set_thousands_separator(ax, which='both', nb_decimals=1)
+            # For the xticks, check if need to plot the decimal.
+            if len(history['loss']) % (len(ax.get_xticks()) - 2) == 0:
+                set_thousands_separator(ax, which='x', nb_decimals=0)
+            else:
+                set_thousands_separator(ax, which='x', nb_decimals=1)
+            set_thousands_separator(ax, which='y', nb_decimals=2)
 
         if not metric:
             # Style of ticks.
             plt.xticks(fontsize=10, alpha=0.7)
             plt.yticks(fontsize=10, alpha=0.7)
+
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
         return axes
 
