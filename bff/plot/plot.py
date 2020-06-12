@@ -556,8 +556,12 @@ def plot_history(history: dict,
                                **kwargs)
             ax_metric.set_ylabel(metric.capitalize(), fontsize=12)
 
-        # Global title of the plot.
-        fig.suptitle(title, fontsize=16)
+        # Global title of the plot, if multiple subplots.
+        if two_axes:
+            fig.suptitle(title, fontsize=14)
+            plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        else:
+            ax_loss.set_title(title, fontsize=14)
 
         # Style, applied on all axis.
         axes_to_style = [ax_loss, ax_metric] if bool(metric) else [ax_loss]
@@ -600,8 +604,6 @@ def plot_history(history: dict,
             ax_loss.legend(loc=loc)
             if bool(metric):
                 ax_metric.legend(loc=loc)
-
-        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
         return axes
 
