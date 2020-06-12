@@ -3,6 +3,7 @@
 
 This module contains fancy plot functions.
 """
+import itertools
 import logging
 from collections import Counter
 from typing import Any, List, Optional, Sequence, Tuple, Union
@@ -451,6 +452,7 @@ def plot_counter(counter: Union[Counter, dict],
 
 def plot_history(history: dict,
                  metric: Optional[str] = None,
+                 twinx: bool = False,
                  title: str = 'Model history',
                  axes: Optional[plt.axes] = None,
                  loc: Union[str, int] = 'best',
@@ -469,6 +471,9 @@ def plot_history(history: dict,
     metric : str, optional
         Metric to plot.
         If no metric is provided, will only print the loss.
+    twinx : bool, default False
+        If metric and twinx, plot the loss and the metric on the same axis.
+        Four colors will be used for the plot.
     title : str, default 'Model history'
         Main title for the plot (figure level).
     axes : plt.axes, optional
@@ -480,7 +485,7 @@ def plot_history(history: dict,
     grid : str, optional
         Axis where to activate the grid ('both', 'x', 'y').
         To turn off, set to None.
-    figsize : Tuple[int, int], default (16, 5)
+    figsize : Tuple[int, int], default (12, 7)
         Size of the figure to plot.
     dpi : int, default 80
         Resolution of the figure.
@@ -511,43 +516,55 @@ def plot_history(history: dict,
         # Given axes are not check for now.
         # If metric is given, must have at least 2 axes.
         # If two axes, share the x.
+        two_axes = bool(metric) and not twinx
         if axes is None:
-            fig, axes = plt.subplots(2 if metric else 1, 1,
-                                     sharex=bool(metric),
+            fig, axes = plt.subplots(2 if two_axes else 1, 1,
+                                     sharex=two_axes,
                                      figsize=figsize, dpi=dpi)
         else:
             fig = plt.gcf()
 
-        if metric:
-            # Summarize history for metric, if any.
-            axes[0].plot(history[metric],
-                         label=f"Training ({history[metric][-1]:.3f})",
-                         **kwargs)
-            if f'val_{metric}' in history.keys():
-                axes[0].plot(history[f'val_{metric}'],
-                             label=f"Validation ({history[f'val_{metric}'][-1]:.3f})",
-                             **kwargs)
-            axes[0].set_ylabel(metric.capitalize(), fontsize=12)
-            axes[0].legend(loc=loc)
-
-        # Summarize history for loss.
-        ax_loss = axes[1] if metric else axes
+        # The loss is always plot.
+        ax_loss = axes[1] if two_axes else axes
         ax_loss.plot(history['loss'],
-                     label=f"Training ({history['loss'][-1]:.3f})",
+                     label=f"Training loss ({history['loss'][-1]:.3f})",
                      **kwargs)
+        # If there is a validation, plot it as well.
         if 'val_loss' in history.keys():
             ax_loss.plot(history['val_loss'],
-                         label=f"Validation ({history['val_loss'][-1]:.3f})",
+                         label=f"Validation loss ({history['val_loss'][-1]:.3f})",
                          **kwargs)
         ax_loss.set_xlabel('Epochs', fontsize=12)
         ax_loss.set_ylabel('Loss', fontsize=12)
-        ax_loss.legend(loc=loc)
 
-        # Global title of the plot.
-        fig.suptitle(title, fontsize=16)
+        # Plot the metric, if any if provided.
+        # If `twinx`, plot on same axis with another scale.
+        # If not, use a subplot below the loss.
+        if metric:
+            ax_metric = axes.twinx() if twinx else axes[0]
+            # If twinx, share the same prop cycler to have different colors.
+            if twinx:
+                ax_metric._get_lines.prop_cycler = ax_loss._get_lines.prop_cycler
+
+            ax_metric.plot(history[metric],
+                           label=f"Training {metric} ({history[metric][-1]:.3f})",
+                           **kwargs)
+            # Plot the validation if any.
+            if f'val_{metric}' in history.keys():
+                ax_metric.plot(history[f'val_{metric}'],
+                               label=f"Validation {metric} ({history[f'val_{metric}'][-1]:.3f})",
+                               **kwargs)
+            ax_metric.set_ylabel(metric.capitalize(), fontsize=12)
+
+        # Global title of the plot, if multiple subplots.
+        if two_axes:
+            fig.suptitle(title, fontsize=14)
+            plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        else:
+            ax_loss.set_title(title, fontsize=14)
 
         # Style, applied on all axis.
-        axes_to_style = axes.flatten() if metric else [axes]
+        axes_to_style = [ax_loss, ax_metric] if bool(metric) else [ax_loss]
         for ax in axes_to_style:
             # Remove border on the top and right.
             ax.spines['top'].set_visible(False)
@@ -556,8 +573,10 @@ def plot_history(history: dict,
             ax.spines['left'].set_alpha(0.4)
             ax.spines['bottom'].set_alpha(0.4)
 
-            # Remove ticks on y axis.
-            ax.yaxis.set_ticks_position('none')
+            # Keep ticks on the left.
+            ax.yaxis.set_ticks_position('left')
+            if not two_axes:
+                ax.xaxis.set_ticks_position('bottom')
 
             # Draw tick lines on wanted axes.
             if grid:
@@ -565,18 +584,26 @@ def plot_history(history: dict,
                              alpha=0.3, linestyle='--', lw=0.5)
 
             # For the xticks, check if need to plot the decimal.
-            if len(history['loss']) % (len(ax.get_xticks()) - 2) == 0:
+            if all(i.is_integer() for i in ax.get_xticks()):
                 set_thousands_separator(ax, which='x', nb_decimals=0)
             else:
                 set_thousands_separator(ax, which='x', nb_decimals=1)
             set_thousands_separator(ax, which='y', nb_decimals=2)
 
-        if not metric:
-            # Style of ticks.
-            plt.xticks(fontsize=10, alpha=0.7)
-            plt.yticks(fontsize=10, alpha=0.7)
+        # If `twinx`, add the right spine.
+        if bool(metric) and twinx:
+            ax_metric.spines['right'].set_visible(True)
+            ax_metric.spines['right'].set_alpha(0.4)
+            ax_metric.yaxis.set_ticks_position('right')
 
-        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+            # Add the legend manually since the number of entries may vary.
+            handles = [ax.get_legend_handles_labels() for ax in axes_to_style]
+            ax_loss.legend(itertools.chain.from_iterable([i[0] for i in handles]),
+                           itertools.chain.from_iterable([i[1] for i in handles]), loc=loc)
+        else:
+            ax_loss.legend(loc=loc)
+            if bool(metric):
+                ax_metric.legend(loc=loc)
 
         return axes
 
@@ -884,7 +911,7 @@ def plot_pie(data: Union[Counter, dict],
             __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
 
             # Function to format the labels on the pie chart.
-            # Percent, with real value in parenthesis.
+            # Percent, with real value in parentheses.
             def format_label(percent, values):
                 absolute = int(percent / 100. * sum(values))
                 return f'{percent:.1f}%\n({absolute:,})'

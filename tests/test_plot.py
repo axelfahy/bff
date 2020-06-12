@@ -370,6 +370,29 @@ class TestPlot(unittest.TestCase):
         return axes[0].figure
 
     @pytest.mark.mpl_image_compare
+    def test_plot_history_with_metric_twinx(self):
+        """
+        Test of the `plot_history` function.
+
+        Metrics is plotted as well as the loss in twinx mode.
+        """
+        ax = bplt.plot_history(self.history, metric='acc', figsize=(10, 6), twinx=True)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_history_with_metric_twinx_with_ax(self):
+        """
+        Test of the `plot_history` function.
+
+        Metrics is plotted as well as the loss in twinx mode.
+
+        Test with external ax.
+        """
+        fig, ax = plt.subplots(1, 1, figsize=(10, 5), dpi=80)
+        bplt.plot_history(self.history, metric='acc', axes=ax, figsize=(10, 6), twinx=True)
+        return fig
+
+    @pytest.mark.mpl_image_compare
     def test_plot_history_with_multiple_ticks(self):
         """
         Test of the `plot_history` function.
@@ -391,6 +414,16 @@ class TestPlot(unittest.TestCase):
         return axes[0].figure
 
     @pytest.mark.mpl_image_compare
+    def test_plot_history_without_val_twinx(self):
+        """
+        Test of the `plot_history` function.
+
+        Test without any validation (`val_loss`) and twinx mode.
+        """
+        ax = bplt.plot_history(self.history_without_val, metric='acc', twinx=True)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
     def test_plot_history_without_val_and_metric(self):
         """
         Test of the `plot_history` function.
@@ -398,6 +431,16 @@ class TestPlot(unittest.TestCase):
         Test without any validation (`val_loss`) and metric.
         """
         ax = bplt.plot_history(self.history_without_val, color='r')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_history_without_val_and_metric_twinx(self):
+        """
+        Test of the `plot_history` function.
+
+        Test without any validation (`val_loss`) and metric with twinx mode.
+        """
+        ax = bplt.plot_history(self.history_without_val, color='r', twinx=True)
         return ax.figure
 
     @pytest.mark.mpl_image_compare
