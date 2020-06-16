@@ -15,8 +15,8 @@ from pandas.api.types import CategoricalDtype
 import pandas.util.testing as tm
 from sklearn.preprocessing import StandardScaler
 
-from bff.fancy import (avg_dicts, cast_to_category_pd, concat_with_categories, get_peaks,
-                       idict, kwargs_2_list, log_df, mem_usage_pd, normalization_pd,
+from bff.fancy import (avg_dicts, cast_to_category_pd, concat_with_categories, dates_split,
+                       get_peaks, idict, kwargs_2_list, log_df, mem_usage_pd, normalization_pd,
                        parse_date, pipe_multiprocessing_pd, size_2_square,
                        sliding_window, value_2_list)
 
@@ -103,7 +103,6 @@ class TestFancy(unittest.TestCase):
         df_unhashable = self.df.copy().assign(dummy=None)
         for row in df_unhashable.itertuples():
             df_unhashable.at[row.Index, 'dummy'] = np.array([1, 2, 3])
-        print(df_unhashable)
         df_unhashable_optimized = cast_to_category_pd(df_unhashable)
         tm.assert_frame_equal(df_unhashable, df_unhashable_optimized,
                               check_dtype=False, check_categorical=False)
@@ -145,6 +144,29 @@ class TestFancy(unittest.TestCase):
         df_left_wrong = pd.DataFrame([['John', 'XXL', 'China']],
                                      columns=['name', 'size', 'country'])
         self.assertRaises(AssertionError, concat_with_categories, df_left_wrong, df_right)
+
+    def test_dates_split(self):
+        """
+        Test of the `dates_split` function.
+        """
+        # Check when all sub-periods have the same size.
+        # In this example, split 30 days into 3 ranges of 10 days.
+        d_start = datetime.datetime(2020, 5, 1)
+        d_end = datetime.datetime(2020, 5, 31)
+        ranges_1 = dates_split(d_start, d_end, 3)
+        res_1 = [(datetime.datetime(2020, 5, 1, 0, 0), datetime.datetime(2020, 5, 11, 0, 0)),
+                 (datetime.datetime(2020, 5, 11, 0, 0), datetime.datetime(2020, 5, 21, 0, 0)),
+                 (datetime.datetime(2020, 5, 21, 0, 0), datetime.datetime(2020, 5, 31, 0, 0))]
+        self.assertListEqual(ranges_1, res_1)
+
+        # Check when there is a last sub period bigger.
+        # In this example, the last period is bigger by 1 second.
+        d_start = datetime.datetime(2020, 5, 1)
+        d_end = datetime.datetime(2020, 5, 11, 0, 0, 3)
+        ranges_2 = dates_split(d_start, d_end, 2)
+        res_2 = [(datetime.datetime(2020, 5, 1, 0, 0), datetime.datetime(2020, 5, 6, 0, 0, 1)),
+                 (datetime.datetime(2020, 5, 6, 0, 0, 1), datetime.datetime(2020, 5, 11, 0, 0, 3))]
+        self.assertListEqual(ranges_2, res_2)
 
     def test_get_peaks(self):
         """

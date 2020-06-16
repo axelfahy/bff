@@ -4,6 +4,7 @@
 This module contains various useful fancy functions.
 """
 from collections import abc, Counter
+from datetime import datetime, timedelta
 import logging
 import math
 import multiprocessing
@@ -61,7 +62,7 @@ def cast_to_category_pd(df: pd.DataFrame, deep: bool = True) -> pd.DataFrame:
     df : pd.DataFrame
         DataFrame with the columns to cast.
     deep : bool, default True
-        Whether or not to perform a deep copy of the original DataFrame.
+        Whether to perform a deep copy of the original DataFrame.
 
     Returns
     -------
@@ -236,6 +237,56 @@ def concat_with_categories(df_left: pd.DataFrame, df_right: pd.DataFrame,
     return pd.concat([df_a, df_b], **kwargs)
 
 
+def dates_split(date_start: datetime, date_end: datetime,
+                n_splits: int) -> Sequence[Tuple[datetime, datetime]]:
+    """
+    Split a period of time defined by two dates into multiple sub-period of time.
+
+    Each sub-period is also defined by two dates.
+    Dates are rounded to the second.
+
+    The last period can have one more second if the total number of second
+    is not a multiple of the number of splits.
+
+    This is similar to the ``numpy.array_split`` function, but for dates.
+
+    Parameters
+    ----------
+    n_splits : int
+        Number of splits to create.
+    date_start : datetime
+        Starting date for the range.
+    date_end : datetime
+        Ending date for the range.
+
+    Returns
+    -------
+    list of tuples
+        List with the start and end date of the sub-periods.
+
+    Examples
+    --------
+    >>> from datetime import datetime
+    >>> date_start = datetime(2020, 5, 1)
+    >>> date_end = datetime(2020, 5, 31)
+    >>> dates_split(date_start, date_end, 3)
+    [(datetime.datetime(2020, 5, 1, 0, 0), datetime.datetime(2020, 5, 11, 0, 0)),
+     (datetime.datetime(2020, 5, 11, 0, 0), datetime.datetime(2020, 5, 21, 0, 0)),
+     (datetime.datetime(2020, 5, 21, 0, 0), datetime.datetime(2020, 5, 31, 0, 0))]
+    """
+    # Calculate the size of the chucks (number of seconds by split).
+    n_seconds_by_chunk = (date_end - date_start).total_seconds() // n_splits
+
+    subdates = [(date_start + timedelta(seconds=i * n_seconds_by_chunk),
+                 date_start + timedelta(seconds=(i + 1) * n_seconds_by_chunk))
+                for i in range(n_splits)]
+
+    # Last date might not be correct if not a multiple of ``n_seconds_by_chunk``.
+    # Just in case, set the end date as ending date of the last chunk.
+    subdates[-1] = (subdates[-1][0], date_end)
+    return subdates
+
+
 def get_peaks(s: pd.Series, distance_scale: float = 0.04):
     """
     Get the peaks of a time series having datetime as index.
@@ -354,7 +405,7 @@ def log_df(df: pd.DataFrame, f: Callable[[pd.DataFrame], Any] = lambda x: x.shap
     The given function is applied and the result is printed.
     The original DataFrame is returned, unmodified.
 
-    This allows to print debug information in method chaining.
+    This allows printing debug information in method chaining.
 
     Parameters
     ----------
