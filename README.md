@@ -56,6 +56,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
     * ADD: Function ``dates_split`` to split a period of time into multiple sub-period of time.
     * ADD: Option ``twinx`` to plot the metric on the same axis as the loss in the ``plot_history`` function.
     * CHANGE: Function ``plot_history`` is now superposed and works without validation.
+    * CHANGE: Rename function ``plot_tsne`` to ``plot_cluster``.
     * FIX: Correction of format for annotation and color bar in ``plot_confusion_matrix``.
 * 0.2.7
     * ADD: Function ``plot_pie`` to plot counter as a pie chart.

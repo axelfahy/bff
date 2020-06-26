@@ -99,7 +99,7 @@ class TestPlot(unittest.TestCase):
     df = pd.DataFrame(X).assign(label=y)
     tsne = TSNE(n_iter=250)
     tsne_results = tsne.fit_transform(df.drop('label', axis='columns'))
-    df_tsne = df[['label']].assign(tsne_1=tsne_results[:, 0], tsne_2=tsne_results[:, 1])
+    df_tsne = df[['label']].assign(col_1=tsne_results[:, 0], col_2=tsne_results[:, 1])
 
     # Data for kmeans.
     pca = PCA(n_components=2).fit_transform(tsne_results)
@@ -119,6 +119,73 @@ class TestPlot(unittest.TestCase):
                np.array([0.50392157, 0.99998103, 0.70492555, 1.]),
                np.array([1.0000000e+00, 1.2246468e-16, 6.1232340e-17, 1.0000000e+00])]
         np.testing.assert_allclose(colors, res)
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_cluster(self):
+        """
+        Test of the `plot_cluster` function.
+        """
+        ax = bplt.plot_cluster(self.df_tsne, label_col='label', labels=['Ko', 'Ok'])
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_cluster_with_colors(self):
+        """
+        Test of the `plot_cluster` function.
+
+        Test with custom colors.
+        """
+        ax = bplt.plot_cluster(self.df_tsne, label_col='label', colors=['r', 'b'])
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_cluster_without_label(self):
+        """
+        Test of the `plot_cluster` function.
+
+        Test without label.
+        """
+        ax = bplt.plot_cluster(self.df_tsne)
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_cluster_without_label_with_color(self):
+        """
+        Test of the `plot_cluster` function.
+
+        Test without label but with custom colors.
+        """
+        cmap = cm.get_cmap('rainbow')
+        colors = list(cmap(np.linspace(0, 1, self.df_tsne.shape[0])))
+        ax = bplt.plot_cluster(self.df_tsne, colors=colors, label_x='Dim x', label_y='Dim_y')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_cluster_warning_colors(self):
+        """
+        Test of the `plot_cluster` function.
+
+        Test the warning regarding the colors.
+        """
+        # Check the error message using a mock.
+        with unittest.mock.patch('logging.Logger.warning') as mock_logging:
+            ax = bplt.plot_cluster(self.df_tsne, label_col='label', colors=['r'])
+            mock_logging.assert_called_with('Number of colors does not match the number '
+                                            'of labels (1/2), using last color for missing ones.')
+            return ax.figure
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_cluster_warning_labels(self):
+        """
+        Test of the `plot_cluster` function.
+
+        Test the warning regarding the labels.
+        """
+        # Check the error message using a mock.
+        with unittest.mock.patch('logging.Logger.warning') as mock_logging:
+            ax = bplt.plot_cluster(self.df_tsne, label_col='label', labels='True')
+            mock_logging.assert_called_with('Not enough labels (1/2).')
+            return ax.figure
 
     @pytest.mark.mpl_image_compare
     def test_plot_confusion_matrix(self):
@@ -714,73 +781,6 @@ class TestPlot(unittest.TestCase):
         ax = bplt.plot_true_vs_pred(self.y_true, self.y_pred,
                                     with_identity=True, marker='.', c='r')
         return ax.figure
-
-    @pytest.mark.mpl_image_compare
-    def test_plot_tsne(self):
-        """
-        Test of the `plot_tsne` function.
-        """
-        ax = bplt.plot_tsne(self.df_tsne, label_col='label', labels=['Ko', 'Ok'])
-        return ax.figure
-
-    @pytest.mark.mpl_image_compare
-    def test_plot_tsne_with_colors(self):
-        """
-        Test of the `plot_tsne` function.
-
-        Test with custom colors.
-        """
-        ax = bplt.plot_tsne(self.df_tsne, label_col='label', colors=['r', 'b'])
-        return ax.figure
-
-    @pytest.mark.mpl_image_compare
-    def test_plot_tsne_without_label(self):
-        """
-        Test of the `plot_tsne` function.
-
-        Test without label.
-        """
-        ax = bplt.plot_tsne(self.df_tsne)
-        return ax.figure
-
-    @pytest.mark.mpl_image_compare
-    def test_plot_tsne_without_label_with_color(self):
-        """
-        Test of the `plot_tsne` function.
-
-        Test without label but with custom colors.
-        """
-        cmap = cm.get_cmap('rainbow')
-        colors = list(cmap(np.linspace(0, 1, self.df_tsne.shape[0])))
-        ax = bplt.plot_tsne(self.df_tsne, colors=colors, label_x='Dim x', label_y='Dim_y')
-        return ax.figure
-
-    @pytest.mark.mpl_image_compare
-    def test_plot_tsne_warning_colors(self):
-        """
-        Test of the `plot_tsne` function.
-
-        Test the warning regarding the colors.
-        """
-        # Check the error message using a mock.
-        with unittest.mock.patch('logging.Logger.warning') as mock_logging:
-            ax = bplt.plot_tsne(self.df_tsne, label_col='label', colors=['r'])
-            mock_logging.assert_called_with('Number of colors does not match the number '
-                                            'of labels (1/2), using last color for missing ones.')
-            return ax.figure
-
-    @pytest.mark.mpl_image_compare
-    def test_plot_tsne_warning_labels(self):
-        """
-        Test of the `plot_tsne` function.
-
-        Test the warning regarding the labels.
-        """
-        # Check the error message using a mock.
-        with unittest.mock.patch('logging.Logger.warning') as mock_logging:
-            ax = bplt.plot_tsne(self.df_tsne, label_col='label', labels='True')
-            mock_logging.assert_called_with('Not enough labels (1/2).')
-            return ax.figure
 
     @pytest.mark.mpl_image_compare
     def test_set_thousands_separator_both(self):

@@ -2,6 +2,7 @@
 
 from .plot import (
     get_n_colors,
+    plot_cluster,
     plot_confusion_matrix,
     plot_correlation,
     plot_counter,
@@ -12,13 +13,13 @@ from .plot import (
     plot_predictions,
     plot_series,
     plot_true_vs_pred,
-    plot_tsne,
     set_thousands_separator,
 )
 
 # Public object of the module.
 __all__ = [
     'get_n_colors',
+    'plot_cluster',
     'plot_confusion_matrix',
     'plot_correlation',
     'plot_counter',
@@ -29,6 +30,5 @@ __all__ = [
     'plot_predictions',
     'plot_series',
     'plot_true_vs_pred',
-    'plot_tsne',
     'set_thousands_separator',
 ]

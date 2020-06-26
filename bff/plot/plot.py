@@ -91,6 +91,191 @@ def get_n_colors(n: int, cmap: str = 'rainbow') -> List:
     return list(cm.get_cmap(cmap)(np.linspace(0, 1, n)))
 
 
+def plot_cluster(df: pd.DataFrame,
+                 cluster_col_1: str = 'col_1',
+                 cluster_col_2: str = 'col_2',
+                 label_col: Optional[str] = None,
+                 colors: Optional[Sequence[str]] = None,
+                 labels: Optional[Union[str, Sequence[str]]] = None,
+                 label_x: str = 'Dimension 1',
+                 label_y: str = 'Dimension 2',
+                 title: str = 'Clustering',
+                 ax: Optional[plt.axes] = None,
+                 loc: Union[str, int] = 'best',
+                 s: Optional[Union[TNum, Sequence]] = mpl.rcParams['lines.markersize'] * 2,
+                 figsize: Tuple[int, int] = (14, 7),
+                 dpi: int = 80,
+                 style: str = 'default',
+                 **kwargs) -> plt.axes:
+    """
+    Plot 2D clustering.
+
+    Clustering, such as T-SNE or UMAP must already be computed and
+    stored inside two separate column of the DataFrame.
+
+    See the example for more information.
+
+    If there are some labels (and the `label_col` is given), there will be one color by label,
+    if there are no label, you can specify a list of colors to be applied for each point of data.
+
+    The `label_col` will create a plot by label. The label will be sorted and the `labels`
+    argument must be given in the same order as the sorted labels.
+
+    If no label and no color are provided, a default color will be used for all points.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with the data and the classes to plot.
+    cluster_col_1 : str, default 'col_1'
+        First column of the DataFrame containing the cluster's values.
+    cluster_col_2 : str, default 'col_2'
+        Second column of the DataFrame containing the cluster's values.
+    label_col : str, optional
+        Column of the DataFrame containing the labels of the data.
+        The labels will be sorted so the `labels` parameter must be in the same order.
+        If given, there will be one color by label. Colors can be
+        provided with the `colors` argument.
+    colors : sequence of str, optional
+        Colors for each classes to plot or for each point of data if there is no label.
+    labels : str or sequence of str, optional
+        Labels of the plotted classes, must be in the same order as the real labels,
+        which are ordered, and the same length. If no class, can be a single value.
+    label_x : str, default 'Dimension 1'
+        Label for x axis.
+    label_y : str, default 'Dimension 2'
+        Label for y axis.
+    title : str, default 't-SNE'
+        Title for the plot (axis level).
+    ax : plt.axes, optional
+        Axes from matplotlib, if None, new figure and axes will be created.
+    loc : str or int, default 'best'
+        Location of the legend on the plot.
+        Either the legend string or legend code are possible.
+    s : number or sequence
+        Size of the points on the graph. Default is the matplotlib markersize * 2.
+    figsize : Tuple[int, int], default (14, 7)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'default'
+        Style to use for matplotlib.pyplot.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.scatter` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+
+    Examples
+    --------
+    >>> from sklearn import datasets, manifold
+    >>> X, y = datasets.make_circles(n_samples=300, factor=.5, noise=.05)
+    >>> df = pd.DataFrame(X).assign(label=y)
+    >>> tsne = manifold.TSNE()
+    >>> tsne_results = tsne.fit_transform(df.drop('label', axis='columns'))
+    >>> df_tsne = df[['label']].assign(tsne_1=tsne_results[:, 0], tsne_2=tsne_results[:, 1])
+    >>> plot_tsne(df_tsne, cluster_col_1='tsne_1', cluster_col_2='tsne_2',
+    ...           label_col='label', colors=['r', 'b'])
+    """
+    assert cluster_col_1 in df.columns, (
+        f'DataFrame does not contain column: {cluster_col_1}')
+    assert cluster_col_2 in df.columns, (
+        f'DataFrame does not contain column: {cluster_col_2}')
+    if label_col is not None:
+        assert label_col in df.columns, (
+            f'DataFrame does not contain column: {label_col}')
+
+    with plt.style.context(style):
+        if ax is None:
+            __, ax = plt.subplots(figsize=figsize, dpi=dpi)
+
+        # Flag to determine if the legend must be printed.
+        print_legend = True
+
+        # If there is a label, use one color by label.
+        # If colors are not provided, or wrong number, create them.
+        if label_col is not None:
+            labels_unique = df[label_col].unique()
+            if colors is None:
+                colors = get_n_colors(len(labels_unique), 'rainbow')
+            else:
+                colors = bff.value_2_list(colors)
+                if len(colors) != len(labels_unique):
+                    LOGGER.warning(f'Number of colors does not match the number of labels '
+                                   f'({len(colors)}/{len(labels_unique)}), '
+                                   f'using last color for missing ones.')
+                    colors = colors + [colors[-1]] * \
+                        (len(labels_unique) - len(colors))  # type: ignore
+
+            if labels is not None:
+                labels = bff.value_2_list(labels)
+                if len(labels) < len(labels_unique):
+                    LOGGER.warning(f'Not enough labels ({len(labels)}/{len(labels_unique)}).')
+                    labels = labels + [None] * (len(labels_unique) - len(labels))  # type: ignore
+            else:
+                print_legend = False
+                labels = [None] * len(labels_unique)  # type: ignore
+
+            for i, l in enumerate(sorted(df[label_col].unique())):
+                data_1 = df.query(f'{label_col} == @l')[cluster_col_1].values
+                data_2 = df.query(f'{label_col} == @l')[cluster_col_2].values
+                ax.scatter(
+                    data_1,
+                    data_2,
+                    s=s,
+                    c=np.array([colors[i]]),  # type: ignore
+                    label=labels[i],  # type: ignore
+                    lw=0.1,
+                    **kwargs
+                )
+        # If there is no label, plot all the points.
+        # If there are some colors, uses the colors, else plot all with the same color.
+        else:
+            print_legend = False
+            if colors is None or len(colors) != df.shape[0]:
+                colors = None
+            data_1 = df[cluster_col_1].values
+            data_2 = df[cluster_col_2].values
+            ax.scatter(
+                data_1,
+                data_2,
+                s=s,
+                c=colors,
+                label=labels,
+                lw=0.1,
+                alpha=1,
+                **kwargs
+            )
+
+        ax.set_xlabel(label_x, fontsize=12)
+        ax.set_ylabel(label_y, fontsize=12)
+        ax.set_title(title, fontsize=14)
+
+        # Style.
+        # Remove border on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # Set alpha on remaining borders.
+        ax.spines['left'].set_alpha(0.4)
+        ax.spines['bottom'].set_alpha(0.4)
+
+        # Only show ticks on the left and bottom spines
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
+        # Style of ticks.
+        plt.xticks(fontsize=10, alpha=0.7)
+        plt.yticks(fontsize=10, alpha=0.7)
+
+        if print_legend:
+            ax.legend(loc=loc)
+
+        return ax
+
+
 def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
                           y_pred: Union[np.array, pd.Series, Sequence],
                           labels_filter: Optional[Union[np.array, Sequence]] = None,
@@ -1462,188 +1647,6 @@ def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
         set_thousands_separator(ax_main, which='both', nb_decimals=1)
 
         return ax_main if not with_histograms else (ax_main, ax_right, ax_bottom)
-
-
-def plot_tsne(df: pd.DataFrame,
-              tsne_col_1: str = 'tsne_1',
-              tsne_col_2: str = 'tsne_2',
-              label_col: Optional[str] = None,
-              colors: Optional[Sequence[str]] = None,
-              labels: Optional[Union[str, Sequence[str]]] = None,
-              label_x: str = 'Dimension 1',
-              label_y: str = 'Dimension 2',
-              title: str = 't-SNE',
-              ax: Optional[plt.axes] = None,
-              loc: Union[str, int] = 'best',
-              s: Optional[Union[TNum, Sequence]] = mpl.rcParams['lines.markersize'] * 2,
-              figsize: Tuple[int, int] = (14, 7),
-              dpi: int = 80,
-              style: str = 'default',
-              **kwargs) -> plt.axes:
-    """
-    Plot t-SNE clustering.
-
-    T-SNE must be already computed and stored inside two separate column of the DataFrame.
-    See the example for more information.
-
-    If there are some labels (and the `label_col` is given), there will be one color by label,
-    if there are no label, you can specify a list of colors to be applied for each point of data.
-
-    The `label_col` will create a plot by label. The label will be sorted and the `labels`
-    argument must be given in the same order as the sorted labels.
-
-    If no label and no color are provided, a default color will be used for all points.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame with the data and the classes to plot.
-    tsne_col_1 : str, default 'tsne_1'
-        First column of the DataFrame containing the tsne values.
-    tsne_col_2 : str, default 'tsne_2'
-        Second column of the DataFrame containing the tsne values.
-    label_col : str, optional
-        Column of the DataFrame containing the labels of the data.
-        The labels will be sorted so the `labels` parameter must be in the same order.
-        If given, there will be one color by label. Colors can be
-        provided with the `colors` argument.
-    colors : sequence of str, optional
-        Colors for each classes to plot or for each point of data if there is no label.
-    labels : str or sequence of str, optional
-        Labels of the plotted classes, must be in the same order as the real labels,
-        which are ordered, and the same length. If no class, can be a single value.
-    label_x : str, default 'Dimension 1'
-        Label for x axis.
-    label_y : str, default 'Dimension 2'
-        Label for y axis.
-    title : str, default 't-SNE'
-        Title for the plot (axis level).
-    ax : plt.axes, optional
-        Axes from matplotlib, if None, new figure and axes will be created.
-    loc : str or int, default 'best'
-        Location of the legend on the plot.
-        Either the legend string or legend code are possible.
-    s : number or sequence
-        Size of the points on the graph. Default is the matplotlib markersize * 2.
-    figsize : Tuple[int, int], default (14, 7)
-        Size of the figure to plot.
-    dpi : int, default 80
-        Resolution of the figure.
-    style : str, default 'default'
-        Style to use for matplotlib.pyplot.
-        The style is use only in this context and not applied globally.
-    **kwargs
-        Additional keyword arguments to be passed to the
-        `plt.scatter` function from matplotlib.
-
-    Returns
-    -------
-    plt.axes
-        Axes returned by the `plt.subplots` function.
-
-    Examples
-    --------
-    >>> from sklearn import datasets, manifold
-    >>> X, y = datasets.make_circles(n_samples=300, factor=.5, noise=.05)
-    >>> df = pd.DataFrame(X).assign(label=y)
-    >>> tsne = manifold.TSNE()
-    >>> tsne_results = tsne.fit_transform(df.drop('label', axis='columns'))
-    >>> df_tsne = df[['label']].assign(tsne_1=tsne_results[:, 0], tsne_2=tsne_results[:, 1])
-    >>> plot_tsne(df_tsne, label_col='label', colors=['r', 'b'])
-    """
-    assert tsne_col_1 in df.columns, (
-        f'DataFrame does not contain column: {tsne_col_1}')
-    assert tsne_col_2 in df.columns, (
-        f'DataFrame does not contain column: {tsne_col_2}')
-    if label_col is not None:
-        assert label_col in df.columns, (
-            f'DataFrame does not contain column: {label_col}')
-
-    with plt.style.context(style):
-        if ax is None:
-            __, ax = plt.subplots(figsize=figsize, dpi=dpi)
-
-        # Flag to determine if the legend must be printed.
-        print_legend = True
-
-        # If there is a label, use one color by label.
-        # If colors are not provided, or wrong number, create them.
-        if label_col is not None:
-            labels_unique = df[label_col].unique()
-            if colors is None:
-                colors = get_n_colors(len(labels_unique), 'rainbow')
-            else:
-                colors = bff.value_2_list(colors)
-                if len(colors) != len(labels_unique):
-                    LOGGER.warning(f'Number of colors does not match the number of labels '
-                                   f'({len(colors)}/{len(labels_unique)}), '
-                                   f'using last color for missing ones.')
-                    colors = colors + [colors[-1]] * \
-                        (len(labels_unique) - len(colors))  # type: ignore
-
-            if labels is not None:
-                labels = bff.value_2_list(labels)
-                if len(labels) < len(labels_unique):
-                    LOGGER.warning(f'Not enough labels ({len(labels)}/{len(labels_unique)}).')
-                    labels = labels + [None] * (len(labels_unique) - len(labels))  # type: ignore
-            else:
-                print_legend = False
-                labels = [None] * len(labels_unique)  # type: ignore
-
-            for i, l in enumerate(sorted(df[label_col].unique())):
-                data_1 = df.query(f'{label_col} == @l')[tsne_col_1].values
-                data_2 = df.query(f'{label_col} == @l')[tsne_col_2].values
-                ax.scatter(
-                    data_1,
-                    data_2,
-                    s=s,
-                    c=np.array([colors[i]]),  # type: ignore
-                    label=labels[i],  # type: ignore
-                    lw=0.1,
-                    **kwargs
-                )
-        # If there is no label, plot all the points.
-        # If there are some colors, uses the colors, else plot all with the same color.
-        else:
-            print_legend = False
-            if colors is None or len(colors) != df.shape[0]:
-                colors = None
-            data_1 = df[tsne_col_1].values
-            data_2 = df[tsne_col_2].values
-            ax.scatter(
-                data_1,
-                data_2,
-                s=s,
-                c=colors,
-                label=labels,
-                lw=0.1,
-                alpha=1,
-                **kwargs
-            )
-
-        ax.set_xlabel(label_x, fontsize=12)
-        ax.set_ylabel(label_y, fontsize=12)
-        ax.set_title(title, fontsize=14)
-
-        # Style.
-        # Remove border on the top and right.
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        # Set alpha on remaining borders.
-        ax.spines['left'].set_alpha(0.4)
-        ax.spines['bottom'].set_alpha(0.4)
-
-        # Only show ticks on the left and bottom spines
-        ax.xaxis.set_ticks_position('bottom')
-        ax.yaxis.set_ticks_position('left')
-        # Style of ticks.
-        plt.xticks(fontsize=10, alpha=0.7)
-        plt.yticks(fontsize=10, alpha=0.7)
-
-        if print_legend:
-            ax.legend(loc=loc)
-
-        return ax
 
 
 def set_thousands_separator(axes: plt.axes, which: str = 'both',
