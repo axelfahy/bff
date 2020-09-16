@@ -40,6 +40,7 @@ code:
 .PHONY: lint
 lint:
 	python -m pytest --pylint --pylint-rcfile=.pylintrc --pylint-error-types=CWEF
+	bandit -r bff -ll
 
 .PHONY: style
 style:

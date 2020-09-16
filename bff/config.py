@@ -70,7 +70,7 @@ class FancyConfig(Mapping):
             path_config_to_load.write_bytes(default_config_path.read_bytes())
 
         with path_config_to_load.open(mode='r', encoding='utf-8') as yaml_config_file:
-            self._config = yaml.load(yaml_config_file, Loader=yaml.FullLoader)
+            self._config = yaml.safe_load(yaml_config_file)
 
     def __getitem__(self, item):
         """Getter of the class."""

@@ -1,4 +1,5 @@
 coveralls
+bandit
 flake8
 ipython
 mypy
