@@ -54,6 +54,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
     * ADD: Function ``plot_kmeans`` to plot K-Means results.
     * ADD: Function ``get_n_colors`` to get N colors from a color map.
     * ADD: Function ``dates_split`` to split a period of time into multiple sub-period of time.
+    * ADD: Option ``threshold`` in ``plot_pie`` to write only the labels having more than the threshold.
     * ADD: Option ``twinx`` to plot the metric on the same axis as the loss in the ``plot_history`` function.
     * CHANGE: Function ``plot_history`` is now superposed and works without validation.
     * CHANGE: Rename function ``plot_tsne`` to ``plot_cluster``.

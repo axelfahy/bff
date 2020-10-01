@@ -1036,6 +1036,7 @@ def plot_pie(data: Union[Counter, dict],
              colors: Optional[Sequence[str]] = None,
              textprops: Optional[dict] = None,
              title: str = 'Pie chart',
+             threshold: int = 0,
              ax: Optional[plt.axes] = None,
              loc: Optional[Union[str, int]] = None,
              figsize: Tuple[int, int] = (14, 8),
@@ -1059,6 +1060,9 @@ def plot_pie(data: Union[Counter, dict],
         Dict of arguments to pass to the text objects.
     title : str, default 'Pie chart'
         Title for the plot (axis level).
+    threshold : int, default = 0
+        Threshold above which the value is written on the plot as text.
+        By default, all wedges have their text.
     ax : plt.axes, optional
         Axes from matplotlib, if None, new figure and axes will be created.
     loc : str or int, optional
@@ -1097,9 +1101,13 @@ def plot_pie(data: Union[Counter, dict],
 
             # Function to format the labels on the pie chart.
             # Percent, with real value in parentheses.
-            def format_label(percent, values):
+            def format_label(percent, values, limit):
                 absolute = int(percent / 100. * sum(values))
-                return f'{percent:.1f}%\n({absolute:,})'
+                return f'{percent:.1f}%\n({absolute:,})' if absolute > limit else ''
+
+            # Function to get the labels above the threshold.
+            def get_labels(sizes, labels, limit):
+                return [label if size > limit else '' for label, size in zip(labels, sizes)]
 
             if colors is None:
                 colors = get_n_colors(len(data), 'rainbow')
@@ -1107,9 +1115,13 @@ def plot_pie(data: Union[Counter, dict],
                 assert len(colors) == len(data), (
                     'The number of colors does not match the number of labels.')
 
-            wedges, texts, autotexts = ax.pie(data.values(), labels=data.keys(),
+            wedges, texts, autotexts = ax.pie(data.values(),
+                                              labels=get_labels(data.values(),
+                                                                data.keys(),
+                                                                threshold),
                                               colors=colors,
-                                              autopct=lambda pct: format_label(pct, data.values()),
+                                              autopct=lambda pct: format_label(
+                                                  pct, data.values(), threshold),
                                               explode=[explode] * len(data),
                                               pctdistance=0.85 if circle else 0.5,
                                               textprops=textprops, **kwargs)
@@ -1127,7 +1139,7 @@ def plot_pie(data: Union[Counter, dict],
             ax.set_title(title, fontsize=14)
 
             if loc:
-                ax.legend(loc=loc)
+                ax.legend(data.keys(), loc=loc)
 
             plt.tight_layout()
 

@@ -590,6 +590,16 @@ class TestPlot(unittest.TestCase):
         return ax.figure
 
     @pytest.mark.mpl_image_compare
+    def test_plot_pie_threshold(self):
+        """
+        Test of the `plot_pie` function.
+        """
+        data = dict(self.counter_pie)
+        ax = bplt.plot_pie(data, explode=0.01, title='Pie chart with threshold for labels',
+                           startangle=10, threshold=100, loc='best')
+        return ax.figure
+
+    @pytest.mark.mpl_image_compare
     def test_plot_pie_dict(self):
         """
         Test of the `plot_pie` function.
