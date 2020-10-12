@@ -107,6 +107,20 @@ class TestPlot(unittest.TestCase):
     df_kmeans = pd.DataFrame({'kmeans_1': pca[:, 0], 'kmeans_2': pca[:, 1],
                               'label': kmeans.predict(pca)})
 
+    # Data for roc curve.
+    labels_roc = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+                  1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+                  1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                  0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                  0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+                  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0]
+    proba_roc = [0.5068, 0.6812, 0.5758, 0.6038, 0.4732, 0.5297, 0.0841, 0.4783, 0.6855, 0.8281,
+                 0.6957, 0.9154, 0.2978, 0.8347, 0.5257, 0.7892, 0.4778, 0.7104, 0.7270, 0.3533,
+                 0.0847, 0.4839, 0.5028, 0.0170, 0.1966, 0.1260, 0.8481, 0.4878, 0.5075, 0.4997,
+                 0.1569, 0.7126, 0.8177, 0.8593, 0.4610, 0.6688, 0.4271, 0.7559, 0.0401, 0.2429,
+                 0.0331, 0.1428, 0.0962, 0.4808, 0.5444, 0.7728, 0.5772, 0.3836, 0.4117, 0.5192,
+                 0.4250, 0.4922, 0.4025, 0.4572, 0.4215, 0.0410, 0.7488, 0.8517, 0.0265, 0.4227]
+
     def test_get_n_colors(self):
         """
         Test of the `get_n_colors` function.
@@ -638,6 +652,14 @@ class TestPlot(unittest.TestCase):
         x_pred = pd.date_range('2018-01-01', periods=len(self.y_pred), freq='H')
         self.assertRaises(AssertionError, bplt.plot_predictions, self.y_true[:-5],
                           self.y_pred, x_true=x_true, x_pred=x_pred)
+
+    @pytest.mark.mpl_image_compare
+    def test_plot_roc_curve(self):
+        """
+        Test of the `plot_roc_curve` function with x length different from y.
+        """
+        ax = bplt.plot_roc_curve(self.labels_roc, self.proba_roc)
+        return ax.figure
 
     def test_plot_series(self):
         """

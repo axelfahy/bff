@@ -51,6 +51,7 @@ As of *v0.2*, plots are not yet tested in the travis build.
 ## Release History
 
 * 0.2.8
+    * ADD: Function ``plot_roc_curve`` to plot a roc curve.
     * ADD: Function ``plot_kmeans`` to plot K-Means results.
     * ADD: Function ``get_n_colors`` to get N colors from a color map.
     * ADD: Function ``dates_split`` to split a period of time into multiple sub-period of time.

@@ -1284,6 +1284,93 @@ def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
         return ax
 
 
+def plot_roc_curve(labels: Sequence[TNum],
+                   predictions: Sequence[float],
+                   label_x: str = 'False Positive Rate',
+                   label_y: str = 'True Positive Rate',
+                   title: str = 'Receiver Operating Characteristic (ROC)',
+                   ax: Optional[plt.axes] = None,
+                   grid: Union[str, None] = 'both',
+                   figsize: Tuple[int, int] = (10, 10),
+                   dpi: int = 80,
+                   style: str = 'default',
+                   **kwargs) -> plt.axes:
+    """
+    Plot the roc curce for the given column of the DataFrame.
+
+    Parameters
+    ----------
+    labels : Sequence of number
+        Binary labels for the ROC curve, numerical.
+    predictions : Sequence of float
+        Predictions (probabilities) for one of the classes (usually the positive one).
+    title : str, default 'Receiver Operating Characteristic (ROC)'
+        Title for the plot (axis level).
+    ax : plt.axes, optional
+        Axes from matplotlib, if None, new figure and axes will be created.
+    grid : str, default 'both'
+        Axis where to activate the grid ('both', 'x', 'y').
+        To turn off, set to None.
+    figsize : Tuple[int, int], default (16, 8)
+        Size of the figure to plot.
+    dpi : int, default 80
+        Resolution of the figure.
+    style : str, default 'white'
+        Style to use for seaborn.axes_style.
+        The style is use only in this context and not applied globally.
+    **kwargs
+        Additional keyword arguments to be passed to the
+        `plt.plot` function from matplotlib.
+
+    Returns
+    -------
+    plt.axes
+        Axes returned by the `plt.subplots` function.
+    """
+    bff.fancy._check_sklearn_support('plot_roc_curve')
+    from sklearn.metrics import roc_curve, roc_auc_score  # pylint: disable=C0415
+
+    auc = roc_auc_score(labels, predictions)
+    fpr, tpr, _ = roc_curve(labels, predictions)
+
+    with plt.style.context(style):
+        if ax is None:
+            __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+
+        # Plot the roc curve.
+        ax.plot(fpr, tpr, color='darkorange',
+                label=f'ROC curve (area = {auc:.2f})', **kwargs)
+        # Plot the identity line (model with no skill, 0.5).
+        ax.plot([0, 1], [0, 1], color='navy', linestyle='--')
+
+        ax.set_xlim([0.0, 1.0])
+        ax.set_ylim([0.0, 1.05])
+
+        ax.set_xlabel(label_x, fontsize=12)
+        ax.set_ylabel(label_y, fontsize=12)
+        ax.set_title(title, fontsize=14)
+
+        ax.legend(loc="lower right")
+
+        # Draw tick lines on wanted axes.
+        if grid:
+            ax.axes.grid(True, which='major', axis=grid, color='black',
+                         alpha=0.3, linestyle='--', lw=0.5)
+
+        # Style.
+        # Remove border on the top and right.
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # Set alpha on remaining borders.
+        ax.spines['left'].set_alpha(0.4)
+        ax.spines['bottom'].set_alpha(0.4)
+        # Remove ticks on y axis.
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('none')
+
+        return ax
+
+
 def plot_series(df: pd.DataFrame,
                 column: str,
                 groupby: Optional[str] = None,
