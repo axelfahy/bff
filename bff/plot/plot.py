@@ -3,6 +3,7 @@
 
 This module contains fancy plot functions.
 """
+# pylint: disable=C0302
 import itertools
 import logging
 from collections import Counter
@@ -91,6 +92,7 @@ def get_n_colors(n: int, cmap: str = 'rainbow') -> List:
     return list(cm.get_cmap(cmap)(np.linspace(0, 1, n)))
 
 
+# pylint: disable=R0912
 def plot_cluster(df: pd.DataFrame,
                  cluster_col_1: str = 'col_1',
                  cluster_col_2: str = 'col_2',
@@ -220,7 +222,7 @@ def plot_cluster(df: pd.DataFrame,
                 print_legend = False
                 labels = [None] * len(labels_unique)  # type: ignore
 
-            for i, l in enumerate(sorted(df[label_col].unique())):
+            for i, l in enumerate(sorted(df[label_col].unique())):  # pylint: disable=W0612
                 data_1 = df.query(f'{label_col} == @l')[cluster_col_1].values
                 data_2 = df.query(f'{label_col} == @l')[cluster_col_2].values
                 ax.scatter(
@@ -354,12 +356,12 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
     >>> y_pred = ['cat', 'cat', 'bird', 'dog', 'bird', 'dog']
     >>> plot_confusion_matrix(y_true, y_pred, stats='accuracy')
     """
-    bff.fancy._check_sklearn_support('plot_confusion_matrix')
-    from sklearn.metrics import classification_report, confusion_matrix
+    bff.fancy._check_sklearn_support('plot_confusion_matrix')  # pylint: disable=W0212
+    from sklearn.metrics import classification_report, confusion_matrix  # pylint: disable=C0415
 
     # Compute the confusion matrix.
-    cm = confusion_matrix(y_true, y_pred, sample_weight=sample_weight,
-                          labels=labels_filter, normalize=normalize)
+    conf_matrix = confusion_matrix(y_true, y_pred, sample_weight=sample_weight,
+                                   labels=labels_filter, normalize=normalize)
 
     with sns.axes_style(style):
         if ax is None:
@@ -372,11 +374,12 @@ def plot_confusion_matrix(y_true: Union[np.array, pd.Series, Sequence],
             annotation_fmt = '.2g' if normalize else ',d'
 
         if cbar_fmt is None:
-            if np.max(cm) > 1_000:
+            if np.max(conf_matrix) > 1_000:
                 cbar_fmt = FuncFormatter(lambda x, p: format(int(x), ',d'))
         # Draw the heatmap with the mask and correct aspect ratio.
-        sns.heatmap(cm, cmap=plt.cm.Blues, ax=ax, annot=True, fmt=annotation_fmt, square=True,
-                    linewidths=0.5, cbar_kws={'shrink': 0.75, 'format': cbar_fmt},
+        # pylint: disable=E1101
+        sns.heatmap(conf_matrix, cmap=plt.cm.Blues, ax=ax, annot=True, fmt=annotation_fmt,
+                    square=True, linewidths=0.5, cbar_kws={'shrink': 0.75, 'format': cbar_fmt},
                     xticklabels=ticklabels, yticklabels=ticklabels)
 
         if stats:
@@ -635,6 +638,7 @@ def plot_counter(counter: Union[Counter, dict],
         return ax
 
 
+# pylint: disable=R0915
 def plot_history(history: dict,
                  metric: Optional[str] = None,
                  twinx: bool = False,
@@ -729,6 +733,7 @@ def plot_history(history: dict,
             ax_metric = axes.twinx() if twinx else axes[0]
             # If twinx, share the same prop cycler to have different colors.
             if twinx:
+                # pylint: disable=W0212
                 ax_metric._get_lines.prop_cycler = ax_loss._get_lines.prop_cycler
 
             ax_metric.plot(history[metric],
@@ -988,7 +993,7 @@ def plot_pca_explained_variance_ratio(pca,
         if ax is None:
             __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
 
-        ax.plot(np.cumsum(pca.explained_variance_ratio_))
+        ax.plot(np.cumsum(pca.explained_variance_ratio_), **kwargs)
 
         if hline:
             ax.axhline(hline, color='darkorange', alpha=0.5)
@@ -1099,51 +1104,51 @@ def plot_pie(data: Union[Counter, dict],
         if ax is None:
             __, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
 
-            # Function to format the labels on the pie chart.
-            # Percent, with real value in parentheses.
-            def format_label(percent, values, limit):
-                absolute = int(percent / 100. * sum(values))
-                return f'{percent:.1f}%\n({absolute:,})' if absolute > limit else ''
+        # Function to format the labels on the pie chart.
+        # Percent, with real value in parentheses.
+        def format_label(percent, values, limit):
+            absolute = int(percent / 100. * sum(values))
+            return f'{percent:.1f}%\n({absolute:,})' if absolute > limit else ''
 
-            # Function to get the labels above the threshold.
-            def get_labels(sizes, labels, limit):
-                return [label if size > limit else '' for label, size in zip(labels, sizes)]
+        # Function to get the labels above the threshold.
+        def get_labels(sizes, labels, limit):
+            return [label if size > limit else '' for label, size in zip(labels, sizes)]
 
-            if colors is None:
-                colors = get_n_colors(len(data), 'rainbow')
-            else:
-                assert len(colors) == len(data), (
-                    'The number of colors does not match the number of labels.')
+        if colors is None:
+            colors = get_n_colors(len(data), 'rainbow')
+        else:
+            assert len(colors) == len(data), (
+                'The number of colors does not match the number of labels.')
 
-            wedges, texts, autotexts = ax.pie(data.values(),
-                                              labels=get_labels(data.values(),
-                                                                data.keys(),
-                                                                threshold),
-                                              colors=colors,
-                                              autopct=lambda pct: format_label(
-                                                  pct, data.values(), threshold),
-                                              explode=[explode] * len(data),
-                                              pctdistance=0.85 if circle else 0.5,
-                                              textprops=textprops, **kwargs)
-            # Draw the inside circle.
-            if circle:
-                plt.setp(wedges, width=0.3)
-                # Ensure that the pie is a circle.
-                ax.set_aspect('equal')
+        wedges, texts, autotexts = ax.pie(data.values(),
+                                          labels=get_labels(data.values(),
+                                                            data.keys(),
+                                                            threshold),
+                                          colors=colors,
+                                          autopct=lambda pct: format_label(
+                                              pct, data.values(), threshold),
+                                          explode=[explode] * len(data),
+                                          pctdistance=0.85 if circle else 0.5,
+                                          textprops=textprops, **kwargs)
+        # Draw the inside circle.
+        if circle:
+            plt.setp(wedges, width=0.3)
+            # Ensure that the pie is a circle.
+            ax.set_aspect('equal')
 
-            # Change the size of the labels.
-            for text in texts:
-                text.set_fontsize(14)
-            plt.setp(autotexts, size=12, weight='bold')
+        # Change the size of the labels.
+        for text in texts:
+            text.set_fontsize(14)
+        plt.setp(autotexts, size=12, weight='bold')
 
-            ax.set_title(title, fontsize=14)
+        ax.set_title(title, fontsize=14)
 
-            if loc:
-                ax.legend(data.keys(), loc=loc)
+        if loc:
+            ax.legend(data.keys(), loc=loc)
 
-            plt.tight_layout()
+        plt.tight_layout()
 
-            return ax
+        return ax
 
 
 def plot_predictions(y_true: Union[np.array, pd.Series, pd.DataFrame],
@@ -1327,7 +1332,7 @@ def plot_roc_curve(labels: Sequence[TNum],
     plt.axes
         Axes returned by the `plt.subplots` function.
     """
-    bff.fancy._check_sklearn_support('plot_roc_curve')
+    bff.fancy._check_sklearn_support('plot_roc_curve')  # pylint: disable=W0212
     from sklearn.metrics import roc_curve, roc_auc_score  # pylint: disable=C0415
 
     auc = roc_auc_score(labels, predictions)
@@ -1371,6 +1376,7 @@ def plot_roc_curve(labels: Sequence[TNum],
         return ax
 
 
+# pylint: disable=R0915
 def plot_series(df: pd.DataFrame,
                 column: str,
                 groupby: Optional[str] = None,
@@ -1564,6 +1570,7 @@ def plot_series(df: pd.DataFrame,
         return ax
 
 
+# pylint: disable=R0915
 def plot_true_vs_pred(y_true: Union[np.array, pd.DataFrame],
                       y_pred: Union[np.array, pd.DataFrame],
                       with_correlation: bool = False,

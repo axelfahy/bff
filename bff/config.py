@@ -7,8 +7,8 @@ from collections.abc import Mapping
 import logging
 from pathlib import Path
 import pprint
-import yaml
 from typing import Union
+import yaml
 
 LOGGER = logging.getLogger(__name__)
 

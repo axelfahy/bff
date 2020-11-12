@@ -140,7 +140,9 @@ disable=print-statement,
         exception-escape,
         comprehension-escape,
         logging-format-interpolation,
-        logging-fstring-interpolation
+        logging-fstring-interpolation,
+        too-many-arguments,
+        too-many-locals
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -428,6 +430,8 @@ good-names=i,
            j,
            k,
            f,
+           l,
+           n,
            df,
            ax,
            cm,

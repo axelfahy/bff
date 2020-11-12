@@ -117,13 +117,14 @@ def _check_sklearn_support(caller_name: str):
     ----------
     caller_name : str
         The name of the caller that requires sklearn.
+
     Raises
     ------
     ImportError
         If sklearn is not installed.
     """
     try:
-        import sklearn  # noqa
+        import sklearn  # noqa, pylint: disable=C0415,W0611
     except ImportError as e:
         raise ImportError(
             f'{caller_name} requires sklearn. You can install scikit-learn with '
@@ -588,7 +589,7 @@ def normalization_pd(df: pd.DataFrame, scaler=None,
     """
     if scaler is None:
         _check_sklearn_support('normalization_pd')
-        from sklearn.preprocessing import MinMaxScaler
+        from sklearn.preprocessing import MinMaxScaler  # pylint: disable=C0415
         scaler = MinMaxScaler
     # If columns are not provided, select all the numerical columns of the DataFrame.
     # If provided, select only the numerical ones.

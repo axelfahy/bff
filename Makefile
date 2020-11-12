@@ -35,19 +35,22 @@ baseline-plot:
 .PHONY: code
 code:
 	pytest --mpl tests/test_plot.py
-	python -m pytest --pycodestyle --pydocstyle
+	pytest
+
+.PHONY: coverage
+coverage:
+	rm -rf coverage_html_report .coverage
+	coverage run -m unittest discover -s tests
+	coverage html
 
 .PHONY: lint
 lint:
-	python -m pytest --pylint --pylint-rcfile=.pylintrc --pylint-error-types=CWEF
+	pylint bff
 	bandit -r bff -ll
 
 .PHONY: style
 style:
 	flake8
 	mypy bff tests
-
-.PHONY: coverage
-coverage:
-	rm -rf coverage_html_report .coverage
-	python -m pytest --cov=bff tests --cov-report=html:coverage_html_report
+	pycodestyle bff tests
+	pydocstyle bff tests
