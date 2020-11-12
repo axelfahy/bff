@@ -744,7 +744,7 @@ def plot_history(history: dict,
         # Global title of the plot, if multiple subplots.
         if two_axes:
             fig.suptitle(title, fontsize=14)
-            plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+            plt.tight_layout()
         else:
             ax_loss.set_title(title, fontsize=14)
 
